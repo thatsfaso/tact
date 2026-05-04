@@ -35,7 +35,6 @@
   .serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif; font-weight: 400; }
   .mono { font-family: "Geist Mono", "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
 
-  /* Liquid chrome canvas */
   #chrome-bg {
     position: fixed; inset: 0;
     width: 100vw; height: 100vh;
@@ -43,7 +42,6 @@
     pointer-events: none;
     opacity: 1;
   }
-  /* paper grain overlay */
   .grain {
     position: fixed; inset: 0; z-index: 1; pointer-events: none;
     opacity: 0.35;
@@ -57,14 +55,12 @@
     border-radius: 8px;
   }
 
-  /* Marquee for hint chips */
   @keyframes drift {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
   .drift { animation: drift 60s linear infinite; }
 
-  /* mic pulse */
   @keyframes mic-pulse {
     0%, 100% { transform: scale(1); opacity: 0.55; }
     50% { transform: scale(1.6); opacity: 0; }
@@ -76,14 +72,12 @@
   }
   .mic-pulse::after { animation-delay: 1.2s; }
 
-  /* listening waveform */
   @keyframes wave {
     0%, 100% { transform: scaleY(0.35); }
     50%      { transform: scaleY(1); }
   }
   .wbar { animation: wave 1.1s ease-in-out infinite; transform-origin: center; }
 
-  /* fade & slide */
   @keyframes rise {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -95,7 +89,6 @@
   }
   .rise-slow { animation: rise-slow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
-  /* Apple-y button */
   .btn {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
@@ -121,7 +114,6 @@
   }
   .btn-ghost:hover { background: rgba(10,10,12,0.04); }
 
-  /* quiet card */
   .card {
     background: rgba(250,250,247,0.82);
     backdrop-filter: blur(14px) saturate(1.1);
@@ -130,7 +122,6 @@
     box-shadow: 0 0 0 1px var(--hairline) inset, 0 30px 80px -30px rgba(10,10,12,0.18);
   }
 
-  /* Braille dot */
   .bd {
     width: 7px; height: 7px; border-radius: 999px;
     background: radial-gradient(circle at 30% 30%, #2a2a2e, #08080a 70%);
@@ -138,11 +129,9 @@
   }
   .bd.off { background: transparent; box-shadow: 0 0 0 1px rgba(10,10,12,0.06) inset; }
 
-  /* Scrollbar suppression in result */
   .nice-scroll::-webkit-scrollbar { width: 6px; }
   .nice-scroll::-webkit-scrollbar-thumb { background: rgba(10,10,12,0.18); border-radius: 999px; }
 
-  /* subtle floating */
   @keyframes float-soft {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
@@ -157,8 +146,6 @@
 
 <!-- ─── Sound system ─────────────────────────────────────────────────────── -->
 <script>
-// Sound system — synthesized, calm, paper-warm.
-// All sounds generated via Web Audio API (no external assets).
 (function () {
   let ctx = null;
   let master = null;
@@ -357,7 +344,6 @@
   if (!gl) return;
 
   var vert = "\n    attribute vec2 a_pos;\n    void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }\n  ";
-
   var frag = "\n    precision highp float;\n    uniform vec2  u_res;\n    uniform float u_time;\n    uniform vec2  u_mouse;\n\n    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\n    float noise(vec2 p){\n      vec2 i = floor(p), f = fract(p);\n      float a = hash(i);\n      float b = hash(i + vec2(1.0,0.0));\n      float c = hash(i + vec2(0.0,1.0));\n      float d = hash(i + vec2(1.0,1.0));\n      vec2 u = f*f*(3.0-2.0*f);\n      return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;\n    }\n    float fbm(vec2 p){\n      float v = 0.0; float a = 0.5;\n      for(int i=0;i<5;i++){ v += a*noise(p); p *= 2.02; a *= 0.5; }\n      return v;\n    }\n\n    void main(){\n      vec2 uv = (gl_FragCoord.xy - 0.5*u_res) / min(u_res.x, u_res.y);\n      vec2 p = uv * 1.4;\n      float t = u_time * 0.06;\n\n      vec2 m = (u_mouse - 0.5*u_res)/min(u_res.x,u_res.y);\n      vec2 q = p + 0.18*vec2(fbm(p + t), fbm(p - t + 3.1));\n      vec2 r = q + 0.22*vec2(fbm(q + 1.7*m + t*1.3), fbm(q + 4.2 - t));\n\n      float f = fbm(r * 1.2 + t*0.5);\n\n      float ridge = sin( (r.x*2.4 + r.y*1.1) * 3.14159 + f*5.0 + t*1.2 );\n      ridge = 0.5 + 0.5 * ridge;\n      ridge = pow(ridge, 1.8);\n\n      vec3 ivory  = vec3(0.972, 0.964, 0.945);\n      vec3 bone   = vec3(0.918, 0.906, 0.879);\n      vec3 pearl  = vec3(0.835, 0.835, 0.842);\n      vec3 ink    = vec3(0.760, 0.748, 0.735);\n\n      vec3 col = mix(ivory, bone, smoothstep(0.15, 0.85, f));\n      col = mix(col, pearl, ridge*0.55);\n      col = mix(col, ink, smoothstep(0.7, 1.05, ridge*0.9 + f*0.4) * 0.35);\n\n      col += 0.012 * sin(vec3(0.0, 0.6, 1.2) + t*1.4 + f*3.0);\n\n      float v = smoothstep(1.25, 0.35, length(uv*vec2(1.0, 0.95)));\n      col *= mix(0.9, 1.0, v);\n\n      gl_FragColor = vec4(col, 1.0);\n    }\n  ";
 
   function compile(type, src) {
@@ -415,86 +401,279 @@
 })();
 </script>
 
-<!-- ─── React app (Blob loader + Braille engine + Main app) ─────────────── -->
+<!-- ─── TACT: Liblouis Web Worker + WebLLM ──────────────────────────────── -->
+<script>
+window.TACT = (function () {
+  "use strict";
+
+  // ── Liblouis Web Worker ──────────────────────────────────────────────────
+  // Synchronous XHR (needed by liblouis on-demand table loading) is only
+  // allowed on Worker threads, not the main thread — so we run it in a
+  // Blob-URL Worker.
+  var WORKER_SRC = [
+    'try {',
+    '  importScripts("https://cdn.jsdelivr.net/npm/liblouis-build@3.2.0-rc/build-no-tables-utf16.js");',
+    '  importScripts("https://cdn.jsdelivr.net/npm/liblouis@0.4.0/easy-api.js");',
+    '  liblouis.enableOnDemandTableLoading("https://cdn.jsdelivr.net/npm/liblouis-build@3.2.0-rc/");',
+    '  self.postMessage({ type: "ready" });',
+    '} catch (e) {',
+    '  self.postMessage({ type: "error", msg: String(e) });',
+    '}',
+    'self.onmessage = function (ev) {',
+    '  var d = ev.data;',
+    '  try {',
+    '    var r = liblouis.translateString(d.table, d.text);',
+    '    self.postMessage({ type: "result", id: d.id, result: r });',
+    '  } catch (ex) {',
+    '    self.postMessage({ type: "result", id: d.id, error: String(ex) });',
+    '  }',
+    '};'
+  ].join('\n');
+
+  var _worker  = null;
+  var _ready   = false;
+  var _failed  = false;
+  var _pending = Object.create(null);
+  var _queue   = [];
+
+  function _startWorker() {
+    try {
+      var blob = new Blob([WORKER_SRC], { type: 'application/javascript' });
+      _worker  = new Worker(URL.createObjectURL(blob));
+      _worker.onmessage = function (ev) {
+        var d = ev.data;
+        if (d.type === 'ready') {
+          _ready = true;
+          _queue.forEach(function (fn) { fn(); });
+          _queue = [];
+        } else if (d.type === 'error') {
+          _failed = true;
+          console.warn('[TACT] liblouis worker error:', d.msg);
+          // flush queue so callers get clean rejections
+          var q = _queue.slice(); _queue = [];
+          q.forEach(function (fn) { fn(); });
+        } else if (d.type === 'result') {
+          var p = _pending[d.id];
+          if (!p) return;
+          delete _pending[d.id];
+          if (d.error) p.reject(new Error(d.error));
+          else p.resolve(_unicodeToDots(d.result));
+        }
+      };
+      _worker.onerror = function (e) {
+        _failed = true;
+        console.warn('[TACT] liblouis worker load failed:', e.message);
+      };
+    } catch (e) {
+      _failed = true;
+      console.warn('[TACT] could not create worker:', e);
+    }
+  }
+
+  // Unicode Braille char → dot-number array. e.g. U+2813 → [1,2,5]
+  function _unicodeToDots(brailleStr) {
+    return Array.from(brailleStr).map(function (ch) {
+      var code = ch.codePointAt(0) - 0x2800;
+      var dots = [];
+      if (code & 0x01) dots.push(1);
+      if (code & 0x02) dots.push(2);
+      if (code & 0x04) dots.push(3);
+      if (code & 0x08) dots.push(4);
+      if (code & 0x10) dots.push(5);
+      if (code & 0x20) dots.push(6);
+      return dots;
+    });
+  }
+
+  // Returns Promise<Array<dots[]>> — one entry per input character (incl. spaces as [])
+  function translateBraille(text, lang) {
+    var cleanText = text.replace(/\s+/g, ' ').trim();
+    var table = lang === 'it' ? 'tables/it-it-comp6.utb' : 'tables/en-ueb-g1.ctb';
+    return new Promise(function (resolve, reject) {
+      if (_failed) { reject(new Error('liblouis unavailable')); return; }
+      if (!_worker) _startWorker();
+      var id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      _pending[id] = { resolve: resolve, reject: reject };
+      var send = function () {
+        if (_failed) { delete _pending[id]; reject(new Error('liblouis unavailable')); return; }
+        _worker.postMessage({ id: id, table: table, text: cleanText });
+      };
+      if (_ready) send(); else _queue.push(send);
+    });
+  }
+
+  // ── WebLLM ───────────────────────────────────────────────────────────────
+  var webgpuSupported = (typeof navigator !== 'undefined') && !!navigator.gpu;
+  var _engine = null;
+
+  var SYSTEM_PROMPT =
+    'You are a children\'s story writer for TACT, a 3D-printable Braille book tool.\n' +
+    'Output ONLY valid JSON — no preamble, no markdown fences, nothing else.\n\n' +
+    'Use this exact schema:\n' +
+    '{"version":"1.0","language":"<it|en>","braille_grade":1,"title":"...","slug":"...","layout":"picture_book",' +
+    '"pages":[{"page_number":1,"text":"...","illustration":{"scene":"...","layout_hint":"center",' +
+    '"elements":[{"shape":"...","scale":1.0,"position":"center","mirror":false}]}}]}\n\n' +
+    'Rules:\n' +
+    '- 3 to 4 pages total. Max 20 words of text per page. 1 to 3 illustration elements per page.\n' +
+    '- braille_grade is always 1. Text must be in the same language as the request.\n' +
+    '- Allowed shape names: cat_sitting cat_standing dog_sitting dog_standing bird_flying fish ' +
+    'butterfly rabbit elephant bear owl horse duck frog turtle boat_sailboat car_simple bicycle ' +
+    'airplane rocket tree_simple flower_simple sun moon star cloud wave house_simple castle_tower ' +
+    'person_standing person_child book hat_pirate crown heart apple umbrella\n' +
+    '- Output ONLY the JSON object. No other text.';
+
+  // onProgress(progress 0-1, statusText string) — called during model download
+  function generateStory(prompt, lang, onProgress) {
+    if (!webgpuSupported) return Promise.reject(new Error('no-webgpu'));
+
+    return import('https://esm.run/@mlc-ai/web-llm').then(function (webllm) {
+      var enginePromise = _engine
+        ? Promise.resolve(_engine)
+        : webllm.CreateMLCEngine('Llama-3.2-1B-Instruct-q4f16_1-MLC', {
+            initProgressCallback: function (report) {
+              if (onProgress) {
+                var pct = typeof report.progress === 'number' ? report.progress : 0;
+                onProgress(pct, report.text || '');
+              }
+            }
+          }).then(function (eng) { _engine = eng; return eng; });
+
+      return enginePromise.then(function (engine) {
+        if (onProgress) onProgress(1, 'ready');
+        var userLang = lang === 'it' ? 'Italian' : 'English';
+        return engine.chat.completions.create({
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user',   content: 'Write a story in ' + userLang + ' about: ' + prompt }
+          ],
+          temperature: 0.8,
+          max_tokens: 900
+        });
+      }).then(function (reply) {
+        var raw = reply.choices[0].message.content;
+        var match = raw.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('no-json');
+        return JSON.parse(match[0]);
+      });
+    });
+  }
+
+  return {
+    webgpuSupported: webgpuSupported,
+    translateBraille: translateBraille,
+    generateStory: generateStory,
+  };
+})();
+</script>
+
+<!-- ─── React app ────────────────────────────────────────────────────────── -->
 <script type="text/babel">
 const { useState, useEffect, useRef, useMemo } = React;
 
+// ─── Shape → file path lookup ─────────────────────────────────────────────────
+const SHAPE_PATHS = {
+  cat_sitting:'animals/cat_sitting', cat_standing:'animals/cat_standing',
+  dog_sitting:'animals/dog_sitting', dog_standing:'animals/dog_standing',
+  bird_flying:'animals/bird_flying', bird_perched:'animals/bird_perched',
+  fish:'animals/fish', butterfly:'animals/butterfly', rabbit:'animals/rabbit',
+  elephant:'animals/elephant', bear:'animals/bear', lion:'animals/lion',
+  owl:'animals/owl', horse:'animals/horse', duck:'animals/duck',
+  frog:'animals/frog', turtle:'animals/turtle',
+  boat_small:'vehicles/boat_small', boat_sailboat:'vehicles/boat_sailboat',
+  car_simple:'vehicles/car_simple', bicycle:'vehicles/bicycle',
+  airplane:'vehicles/airplane', train_simple:'vehicles/train_simple', rocket:'vehicles/rocket',
+  tree_simple:'nature/tree_simple', flower_simple:'nature/flower_simple',
+  sun:'nature/sun', moon:'nature/moon', star:'nature/star',
+  cloud:'nature/cloud', mountain:'nature/mountain', wave:'nature/wave', leaf:'nature/leaf',
+  house_simple:'buildings/house_simple', castle_tower:'buildings/castle_tower',
+  lighthouse:'buildings/lighthouse',
+  person_standing:'people/person_standing', person_child:'people/person_child',
+  person_waving:'people/person_waving',
+  book:'objects/book', hat_pirate:'objects/hat_pirate', crown:'objects/crown',
+  key:'objects/key', heart:'objects/heart', apple:'objects/apple', umbrella:'objects/umbrella',
+};
+
+// ─── Demo pages (shown when WebGPU/LLM unavailable) ──────────────────────────
+const DEMO_PAGES = {
+  en: [
+    { text: "Once upon a time, a brave cat named Whiskers wore a tiny eyepatch and dreamed of the moon.",
+      illustration: { scene: "A cat with an eyepatch looking at the sky", layout_hint: "center",
+        elements: [{ shape: "cat_sitting", scale: 1.2, position: "center", mirror: false }] } },
+    { text: "He built a small wooden boat and sailed across a sea of silver clouds, all the way to the stars.",
+      illustration: { scene: "A sailboat on silver clouds, stars above", layout_hint: "distributed",
+        elements: [{ shape: "boat_sailboat", scale: 1.1, position: "center", mirror: false },
+                   { shape: "star", scale: 0.8, position: "top", mirror: false }] } },
+    { text: "There he found a quiet garden where the moon kept her gentlest songs.",
+      illustration: { scene: "A crescent moon with small flowers", layout_hint: "center",
+        elements: [{ shape: "moon", scale: 1.3, position: "center", mirror: false },
+                   { shape: "flower_simple", scale: 0.7, position: "left", mirror: false }] } },
+  ],
+  it: [
+    { text: "C'era una volta un gatto coraggioso di nome Baffi, con una piccola benda sull'occhio, che sognava la luna.",
+      illustration: { scene: "Un gatto con una benda che guarda il cielo", layout_hint: "center",
+        elements: [{ shape: "cat_sitting", scale: 1.2, position: "center", mirror: false }] } },
+    { text: "Costruì una piccola barca di legno e navigò un mare di nuvole d'argento, fino alle stelle.",
+      illustration: { scene: "Una barca a vela tra le nuvole con stelle", layout_hint: "distributed",
+        elements: [{ shape: "boat_sailboat", scale: 1.1, position: "center", mirror: false },
+                   { shape: "star", scale: 0.8, position: "top", mirror: false }] } },
+    { text: "Là trovò un giardino silenzioso dove la luna custodiva le sue canzoni più dolci.",
+      illustration: { scene: "Una luna crescente con piccoli fiori", layout_hint: "center",
+        elements: [{ shape: "moon", scale: 1.3, position: "center", mirror: false },
+                   { shape: "flower_simple", scale: 0.7, position: "left", mirror: false }] } },
+  ],
+};
+
 // ─── Blob loader ─────────────────────────────────────────────────────────────
-function BlobLoader({ size = 220, label = "" }) {
+function BlobLoader({ size = 220 }) {
   const [t, setT] = useState(0);
   const raf = useRef(0);
   useEffect(() => {
     let start = performance.now();
-    const tick = () => {
-      setT((performance.now() - start) / 1000);
-      raf.current = requestAnimationFrame(tick);
-    };
+    const tick = () => { setT((performance.now() - start) / 1000); raf.current = requestAnimationFrame(tick); };
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
   }, []);
 
-  const N = 9;
-  const cx = 100, cy = 100, baseR = 56;
+  const N = 9, cx = 100, cy = 100, baseR = 56;
   const pts = [];
   for (let i = 0; i < N; i++) {
     const a = (i / N) * Math.PI * 2;
-    const wob =
-      Math.sin(t * 0.9 + i * 1.7) * 6 +
-      Math.sin(t * 1.4 + i * 0.6) * 4 +
-      Math.cos(t * 0.5 + i * 2.1) * 5;
+    const wob = Math.sin(t * 0.9 + i * 1.7) * 6 + Math.sin(t * 1.4 + i * 0.6) * 4 + Math.cos(t * 0.5 + i * 2.1) * 5;
     pts.push([cx + Math.cos(a) * (baseR + wob), cy + Math.sin(a) * (baseR + wob)]);
   }
-
   const path = (() => {
     const p = pts, n = p.length;
     let d = `M ${p[0][0].toFixed(2)},${p[0][1].toFixed(2)} `;
     for (let i = 0; i < n; i++) {
-      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
-      const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
-      const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      const p0 = p[(i-1+n)%n], p1 = p[i], p2 = p[(i+1)%n], p3 = p[(i+2)%n];
+      const c1x = p1[0]+(p2[0]-p0[0])/6, c1y = p1[1]+(p2[1]-p0[1])/6;
+      const c2x = p2[0]-(p3[0]-p1[0])/6, c2y = p2[1]-(p3[1]-p1[1])/6;
       d += `C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)} `;
     }
     return d + "Z";
   })();
-
   const sat = (phase, dist, r) => {
     const a = t * 0.6 + phase;
-    return {
-      cx: cx + Math.cos(a) * dist + Math.sin(t * 1.3 + phase) * 3,
-      cy: cy + Math.sin(a) * dist + Math.cos(t * 0.9 + phase) * 3,
-      r:  r  + Math.sin(t * 1.7 + phase) * 2,
-    };
+    return { cx: cx+Math.cos(a)*dist+Math.sin(t*1.3+phase)*3, cy: cy+Math.sin(a)*dist+Math.cos(t*0.9+phase)*3, r: r+Math.sin(t*1.7+phase)*2 };
   };
-  const s1 = sat(0,   44, 14);
-  const s2 = sat(2.1, 40, 11);
-  const s3 = sat(4.3, 48,  9);
-
+  const s1 = sat(0, 44, 14), s2 = sat(2.1, 40, 11), s3 = sat(4.3, 48, 9);
   return (
-    <div className="flex flex-col items-center gap-5">
-      <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
-            <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
-          </filter>
-          <radialGradient id="blobFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#0a0a0c" />
-            <stop offset="100%" stopColor="#0a0a0c" />
-          </radialGradient>
-        </defs>
-        <g filter="url(#goo)">
-          <path d={path} fill="url(#blobFill)" />
-          <circle cx={s1.cx} cy={s1.cy} r={s1.r} fill="url(#blobFill)" />
-          <circle cx={s2.cx} cy={s2.cy} r={s2.r} fill="url(#blobFill)" />
-          <circle cx={s3.cx} cy={s3.cy} r={s3.r} fill="url(#blobFill)" />
-        </g>
-      </svg>
-      {label ? <div className="mono text-[12px] tracking-[0.18em] uppercase" style={{ color: "var(--muted)" }}>{label}</div> : null}
-    </div>
+    <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" /><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" /></filter>
+        <radialGradient id="blobFill" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#0a0a0c" /><stop offset="100%" stopColor="#0a0a0c" /></radialGradient>
+      </defs>
+      <g filter="url(#goo)">
+        <path d={path} fill="url(#blobFill)" />
+        <circle cx={s1.cx} cy={s1.cy} r={s1.r} fill="url(#blobFill)" />
+        <circle cx={s2.cx} cy={s2.cy} r={s2.r} fill="url(#blobFill)" />
+        <circle cx={s3.cx} cy={s3.cy} r={s3.r} fill="url(#blobFill)" />
+      </g>
+    </svg>
   );
 }
 
-// ─── Braille engine (Grade 1 prototype — Liblouis WASM goes here for prod) ──
+// ─── Braille JS fallback (used when Liblouis WASM is unavailable) ─────────────
 const BRAILLE_MAP = {
   a:[1],b:[1,2],c:[1,4],d:[1,4,5],e:[1,5],f:[1,2,4],g:[1,2,4,5],
   h:[1,2,5],i:[2,4],j:[2,4,5],k:[1,3],l:[1,2,3],m:[1,3,4],n:[1,3,4,5],
@@ -517,19 +696,13 @@ function textToBrailleCells(text) {
     if (raw === "\n") { cells.push("BR"); inNumber = false; continue; }
     if (/[0-9]/.test(raw)) {
       if (!inNumber) { cells.push(NUM_INDICATOR); inNumber = true; }
-      cells.push(BRAILLE_MAP[raw]);
+      cells.push(BRAILLE_MAP[raw] || []);
       continue;
     }
     inNumber = false;
     const lower = raw.toLowerCase();
-    if (raw !== lower && BRAILLE_MAP[lower]) {
-      cells.push(CAP_INDICATOR);
-      cells.push(BRAILLE_MAP[lower]);
-    } else if (BRAILLE_MAP[lower]) {
-      cells.push(BRAILLE_MAP[lower]);
-    } else {
-      cells.push([]);
-    }
+    if (raw !== lower && BRAILLE_MAP[lower]) { cells.push(CAP_INDICATOR); cells.push(BRAILLE_MAP[lower]); }
+    else cells.push(BRAILLE_MAP[lower] || []);
   }
   return cells;
 }
@@ -540,15 +713,10 @@ function layoutBrailleLines(cells, cellsPerLine = 22) {
   for (const c of cells) {
     if (c === "BR") { lines.push(line); line = []; lastSpace = -1; continue; }
     line.push(c);
-    if (c.length === 0) lastSpace = line.length - 1;
+    if (Array.isArray(c) && c.length === 0) lastSpace = line.length - 1;
     if (line.length >= cellsPerLine) {
-      if (lastSpace > 0) {
-        const rest = line.slice(lastSpace + 1);
-        lines.push(line.slice(0, lastSpace));
-        line = rest; lastSpace = -1;
-      } else {
-        lines.push(line); line = []; lastSpace = -1;
-      }
+      if (lastSpace > 0) { const rest = line.slice(lastSpace + 1); lines.push(line.slice(0, lastSpace)); line = rest; lastSpace = -1; }
+      else { lines.push(line); line = []; lastSpace = -1; }
     }
   }
   if (line.length) lines.push(line);
@@ -574,23 +742,24 @@ const COPY = {
   en: {
     eyebrow:    "Stories you can read with your fingers",
     headline:   "Tell me a story…",
-    sub:        "Speak your idea. We’ll write it, translate it to Braille, and prepare a tactile page you can print at home.",
+    sub:        "Speak your idea. We'll write it, translate it to Braille, and prepare a tactile page you can print at home.",
     tap:        "Tap to speak",
     listening:  "Listening…",
     stop:       "Tap to stop",
     or:         "or type below",
     placeholder:"a pirate cat who sails to the moon",
     submit:     "Make my story",
-    weaving:    "Weaving your story",
-    translating:"Translating to Braille",
-    drawing:    "Drawing tactile shapes",
-    composing:  "Laying out the page",
+    weaving:    "Weaving your story…",
+    generating: "Writing your story…",
+    modelDownloading: "Downloading AI model…",
+    brailleTranslating: "Translating to Braille…",
     yourStory:  "Your story",
     page:       "Page",
     of:         "of",
     download:   "Download print file",
     again:      "Tell another",
-    hints: ["a brave robot lost in the snow","the moon’s secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
+    demoNotice: "Demo mode — AI not available",
+    hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
     footer: "Open source · No account · Works with any FDM 3D printer",
   },
   it: {
@@ -603,72 +772,76 @@ const COPY = {
     or:         "oppure scrivi qui sotto",
     placeholder:"un gatto pirata che naviga verso la luna",
     submit:     "Crea la storia",
-    weaving:    "Sto scrivendo la storia",
-    translating:"Traduco in Braille",
-    drawing:    "Disegno le forme tattili",
-    composing:  "Compongo la pagina",
+    weaving:    "Sto creando la storia…",
+    generating: "Sto scrivendo la storia…",
+    modelDownloading: "Scarico il modello AI…",
+    brailleTranslating: "Traduco in Braille…",
     yourStory:  "La tua storia",
     page:       "Pagina",
     of:         "di",
     download:   "Scarica file di stampa",
-    again:      "Un’altra storia",
+    again:      "Un'altra storia",
+    demoNotice: "Modalità demo — AI non disponibile",
     hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
     footer: "Open source · Senza account · Funziona con ogni stampante FDM",
   },
 };
 
-// ─── Faux story generator (placeholder for LLM call) ─────────────────────────
-function fakeStory(prompt, lang) {
-  const en = [
-    { text: "Once upon a time, a brave cat named Whiskers wore a tiny eyepatch and dreamed of the moon.", shape: "cat" },
-    { text: "He built a small wooden boat and sailed across a sea of silver clouds, all the way to the stars.", shape: "boat" },
-    { text: "There he found a quiet garden where the moon kept her gentlest songs.", shape: "moon" },
-  ];
-  const it = [
-    { text: "C’era una volta un gatto coraggioso di nome Baffi, con una piccola benda sull’occhio, che sognava la luna.", shape: "cat" },
-    { text: "Costruì una piccola barca di legno e navigò un mare di nuvole d’argento, fino alle stelle.", shape: "boat" },
-    { text: "Là trovò un giardino silenzioso dove la luna custodiva le sue canzoni più dolci.", shape: "moon" },
-  ];
-  return lang === "it" ? it : en;
-}
+// ─── Shape renderer (fetches SVG from shapes/ dir, falls back to inline) ──────
+function ShapeRenderer({ illustration }) {
+  const shape = illustration?.elements?.[0]?.shape || 'star';
+  const [svgMarkup, setSvgMarkup] = useState(null);
 
-// ─── Tactile shape silhouettes ────────────────────────────────────────────────
-function ShapeSilhouette({ shape }) {
+  useEffect(() => {
+    setSvgMarkup(null);
+    const relPath = SHAPE_PATHS[shape];
+    if (!relPath) return;
+    fetch('shapes/' + relPath + '.svg')
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(txt => setSvgMarkup(txt))
+      .catch(() => {});
+  }, [shape]);
+
+  if (svgMarkup) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: svgMarkup }}
+        style={{ maxWidth: 240, margin: '0 auto', lineHeight: 0 }}
+      />
+    );
+  }
+
+  // Inline fallback for the 3 shapes used in demo pages
   const stroke = "#0a0a0c", sw = 3;
-  let path = null;
-  if (shape === "cat") {
-    path = (
-      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M 60 70 L 78 42 L 92 60 Q 110 54 128 60 L 142 42 L 160 70 Q 170 92 160 112 Q 140 134 110 134 Q 80 134 60 112 Q 50 92 60 70 Z" />
-        <circle cx="98" cy="86" r="4" fill={stroke} />
-        <path d="M 116 80 L 138 78 L 138 98 L 118 96 Z" />
-        <path d="M 118 80 L 100 70" />
-        <path d="M 138 80 L 156 70" />
-        <path d="M 80 102 L 60 100 M 80 108 L 58 112 M 140 102 L 162 100 M 140 108 L 162 112" />
-        <path d="M 105 110 Q 110 116 115 110" />
-      </g>
+  if (shape === 'cat_sitting' || shape === 'cat_standing') {
+    return (
+      <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 60 70 L 78 42 L 92 60 Q 110 54 128 60 L 142 42 L 160 70 Q 170 92 160 112 Q 140 134 110 134 Q 80 134 60 112 Q 50 92 60 70 Z" />
+          <circle cx="98" cy="86" r="4" fill={stroke} /><circle cx="122" cy="86" r="4" fill={stroke} />
+          <path d="M 105 110 Q 110 116 115 110" />
+          <path d="M 80 102 L 60 100 M 80 108 L 58 112 M 140 102 L 162 100 M 140 108 L 162 112" />
+        </g>
+      </svg>
     );
-  } else if (shape === "boat") {
-    path = (
-      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M 36 110 Q 110 140 184 110 L 168 130 Q 110 150 52 130 Z" />
-        <path d="M 110 30 L 110 110" />
-        <path d="M 110 36 L 158 100 L 110 100 Z" />
-        <path d="M 24 146 Q 40 138 56 146 T 88 146 T 120 146 T 152 146 T 184 146 T 210 146" opacity="0.6" />
-      </g>
-    );
-  } else if (shape === "moon") {
-    path = (
-      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
-        <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
-        <path d="M 60 110 L 63 104 L 66 110 L 72 113 L 66 116 L 63 122 L 60 116 L 54 113 Z" />
-      </g>
+  }
+  if (shape === 'boat_sailboat' || shape === 'boat_small') {
+    return (
+      <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 36 110 Q 110 140 184 110 L 168 130 Q 110 150 52 130 Z" />
+          <path d="M 110 30 L 110 110" /><path d="M 110 36 L 158 100 L 110 100 Z" />
+          <path d="M 24 146 Q 40 138 56 146 T 88 146 T 120 146 T 152 146 T 184 146" opacity="0.6" />
+        </g>
+      </svg>
     );
   }
   return (
-    <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 320 }}>
-      {path}
+    <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
+      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
+        <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
+      </g>
     </svg>
   );
 }
@@ -679,45 +852,32 @@ function Header({ lang, setLang, sound, setSound }) {
     <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6" style={{ zIndex: 5 }}>
       <div className="flex items-center gap-3">
         <div className="grid grid-cols-2 gap-[3px]" style={{ width: 18 }}>
-          <div className="bd"></div>
-          <div className="bd off"></div>
-          <div className="bd"></div>
-          <div className="bd"></div>
-          <div className="bd off"></div>
-          <div className="bd"></div>
+          <div className="bd"></div><div className="bd off"></div>
+          <div className="bd"></div><div className="bd"></div>
+          <div className="bd off"></div><div className="bd"></div>
         </div>
         <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>TACT</div>
-        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>
-          prototype
-        </div>
+        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>prototype</div>
       </div>
       <div className="flex items-center gap-2">
         <button
           onClick={() => { const v = !sound; setSound(v); window.SFX.setEnabled(v); }}
           className="focus-ring w-9 h-9 rounded-full flex items-center justify-center transition-colors"
           style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)" }}
-          aria-label={sound ? "Mute sounds" : "Unmute sounds"}
-          aria-pressed={sound}
+          aria-label={sound ? "Mute sounds" : "Unmute sounds"} aria-pressed={sound}
         >
           {sound ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
           )}
         </button>
         <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}>
           {["en", "it"].map((l) => (
-            <button
-              key={l}
-              onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
+            <button key={l} onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
               className="focus-ring mono text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full transition-colors"
               style={{ background: lang === l ? "var(--ink)" : "transparent", color: lang === l ? "var(--paper)" : "var(--ink)" }}
-              aria-pressed={lang === l}
-            >
+              aria-pressed={lang === l}>
               {l === "en" ? "English" : "Italiano"}
             </button>
           ))}
@@ -731,26 +891,17 @@ function Header({ lang, setLang, sound, setSound }) {
 function MicButton({ state, onClick, t }) {
   const isListening = state === "listening";
   return (
-    <button
-      onClick={onClick}
-      className="focus-ring relative inline-flex items-center justify-center"
+    <button onClick={onClick} className="focus-ring relative inline-flex items-center justify-center"
       aria-label={isListening ? t.stop : t.tap}
-      style={{
-        width: 96, height: 96, borderRadius: 999,
-        background: "var(--ink)", color: "var(--paper)",
+      style={{ width: 96, height: 96, borderRadius: 999, background: "var(--ink)", color: "var(--paper)",
         boxShadow: isListening
           ? "0 0 0 8px rgba(10,10,12,0.06), 0 0 0 18px rgba(10,10,12,0.04), 0 18px 50px -12px rgba(10,10,12,0.5)"
           : "0 1px 0 rgba(255,255,255,0.18) inset, 0 18px 50px -16px rgba(10,10,12,0.4)",
-        transition: "box-shadow 0.4s ease",
-        cursor: "pointer",
-      }}
-    >
+        transition: "box-shadow 0.4s ease", cursor: "pointer" }}>
       {!isListening && <span className="mic-pulse absolute inset-0 rounded-full"></span>}
       {!isListening ? (
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="9" y="3" width="6" height="12" rx="3" />
-          <path d="M5 11a7 7 0 0 0 14 0" />
-          <path d="M12 18v3" />
+          <rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><path d="M12 18v3" />
         </svg>
       ) : (
         <div className="flex items-end gap-[4px]" style={{ height: 28 }}>
@@ -770,14 +921,10 @@ function HintMarquee({ hints, onPick }) {
     <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)" }}>
       <div className="drift flex gap-3 whitespace-nowrap py-1">
         {doubled.map((h, i) => (
-          <button
-            key={i}
-            onClick={() => onPick(h)}
+          <button key={i} onClick={() => onPick(h)}
             className="focus-ring px-4 py-2 rounded-full text-[13px] transition-colors"
-            style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}
-          >
-            <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }}>↗</span>
-            {h}
+            style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}>
+            <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }}>↗</span>{h}
           </button>
         ))}
       </div>
@@ -786,33 +933,45 @@ function HintMarquee({ hints, onPick }) {
 }
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
-function LoadingScreen({ t }) {
-  const stages = [t.weaving, t.translating, t.drawing, t.composing];
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setI((x) => (x + 1) % stages.length), 1400);
-    return () => clearInterval(id);
-  }, []);
+function LoadingScreen({ msg, progress, t }) {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-10" style={{ zIndex: 5 }}>
       <BlobLoader size={240} />
-      <div className="flex flex-col items-center gap-2 rise">
-        <div className="serif text-[28px]" style={{ letterSpacing: "-0.01em" }}>{stages[i]}</div>
-        <div className="flex gap-1.5 mt-1">
-          {stages.map((_, k) => (
-            <div key={k} style={{ width: 18, height: 2, borderRadius: 2, background: k === i ? "var(--ink)" : "rgba(10,10,12,0.18)", transition: "background 0.4s ease" }} />
-          ))}
+      <div className="flex flex-col items-center gap-4 rise" style={{ maxWidth: 400, width: '100%', padding: '0 32px' }}>
+        <div className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
+          {msg || t.weaving}
         </div>
+        {progress !== null ? (
+          <div style={{ width: '100%' }}>
+            <div style={{ height: 2, borderRadius: 2, background: 'rgba(10,10,12,0.1)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 2, background: 'var(--ink)',
+                width: Math.round((progress || 0) * 100) + '%', transition: 'width 0.4s ease' }} />
+            </div>
+            <div className="mono text-center mt-2 text-[11px] tracking-[0.18em]" style={{ color: 'var(--muted)' }}>
+              {Math.round((progress || 0) * 100)}%
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2 mt-1">
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(10,10,12,0.35)',
+                animation: 'float-soft 1.2s ease-in-out infinite', animationDelay: i * 0.22 + 's' }} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 // ─── Story result ─────────────────────────────────────────────────────────────
+// pages: Array<{ text, illustration, brailleCells: dots[][]|null, demo: bool }>
 function StoryResult({ pages, lang, t, onAgain }) {
   const [page, setPage] = useState(0);
   const p = pages[page];
-  const cells = useMemo(() => textToBrailleCells(p.text), [p.text]);
+
+  // Use Liblouis cells when available, JS fallback otherwise
+  const cells = useMemo(() => p.brailleCells || textToBrailleCells(p.text), [p]);
   const lines  = useMemo(() => layoutBrailleLines(cells, 22), [cells]);
 
   return (
@@ -821,96 +980,71 @@ function StoryResult({ pages, lang, t, onAgain }) {
 
         {/* Left — physical page preview */}
         <div className="col-span-7 rise">
-          <div
-            className="relative mx-auto"
-            style={{
-              width: "100%", maxWidth: 560,
-              aspectRatio: "1 / 1",
-              borderRadius: 8,
+          <div className="relative mx-auto"
+            style={{ width: "100%", maxWidth: 560, aspectRatio: "1 / 1", borderRadius: 8,
               background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
               boxShadow: "0 0 0 1px rgba(10,10,12,0.08) inset, 0 50px 90px -40px rgba(10,10,12,0.35), 0 18px 40px -20px rgba(10,10,12,0.15)",
-              padding: "44px 40px",
-              transform: "rotate(-0.6deg)",
-            }}
-          >
+              padding: "44px 40px", transform: "rotate(-0.6deg)" }}>
             <div style={{ position: "absolute", inset: 0, borderRadius: 8, pointerEvents: "none", opacity: 0.5,
               backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-              mixBlendMode: "multiply"
-            }} />
+              mixBlendMode: "multiply" }} />
             <div className="mono absolute top-3 right-4 text-[9px] tracking-[0.2em] uppercase" style={{ color: "rgba(10,10,12,0.35)" }}>
               {t.page} {page + 1} {t.of} {pages.length}
             </div>
-
-            {/* Braille block */}
             <div className="flex flex-col gap-[10px]">
               {lines.slice(0, 5).map((line, li) => (
                 <div key={li} className="flex gap-[8px]">
-                  {line.map((cell, ci) => (
-                    <BrailleCell key={ci} dots={cell} />
-                  ))}
+                  {line.map((cell, ci) => <BrailleCell key={ci} dots={cell} />)}
                 </div>
               ))}
             </div>
-
-            {/* Tactile illustration */}
             <div className="absolute bottom-8 left-0 right-0 px-10">
               <div style={{ borderTop: "1px dashed rgba(10,10,12,0.18)", paddingTop: 16 }}>
-                <ShapeSilhouette shape={p.shape} />
+                <ShapeRenderer illustration={p.illustration} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right — story text + actions */}
+        {/* Right — text + actions */}
         <div className="col-span-5 flex flex-col gap-6 rise-slow">
-          <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--muted)" }}>
-            {t.yourStory}
-          </div>
-          <div className="serif text-[34px] leading-[1.15]" style={{ letterSpacing: "-0.01em" }}>
-            "{p.text}"
-          </div>
+          {p.demo && (
+            <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full inline-block"
+              style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)', alignSelf: 'flex-start' }}>
+              {t.demoNotice}
+            </div>
+          )}
+          <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--muted)" }}>{t.yourStory}</div>
+          <div className="serif text-[32px] leading-[1.18]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</div>
 
-          {/* Page navigator */}
           <div className="flex items-center gap-3 mt-2">
-            <button
-              onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage((x) => Math.max(0, x - 1)); }}
-              disabled={page === 0}
-              className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+            <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.max(0, x-1)); }}
+              disabled={page === 0} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
               style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === 0 ? 0.35 : 1, cursor: page === 0 ? "default" : "pointer" }}
-              aria-label="Previous page"
-            >‹</button>
+              aria-label="Previous page">‹</button>
             <div className="flex gap-1.5">
               {pages.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  aria-label={`Page ${i + 1}`}
-                  style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6, background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)", transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }}
-                />
+                <button key={i} onClick={() => setPage(i)} aria-label={`Page ${i+1}`}
+                  style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6,
+                    background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)",
+                    transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }} />
               ))}
             </div>
-            <button
-              onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage((x) => Math.min(pages.length - 1, x + 1)); }}
-              disabled={page === pages.length - 1}
-              className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === pages.length - 1 ? 0.35 : 1, cursor: page === pages.length - 1 ? "default" : "pointer" }}
-              aria-label="Next page"
-            >›</button>
+            <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.min(pages.length-1, x+1)); }}
+              disabled={page === pages.length-1} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === pages.length-1 ? 0.35 : 1, cursor: page === pages.length-1 ? "default" : "pointer" }}
+              aria-label="Next page">›</button>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-wrap gap-3 mt-4">
             <button className="btn" onClick={() => window.SFX && window.SFX.play("download")}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
-              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               {t.download}
               <span className="mono text-[10px] opacity-60 ml-1">.STL</span>
             </button>
             <button className="btn btn-ghost" onClick={onAgain}>{t.again}</button>
           </div>
 
-          {/* Tiny meta */}
           <div className="mono text-[10px] uppercase tracking-[0.22em] flex gap-4 mt-2" style={{ color: "var(--muted-soft)" }}>
             <span>● {lang === "it" ? "Italiano · Grado 1" : "English · Grade 1 UEB"}</span>
             <span>● 220 × 220 mm</span>
@@ -929,59 +1063,146 @@ function App() {
   const [phase, setPhase] = useState("idle");
   const [text,  setText]  = useState("");
   const [pages, setPages] = useState(null);
+  const [loadingMsg,      setLoadingMsg]      = useState("");
+  const [loadingProgress, setLoadingProgress] = useState(null);
   const t = COPY[lang];
-  const inputRef = useRef(null);
-  const padRef   = useRef(null);
+
+  const inputRef  = useRef(null);
+  const loaderRef = useRef(null);
+  const srRef     = useRef(null);
+
+  const stopLoader = () => {
+    if (loaderRef.current) { loaderRef.current.stop(); loaderRef.current = null; }
+  };
 
   const toggleListen = () => {
     if (phase === "listening") {
+      if (srRef.current) { srRef.current.stop(); srRef.current = null; }
       window.SFX && window.SFX.play("listenEnd");
-      const phrase = lang === "it"
-        ? "un gatto pirata che naviga verso la luna"
-        : "a pirate cat who sails to the moon";
-      setText(phrase);
-      submit(phrase);
-    } else {
-      window.SFX && window.SFX.play("listenStart");
-      setPhase("listening");
+      setPhase("idle");
+      return;
+    }
+    window.SFX && window.SFX.play("listenStart");
+    setPhase("listening");
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      // No Web Speech API — simulate after 3s
       setTimeout(() => {
-        window.SFX && window.SFX.play("listenEnd");
-        const phrase = lang === "it"
-          ? "un gatto pirata che naviga verso la luna"
-          : "a pirate cat who sails to the moon";
+        const phrase = lang === "it" ? "un gatto pirata che naviga verso la luna" : "a pirate cat who sails to the moon";
         setText(phrase);
-        submit(phrase);
-      }, 3500);
+        window.SFX && window.SFX.play("listenEnd");
+        doSubmit(phrase);
+      }, 3000);
+      return;
+    }
+
+    const sr = new SR();
+    srRef.current = sr;
+    sr.lang = lang === "it" ? "it-IT" : "en-US";
+    sr.continuous = false;
+    sr.interimResults = false;
+    sr.onresult = (e) => {
+      const phrase = e.results[0][0].transcript;
+      setText(phrase);
+      srRef.current = null;
+      window.SFX && window.SFX.play("listenEnd");
+      doSubmit(phrase);
+    };
+    sr.onerror = () => { srRef.current = null; setPhase("idle"); window.SFX && window.SFX.play("listenEnd"); };
+    sr.onend   = () => { srRef.current = null; };
+    sr.start();
+  };
+
+  const doSubmit = async (q) => {
+    setPhase("loading");
+    setLoadingMsg(t.weaving);
+    setLoadingProgress(null);
+    loaderRef.current = window.SFX && window.SFX.startLoader ? window.SFX.startLoader() : null;
+
+    try {
+      let rawPages;
+
+      if (!window.TACT.webgpuSupported) {
+        await new Promise(r => setTimeout(r, 1600));
+        rawPages = DEMO_PAGES[lang];
+        const demoResult = rawPages.map(p => ({ ...p, brailleCells: null, demo: true }));
+        stopLoader();
+        window.SFX && window.SFX.play("ready");
+        setPages(demoResult);
+        setPhase("result");
+        return;
+      }
+
+      // Real LLM path
+      let storyJSON = null;
+      try {
+        storyJSON = await window.TACT.generateStory(q, lang, (pct, statusText) => {
+          if (pct < 1) {
+            setLoadingMsg(t.modelDownloading);
+            setLoadingProgress(pct);
+          } else {
+            setLoadingMsg(t.generating);
+            setLoadingProgress(null);
+          }
+        });
+      } catch (llmErr) {
+        console.warn('[TACT] LLM failed, falling back to demo:', llmErr.message);
+      }
+
+      rawPages = storyJSON ? storyJSON.pages : DEMO_PAGES[lang];
+      const isDemo = !storyJSON;
+
+      setLoadingMsg(t.brailleTranslating);
+      setLoadingProgress(null);
+
+      const storyPages = await Promise.all(rawPages.map(async (p) => {
+        let brailleCells = null;
+        try { brailleCells = await window.TACT.translateBraille(p.text, lang); }
+        catch (e) { /* JS fallback used in StoryResult */ }
+        return { text: p.text, illustration: p.illustration, brailleCells, demo: isDemo };
+      }));
+
+      stopLoader();
+      window.SFX && window.SFX.play("ready");
+      setPages(storyPages);
+      setPhase("result");
+
+    } catch (err) {
+      console.error('[TACT] submit failed:', err);
+      stopLoader();
+      const fallback = DEMO_PAGES[lang].map(p => ({ ...p, brailleCells: null, demo: true }));
+      window.SFX && window.SFX.play("ready");
+      setPages(fallback);
+      setPhase("result");
     }
   };
 
-  const submit = (q) => {
-    setPhase("loading");
-    if (window.SFX && window.SFX.startLoader) {
-      try { padRef.current = window.SFX.startLoader(); } catch (e) {}
-    }
-    setTimeout(() => {
-      if (padRef.current && padRef.current.stop) { padRef.current.stop(); padRef.current = null; }
-      window.SFX && window.SFX.play("ready");
-      setPages(fakeStory(q, lang));
-      setPhase("result");
-    }, 5000);
-  };
+  const submit = (q) => { if (q && q.trim()) doSubmit(q.trim()); };
 
   const reset = () => {
-    if (padRef.current && padRef.current.stop) { padRef.current.stop(); padRef.current = null; }
+    stopLoader();
+    if (srRef.current) { srRef.current.stop(); srRef.current = null; }
     window.SFX && window.SFX.play("tap");
     setPages(null); setText(""); setPhase("idle");
+    setLoadingMsg(""); setLoadingProgress(null);
   };
 
   return (
     <div className="relative w-full h-full">
       <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} />
 
-      {/* Idle / listening */}
       {(phase === "idle" || phase === "listening") && (
         <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
           <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center">
+
+            {!window.TACT.webgpuSupported && (
+              <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)' }}>
+                {t.demoNotice}
+              </div>
+            )}
+
             <div className="mono text-[11px] tracking-[0.24em] uppercase rise" style={{ color: "var(--muted)" }}>
               {t.eyebrow}
             </div>
@@ -1000,29 +1221,15 @@ function App() {
             </div>
 
             <div className="flex flex-col items-center gap-4 w-full rise-slow">
-              <div className="mono text-[10px] tracking-[0.24em] uppercase" style={{ color: "var(--muted-soft)" }}>
-                — {t.or} —
-              </div>
-              <form
-                className="w-full max-w-[520px] flex items-center gap-2 px-2 py-2 rounded-full"
+              <div className="mono text-[10px] tracking-[0.24em] uppercase" style={{ color: "var(--muted-soft)" }}>— {t.or} —</div>
+              <form className="w-full max-w-[520px] flex items-center gap-2 px-2 py-2 rounded-full"
                 style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}
-                onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}
-              >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder={t.placeholder}
-                  className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
-                  style={{ color: "var(--ink)" }}
-                />
-                <button
-                  type="submit"
-                  disabled={!text.trim()}
-                  className="btn"
-                  style={{ padding: "10px 18px", opacity: text.trim() ? 1 : 0.4, cursor: text.trim() ? "pointer" : "default" }}
-                >
+                onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}>
+                <input ref={inputRef} type="text" value={text} onChange={(e) => setText(e.target.value)}
+                  placeholder={t.placeholder} className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
+                  style={{ color: "var(--ink)" }} />
+                <button type="submit" disabled={!text.trim()} className="btn"
+                  style={{ padding: "10px 18px", opacity: text.trim() ? 1 : 0.4, cursor: text.trim() ? "pointer" : "default" }}>
                   {t.submit}
                 </button>
               </form>
@@ -1039,7 +1246,7 @@ function App() {
         </main>
       )}
 
-      {phase === "loading" && <LoadingScreen t={t} />}
+      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} />}
       {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
     </div>
   );
