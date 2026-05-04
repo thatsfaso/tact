@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TACT — tell me a story</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0c;
+    --ink-soft: #1a1a1e;
+    --paper: #fafaf7;
+    --paper-warm: #f4f2ec;
+    --hairline: rgba(10, 10, 12, 0.08);
+    --hairline-strong: rgba(10, 10, 12, 0.14);
+    --muted: rgba(10, 10, 12, 0.55);
+    --muted-soft: rgba(10, 10, 12, 0.35);
+  }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+  .serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif; font-weight: 400; }
+  .mono { font-family: "Geist Mono", "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
+
+  /* Liquid chrome canvas */
+  #chrome-bg {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 1;
+  }
+  /* paper grain overlay */
+  .grain {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.07  0 0 0 0.42 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+
+  /* Marquee for hint chips */
+  @keyframes drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .drift { animation: drift 60s linear infinite; }
+
+  /* mic pulse */
+  @keyframes mic-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
+  .mic-pulse::before, .mic-pulse::after {
+    content: ""; position: absolute; inset: 0; border-radius: 999px;
+    border: 1.5px solid rgba(10,10,12,0.4);
+    animation: mic-pulse 2.4s ease-out infinite;
+  }
+  .mic-pulse::after { animation-delay: 1.2s; }
+
+  /* listening waveform */
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.35); }
+    50%      { transform: scaleY(1); }
+  }
+  .wbar { animation: wave 1.1s ease-in-out infinite; transform-origin: center; }
+
+  /* fade & slide */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise { animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes rise-slow {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise-slow { animation: rise-slow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+  /* Apple-y button */
+  .btn {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.2s ease;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 22px rgba(10,10,12,0.18);
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 14px 36px rgba(10,10,12,0.22); }
+  .btn:active { transform: translateY(0); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: 0 0 0 1px var(--hairline-strong) inset;
+  }
+  .btn-ghost:hover { background: rgba(10,10,12,0.04); }
+
+  /* quiet card */
+  .card {
+    background: rgba(250,250,247,0.82);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-radius: 22px;
+    box-shadow: 0 0 0 1px var(--hairline) inset, 0 30px 80px -30px rgba(10,10,12,0.18);
+  }
+
+  /* Braille dot */
+  .bd {
+    width: 7px; height: 7px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #2a2a2e, #08080a 70%);
+    box-shadow: 0 1px 1.5px rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.18);
+  }
+  .bd.off { background: transparent; box-shadow: 0 0 0 1px rgba(10,10,12,0.06) inset; }
+
+  /* Scrollbar suppression in result */
+  .nice-scroll::-webkit-scrollbar { width: 6px; }
+  .nice-scroll::-webkit-scrollbar-thumb { background: rgba(10,10,12,0.18); border-radius: 999px; }
+
+  /* subtle floating */
+  @keyframes float-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .float-soft { animation: float-soft 8s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<canvas id="chrome-bg"></canvas>
+<div class="grain"></div>
+<div id="root" class="relative" style="z-index:2;"></div>
+
+<!-- ─── Sound system ─────────────────────────────────────────────────────── -->
+<script>
+// Sound system — synthesized, calm, paper-warm.
+// All sounds generated via Web Audio API (no external assets).
+(function () {
+  let ctx = null;
+  let master = null;
+  let enabled = (function() {
+    try { return localStorage.getItem("tact-sound") !== "off"; }
+    catch (e) { return true; }
+  })();
+
+  function ensure() {
+    if (ctx) return ctx;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.18;
+    master.connect(ctx.destination);
+    return ctx;
+  }
+
+  ["pointerdown", "keydown", "touchstart"].forEach(function(ev) {
+    window.addEventListener(ev, function() {
+      var c = ensure();
+      if (c && c.state === "suspended") c.resume();
+    }, { once: false, passive: true });
+  });
+
+  function envelope(node, t0, attack, hold, release, peak) {
+    peak = peak || 1;
+    node.gain.cancelScheduledValues(t0);
+    node.gain.setValueAtTime(0.0001, t0);
+    node.gain.exponentialRampToValueAtTime(peak, t0 + attack);
+    node.gain.setValueAtTime(peak, t0 + attack + hold);
+    node.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + hold + release);
+  }
+
+  function chime(freqs, opts) {
+    opts = opts || {};
+    var gain = opts.gain !== undefined ? opts.gain : 0.5;
+    var attack = opts.attack !== undefined ? opts.attack : 0.01;
+    var hold = opts.hold !== undefined ? opts.hold : 0.04;
+    var release = opts.release !== undefined ? opts.release : 0.5;
+    var detune = opts.detune || 0;
+    if (!enabled) return;
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime;
+    var out = c.createGain();
+    out.gain.value = gain;
+    var lpf = c.createBiquadFilter();
+    lpf.type = "lowpass";
+    lpf.frequency.value = 4800;
+    lpf.Q.value = 0.4;
+    out.connect(lpf);
+    lpf.connect(master);
+    freqs.forEach(function(f, i) {
+      var o = c.createOscillator();
+      o.type = "sine";
+      o.frequency.value = f;
+      o.detune.value = detune + (i - freqs.length / 2) * 1.5;
+      var g = c.createGain();
+      g.gain.value = 0;
+      o.connect(g);
+      g.connect(out);
+      envelope(g, t, attack, hold, release, 1 / freqs.length);
+      o.start(t);
+      o.stop(t + attack + hold + release + 0.05);
+    });
+  }
+
+  function noiseBurst(opts) {
+    opts = opts || {};
+    var duration = opts.duration !== undefined ? opts.duration : 0.2;
+    var gain = opts.gain !== undefined ? opts.gain : 0.15;
+    var freq = opts.freq !== undefined ? opts.freq : 2000;
+    var q = opts.q !== undefined ? opts.q : 1.2;
+    var type = opts.type || "bandpass";
+    if (!enabled) return;
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime;
+    var len = Math.max(1, Math.floor(c.sampleRate * duration));
+    var buf = c.createBuffer(1, len, c.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    var src = c.createBufferSource();
+    src.buffer = buf;
+    var f = c.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    f.Q.value = q;
+    var g = c.createGain();
+    g.gain.value = 0;
+    src.connect(f);
+    f.connect(g);
+    g.connect(master);
+    envelope(g, t, 0.005, 0.02, duration, gain);
+    src.start(t);
+    src.stop(t + duration + 0.05);
+  }
+
+  function startPad() {
+    if (!enabled) return null;
+    var c = ensure(); if (!c) return null;
+    var t = c.currentTime;
+    var g = c.createGain();
+    g.gain.value = 0;
+    var lpf = c.createBiquadFilter();
+    lpf.type = "lowpass";
+    lpf.frequency.value = 1200;
+    g.connect(lpf);
+    lpf.connect(master);
+    var o1 = c.createOscillator();
+    o1.type = "sine"; o1.frequency.value = 220; o1.detune.value = -4;
+    var o2 = c.createOscillator();
+    o2.type = "sine"; o2.frequency.value = 330; o2.detune.value = +5;
+    var o3 = c.createOscillator();
+    o3.type = "sine"; o3.frequency.value = 165; o3.detune.value = +2;
+    var tremolo = c.createOscillator();
+    tremolo.frequency.value = 0.18;
+    var tremGain = c.createGain();
+    tremGain.gain.value = 0.06;
+    tremolo.connect(tremGain);
+    tremGain.connect(g.gain);
+    [o1, o2, o3].forEach(function(o) { o.connect(g); });
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 1.2);
+    o1.start(t); o2.start(t); o3.start(t); tremolo.start(t);
+    return {
+      stop: function() {
+        var now = c.currentTime;
+        g.gain.cancelScheduledValues(now);
+        g.gain.setValueAtTime(g.gain.value, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        [o1, o2, o3, tremolo].forEach(function(o) { o.stop(now + 0.7); });
+      }
+    };
+  }
+
+  var sounds = {
+    tap:        function() { chime([880, 1320], { gain: 0.18, attack: 0.005, hold: 0.02, release: 0.18 }); },
+    hover:      function() { chime([1760], { gain: 0.05, attack: 0.005, hold: 0.01, release: 0.12 }); },
+    listenStart: function() {
+      chime([523, 659], { gain: 0.28, attack: 0.01, hold: 0.05, release: 0.45 });
+      setTimeout(function() { chime([784, 988], { gain: 0.22, attack: 0.01, hold: 0.04, release: 0.5 }); }, 110);
+    },
+    listenEnd: function() {
+      chime([987], { gain: 0.22, attack: 0.01, hold: 0.04, release: 0.3 });
+      setTimeout(function() { chime([659.25, 783.99], { gain: 0.24, attack: 0.01, hold: 0.05, release: 0.6 }); }, 130);
+    },
+    ready: function() {
+      chime([220], { gain: 0.10, attack: 0.04, hold: 0.06, release: 0.5 });
+      setTimeout(function() { chime([277, 329.6], { gain: 0.12, attack: 0.04, hold: 0.07, release: 0.7 }); }, 110);
+      setTimeout(function() { chime([440, 554], { gain: 0.10, attack: 0.04, hold: 0.07, release: 0.85 }); }, 280);
+    },
+    pageTurn: function() {
+      chime([240], { gain: 0.32, attack: 0.001, hold: 0.005, release: 0.18 });
+    },
+    download: function() {
+      noiseBurst({ duration: 0.04, gain: 0.32, freq: 280, q: 6, type: "bandpass" });
+      setTimeout(function() { chime([180], { gain: 0.18, attack: 0.001, hold: 0.005, release: 0.12 }); }, 8);
+    },
+    startLoader: function() {
+      if (!enabled) return null;
+      var alive = true;
+      var tick = function() {
+        if (!alive || !enabled) return;
+        chime([110], { gain: 0.12, attack: 0.005, hold: 0.04, release: 0.35 });
+        setTimeout(function() { if (alive && enabled) chime([138], { gain: 0.08, attack: 0.005, hold: 0.03, release: 0.3 }); }, 140);
+      };
+      tick();
+      var id = setInterval(tick, 1400);
+      return { stop: function() { alive = false; clearInterval(id); } };
+    },
+    toggle: function() { chime([1175], { gain: 0.16, attack: 0.005, hold: 0.02, release: 0.18 }); },
+    type:   function() { noiseBurst({ duration: 0.025, gain: 0.06, freq: 3200, q: 8, type: "bandpass" }); },
+    startPad: startPad,
+  };
+
+  window.SFX = {
+    play: function(name) { if (sounds[name]) sounds[name](); },
+    startPad: function() { return sounds.startPad(); },
+    startLoader: function() { return sounds.startLoader(); },
+    isEnabled: function() { return enabled; },
+    setEnabled: function(v) {
+      enabled = !!v;
+      try { localStorage.setItem("tact-sound", v ? "on" : "off"); } catch (e) {}
+    },
+  };
+})();
+</script>
+
+<!-- ─── Liquid chrome WebGL background ──────────────────────────────────── -->
+<script>
+(function () {
+  var canvas = document.getElementById("chrome-bg");
+  if (!canvas) return;
+  var gl = canvas.getContext("webgl", { antialias: true, premultipliedAlpha: false });
+  if (!gl) return;
+
+  var vert = "\n    attribute vec2 a_pos;\n    void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }\n  ";
+
+  var frag = "\n    precision highp float;\n    uniform vec2  u_res;\n    uniform float u_time;\n    uniform vec2  u_mouse;\n\n    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\n    float noise(vec2 p){\n      vec2 i = floor(p), f = fract(p);\n      float a = hash(i);\n      float b = hash(i + vec2(1.0,0.0));\n      float c = hash(i + vec2(0.0,1.0));\n      float d = hash(i + vec2(1.0,1.0));\n      vec2 u = f*f*(3.0-2.0*f);\n      return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;\n    }\n    float fbm(vec2 p){\n      float v = 0.0; float a = 0.5;\n      for(int i=0;i<5;i++){ v += a*noise(p); p *= 2.02; a *= 0.5; }\n      return v;\n    }\n\n    void main(){\n      vec2 uv = (gl_FragCoord.xy - 0.5*u_res) / min(u_res.x, u_res.y);\n      vec2 p = uv * 1.4;\n      float t = u_time * 0.06;\n\n      vec2 m = (u_mouse - 0.5*u_res)/min(u_res.x,u_res.y);\n      vec2 q = p + 0.18*vec2(fbm(p + t), fbm(p - t + 3.1));\n      vec2 r = q + 0.22*vec2(fbm(q + 1.7*m + t*1.3), fbm(q + 4.2 - t));\n\n      float f = fbm(r * 1.2 + t*0.5);\n\n      float ridge = sin( (r.x*2.4 + r.y*1.1) * 3.14159 + f*5.0 + t*1.2 );\n      ridge = 0.5 + 0.5 * ridge;\n      ridge = pow(ridge, 1.8);\n\n      vec3 ivory  = vec3(0.972, 0.964, 0.945);\n      vec3 bone   = vec3(0.918, 0.906, 0.879);\n      vec3 pearl  = vec3(0.835, 0.835, 0.842);\n      vec3 ink    = vec3(0.760, 0.748, 0.735);\n\n      vec3 col = mix(ivory, bone, smoothstep(0.15, 0.85, f));\n      col = mix(col, pearl, ridge*0.55);\n      col = mix(col, ink, smoothstep(0.7, 1.05, ridge*0.9 + f*0.4) * 0.35);\n\n      col += 0.012 * sin(vec3(0.0, 0.6, 1.2) + t*1.4 + f*3.0);\n\n      float v = smoothstep(1.25, 0.35, length(uv*vec2(1.0, 0.95)));\n      col *= mix(0.9, 1.0, v);\n\n      gl_FragColor = vec4(col, 1.0);\n    }\n  ";
+
+  function compile(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+  var a_pos = gl.getAttribLocation(prog, "a_pos");
+  gl.enableVertexAttribArray(a_pos);
+  gl.vertexAttribPointer(a_pos, 2, gl.FLOAT, false, 0, 0);
+
+  var u_res   = gl.getUniformLocation(prog, "u_res");
+  var u_time  = gl.getUniformLocation(prog, "u_time");
+  var u_mouse = gl.getUniformLocation(prog, "u_mouse");
+
+  var mouse = [window.innerWidth * 0.5, window.innerHeight * 0.5];
+  var target = mouse.slice();
+  window.addEventListener("pointermove", function(e) {
+    target = [e.clientX, window.innerHeight - e.clientY];
+  });
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = Math.floor(window.innerWidth  * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width  = window.innerWidth  + "px";
+    canvas.style.height = window.innerHeight + "px";
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  var start = performance.now();
+  function frame() {
+    mouse[0] += (target[0] - mouse[0]) * 0.05;
+    mouse[1] += (target[1] - mouse[1]) * 0.05;
+    gl.uniform2f(u_res,   canvas.width, canvas.height);
+    gl.uniform1f(u_time,  (performance.now() - start) / 1000);
+    gl.uniform2f(u_mouse, mouse[0] * (window.devicePixelRatio || 1), mouse[1] * (window.devicePixelRatio || 1));
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+
+<!-- ─── React app (Blob loader + Braille engine + Main app) ─────────────── -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ─── Blob loader ─────────────────────────────────────────────────────────────
+function BlobLoader({ size = 220, label = "" }) {
+  const [t, setT] = useState(0);
+  const raf = useRef(0);
+  useEffect(() => {
+    let start = performance.now();
+    const tick = () => {
+      setT((performance.now() - start) / 1000);
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, []);
+
+  const N = 9;
+  const cx = 100, cy = 100, baseR = 56;
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    const wob =
+      Math.sin(t * 0.9 + i * 1.7) * 6 +
+      Math.sin(t * 1.4 + i * 0.6) * 4 +
+      Math.cos(t * 0.5 + i * 2.1) * 5;
+    pts.push([cx + Math.cos(a) * (baseR + wob), cy + Math.sin(a) * (baseR + wob)]);
+  }
+
+  const path = (() => {
+    const p = pts, n = p.length;
+    let d = `M ${p[0][0].toFixed(2)},${p[0][1].toFixed(2)} `;
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+      const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += `C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)} `;
+    }
+    return d + "Z";
+  })();
+
+  const sat = (phase, dist, r) => {
+    const a = t * 0.6 + phase;
+    return {
+      cx: cx + Math.cos(a) * dist + Math.sin(t * 1.3 + phase) * 3,
+      cy: cy + Math.sin(a) * dist + Math.cos(t * 0.9 + phase) * 3,
+      r:  r  + Math.sin(t * 1.7 + phase) * 2,
+    };
+  };
+  const s1 = sat(0,   44, 14);
+  const s2 = sat(2.1, 40, 11);
+  const s3 = sat(4.3, 48,  9);
+
+  return (
+    <div className="flex flex-col items-center gap-5">
+      <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <filter id="goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
+            <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
+          </filter>
+          <radialGradient id="blobFill" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#0a0a0c" />
+            <stop offset="100%" stopColor="#0a0a0c" />
+          </radialGradient>
+        </defs>
+        <g filter="url(#goo)">
+          <path d={path} fill="url(#blobFill)" />
+          <circle cx={s1.cx} cy={s1.cy} r={s1.r} fill="url(#blobFill)" />
+          <circle cx={s2.cx} cy={s2.cy} r={s2.r} fill="url(#blobFill)" />
+          <circle cx={s3.cx} cy={s3.cy} r={s3.r} fill="url(#blobFill)" />
+        </g>
+      </svg>
+      {label ? <div className="mono text-[12px] tracking-[0.18em] uppercase" style={{ color: "var(--muted)" }}>{label}</div> : null}
+    </div>
+  );
+}
+
+// ─── Braille engine (Grade 1 prototype — Liblouis WASM goes here for prod) ──
+const BRAILLE_MAP = {
+  a:[1],b:[1,2],c:[1,4],d:[1,4,5],e:[1,5],f:[1,2,4],g:[1,2,4,5],
+  h:[1,2,5],i:[2,4],j:[2,4,5],k:[1,3],l:[1,2,3],m:[1,3,4],n:[1,3,4,5],
+  o:[1,3,5],p:[1,2,3,4],q:[1,2,3,4,5],r:[1,2,3,5],s:[2,3,4],t:[2,3,4,5],
+  u:[1,3,6],v:[1,2,3,6],w:[2,4,5,6],x:[1,3,4,6],y:[1,3,4,5,6],z:[1,3,5,6],
+  "à":[1,2,3,5,6],"è":[2,3,4,6],"é":[1,2,3,4,5,6],"ì":[3,4],"ò":[3,4,6],"ù":[2,3,4,5,6],
+  ".":[2,5,6],",":[2],";":[2,3],":":[2,5],"?":[2,6],"!":[2,3,5],
+  "'":[3],"-":[3,6],'"':[2,3,6],
+  "1":[1],"2":[1,2],"3":[1,4],"4":[1,4,5],"5":[1,5],
+  "6":[1,2,4],"7":[1,2,4,5],"8":[1,2,5],"9":[2,4],"0":[2,4,5],
+};
+const CAP_INDICATOR = [6];
+const NUM_INDICATOR = [3,4,5,6];
+
+function textToBrailleCells(text) {
+  const cells = [];
+  let inNumber = false;
+  for (const raw of text) {
+    if (raw === " ") { cells.push([]); inNumber = false; continue; }
+    if (raw === "\n") { cells.push("BR"); inNumber = false; continue; }
+    if (/[0-9]/.test(raw)) {
+      if (!inNumber) { cells.push(NUM_INDICATOR); inNumber = true; }
+      cells.push(BRAILLE_MAP[raw]);
+      continue;
+    }
+    inNumber = false;
+    const lower = raw.toLowerCase();
+    if (raw !== lower && BRAILLE_MAP[lower]) {
+      cells.push(CAP_INDICATOR);
+      cells.push(BRAILLE_MAP[lower]);
+    } else if (BRAILLE_MAP[lower]) {
+      cells.push(BRAILLE_MAP[lower]);
+    } else {
+      cells.push([]);
+    }
+  }
+  return cells;
+}
+
+function layoutBrailleLines(cells, cellsPerLine = 22) {
+  const lines = [];
+  let line = [], lastSpace = -1;
+  for (const c of cells) {
+    if (c === "BR") { lines.push(line); line = []; lastSpace = -1; continue; }
+    line.push(c);
+    if (c.length === 0) lastSpace = line.length - 1;
+    if (line.length >= cellsPerLine) {
+      if (lastSpace > 0) {
+        const rest = line.slice(lastSpace + 1);
+        lines.push(line.slice(0, lastSpace));
+        line = rest; lastSpace = -1;
+      } else {
+        lines.push(line); line = []; lastSpace = -1;
+      }
+    }
+  }
+  if (line.length) lines.push(line);
+  return lines;
+}
+
+function BrailleCell({ dots }) {
+  const has = (n) => dots && dots.includes(n);
+  return (
+    <div className="grid grid-cols-2 gap-[5px]" style={{ width: 19 }}>
+      <div className={"bd " + (has(1) ? "" : "off")}></div>
+      <div className={"bd " + (has(4) ? "" : "off")}></div>
+      <div className={"bd " + (has(2) ? "" : "off")}></div>
+      <div className={"bd " + (has(5) ? "" : "off")}></div>
+      <div className={"bd " + (has(3) ? "" : "off")}></div>
+      <div className={"bd " + (has(6) ? "" : "off")}></div>
+    </div>
+  );
+}
+
+// ─── i18n ─────────────────────────────────────────────────────────────────────
+const COPY = {
+  en: {
+    eyebrow:    "Stories you can read with your fingers",
+    headline:   "Tell me a story…",
+    sub:        "Speak your idea. We’ll write it, translate it to Braille, and prepare a tactile page you can print at home.",
+    tap:        "Tap to speak",
+    listening:  "Listening…",
+    stop:       "Tap to stop",
+    or:         "or type below",
+    placeholder:"a pirate cat who sails to the moon",
+    submit:     "Make my story",
+    weaving:    "Weaving your story",
+    translating:"Translating to Braille",
+    drawing:    "Drawing tactile shapes",
+    composing:  "Laying out the page",
+    yourStory:  "Your story",
+    page:       "Page",
+    of:         "of",
+    download:   "Download print file",
+    again:      "Tell another",
+    hints: ["a brave robot lost in the snow","the moon’s secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
+    footer: "Open source · No account · Works with any FDM 3D printer",
+  },
+  it: {
+    eyebrow:    "Storie da leggere con le dita",
+    headline:   "Raccontami una storia…",
+    sub:        "Dimmi la tua idea. La scriviamo, la traduciamo in Braille e prepariamo una pagina tattile da stampare a casa.",
+    tap:        "Tocca e parla",
+    listening:  "Ti ascolto…",
+    stop:       "Tocca per fermare",
+    or:         "oppure scrivi qui sotto",
+    placeholder:"un gatto pirata che naviga verso la luna",
+    submit:     "Crea la storia",
+    weaving:    "Sto scrivendo la storia",
+    translating:"Traduco in Braille",
+    drawing:    "Disegno le forme tattili",
+    composing:  "Compongo la pagina",
+    yourStory:  "La tua storia",
+    page:       "Pagina",
+    of:         "di",
+    download:   "Scarica file di stampa",
+    again:      "Un’altra storia",
+    hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
+    footer: "Open source · Senza account · Funziona con ogni stampante FDM",
+  },
+};
+
+// ─── Faux story generator (placeholder for LLM call) ─────────────────────────
+function fakeStory(prompt, lang) {
+  const en = [
+    { text: "Once upon a time, a brave cat named Whiskers wore a tiny eyepatch and dreamed of the moon.", shape: "cat" },
+    { text: "He built a small wooden boat and sailed across a sea of silver clouds, all the way to the stars.", shape: "boat" },
+    { text: "There he found a quiet garden where the moon kept her gentlest songs.", shape: "moon" },
+  ];
+  const it = [
+    { text: "C’era una volta un gatto coraggioso di nome Baffi, con una piccola benda sull’occhio, che sognava la luna.", shape: "cat" },
+    { text: "Costruì una piccola barca di legno e navigò un mare di nuvole d’argento, fino alle stelle.", shape: "boat" },
+    { text: "Là trovò un giardino silenzioso dove la luna custodiva le sue canzoni più dolci.", shape: "moon" },
+  ];
+  return lang === "it" ? it : en;
+}
+
+// ─── Tactile shape silhouettes ────────────────────────────────────────────────
+function ShapeSilhouette({ shape }) {
+  const stroke = "#0a0a0c", sw = 3;
+  let path = null;
+  if (shape === "cat") {
+    path = (
+      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M 60 70 L 78 42 L 92 60 Q 110 54 128 60 L 142 42 L 160 70 Q 170 92 160 112 Q 140 134 110 134 Q 80 134 60 112 Q 50 92 60 70 Z" />
+        <circle cx="98" cy="86" r="4" fill={stroke} />
+        <path d="M 116 80 L 138 78 L 138 98 L 118 96 Z" />
+        <path d="M 118 80 L 100 70" />
+        <path d="M 138 80 L 156 70" />
+        <path d="M 80 102 L 60 100 M 80 108 L 58 112 M 140 102 L 162 100 M 140 108 L 162 112" />
+        <path d="M 105 110 Q 110 116 115 110" />
+      </g>
+    );
+  } else if (shape === "boat") {
+    path = (
+      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M 36 110 Q 110 140 184 110 L 168 130 Q 110 150 52 130 Z" />
+        <path d="M 110 30 L 110 110" />
+        <path d="M 110 36 L 158 100 L 110 100 Z" />
+        <path d="M 24 146 Q 40 138 56 146 T 88 146 T 120 146 T 152 146 T 184 146 T 210 146" opacity="0.6" />
+      </g>
+    );
+  } else if (shape === "moon") {
+    path = (
+      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+        <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
+        <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
+        <path d="M 60 110 L 63 104 L 66 110 L 72 113 L 66 116 L 63 122 L 60 116 L 54 113 Z" />
+      </g>
+    );
+  }
+  return (
+    <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 320 }}>
+      {path}
+    </svg>
+  );
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+function Header({ lang, setLang, sound, setSound }) {
+  return (
+    <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6" style={{ zIndex: 5 }}>
+      <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 gap-[3px]" style={{ width: 18 }}>
+          <div className="bd"></div>
+          <div className="bd off"></div>
+          <div className="bd"></div>
+          <div className="bd"></div>
+          <div className="bd off"></div>
+          <div className="bd"></div>
+        </div>
+        <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>TACT</div>
+        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>
+          prototype
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => { const v = !sound; setSound(v); window.SFX.setEnabled(v); }}
+          className="focus-ring w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+          style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)" }}
+          aria-label={sound ? "Mute sounds" : "Unmute sounds"}
+          aria-pressed={sound}
+        >
+          {sound ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/>
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/>
+            </svg>
+          )}
+        </button>
+        <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}>
+          {["en", "it"].map((l) => (
+            <button
+              key={l}
+              onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
+              className="focus-ring mono text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full transition-colors"
+              style={{ background: lang === l ? "var(--ink)" : "transparent", color: lang === l ? "var(--paper)" : "var(--ink)" }}
+              aria-pressed={lang === l}
+            >
+              {l === "en" ? "English" : "Italiano"}
+            </button>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── Mic button ───────────────────────────────────────────────────────────────
+function MicButton({ state, onClick, t }) {
+  const isListening = state === "listening";
+  return (
+    <button
+      onClick={onClick}
+      className="focus-ring relative inline-flex items-center justify-center"
+      aria-label={isListening ? t.stop : t.tap}
+      style={{
+        width: 96, height: 96, borderRadius: 999,
+        background: "var(--ink)", color: "var(--paper)",
+        boxShadow: isListening
+          ? "0 0 0 8px rgba(10,10,12,0.06), 0 0 0 18px rgba(10,10,12,0.04), 0 18px 50px -12px rgba(10,10,12,0.5)"
+          : "0 1px 0 rgba(255,255,255,0.18) inset, 0 18px 50px -16px rgba(10,10,12,0.4)",
+        transition: "box-shadow 0.4s ease",
+        cursor: "pointer",
+      }}
+    >
+      {!isListening && <span className="mic-pulse absolute inset-0 rounded-full"></span>}
+      {!isListening ? (
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="3" width="6" height="12" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0" />
+          <path d="M12 18v3" />
+        </svg>
+      ) : (
+        <div className="flex items-end gap-[4px]" style={{ height: 28 }}>
+          {[0.1, 0.3, 0.5, 0.3, 0.1].map((d, i) => (
+            <span key={i} className="wbar" style={{ width: 4, height: "100%", borderRadius: 4, background: "var(--paper)", animationDelay: `${d}s` }} />
+          ))}
+        </div>
+      )}
+    </button>
+  );
+}
+
+// ─── Hint marquee ─────────────────────────────────────────────────────────────
+function HintMarquee({ hints, onPick }) {
+  const doubled = [...hints, ...hints];
+  return (
+    <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)" }}>
+      <div className="drift flex gap-3 whitespace-nowrap py-1">
+        {doubled.map((h, i) => (
+          <button
+            key={i}
+            onClick={() => onPick(h)}
+            className="focus-ring px-4 py-2 rounded-full text-[13px] transition-colors"
+            style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}
+          >
+            <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }}>↗</span>
+            {h}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Loading screen ───────────────────────────────────────────────────────────
+function LoadingScreen({ t }) {
+  const stages = [t.weaving, t.translating, t.drawing, t.composing];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setI((x) => (x + 1) % stages.length), 1400);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10" style={{ zIndex: 5 }}>
+      <BlobLoader size={240} />
+      <div className="flex flex-col items-center gap-2 rise">
+        <div className="serif text-[28px]" style={{ letterSpacing: "-0.01em" }}>{stages[i]}</div>
+        <div className="flex gap-1.5 mt-1">
+          {stages.map((_, k) => (
+            <div key={k} style={{ width: 18, height: 2, borderRadius: 2, background: k === i ? "var(--ink)" : "rgba(10,10,12,0.18)", transition: "background 0.4s ease" }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Story result ─────────────────────────────────────────────────────────────
+function StoryResult({ pages, lang, t, onAgain }) {
+  const [page, setPage] = useState(0);
+  const p = pages[page];
+  const cells = useMemo(() => textToBrailleCells(p.text), [p.text]);
+  const lines  = useMemo(() => layoutBrailleLines(cells, 22), [cells]);
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center px-6" style={{ zIndex: 5 }}>
+      <div className="w-full max-w-[1100px] grid grid-cols-12 gap-8 items-center">
+
+        {/* Left — physical page preview */}
+        <div className="col-span-7 rise">
+          <div
+            className="relative mx-auto"
+            style={{
+              width: "100%", maxWidth: 560,
+              aspectRatio: "1 / 1",
+              borderRadius: 8,
+              background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
+              boxShadow: "0 0 0 1px rgba(10,10,12,0.08) inset, 0 50px 90px -40px rgba(10,10,12,0.35), 0 18px 40px -20px rgba(10,10,12,0.15)",
+              padding: "44px 40px",
+              transform: "rotate(-0.6deg)",
+            }}
+          >
+            <div style={{ position: "absolute", inset: 0, borderRadius: 8, pointerEvents: "none", opacity: 0.5,
+              backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+              mixBlendMode: "multiply"
+            }} />
+            <div className="mono absolute top-3 right-4 text-[9px] tracking-[0.2em] uppercase" style={{ color: "rgba(10,10,12,0.35)" }}>
+              {t.page} {page + 1} {t.of} {pages.length}
+            </div>
+
+            {/* Braille block */}
+            <div className="flex flex-col gap-[10px]">
+              {lines.slice(0, 5).map((line, li) => (
+                <div key={li} className="flex gap-[8px]">
+                  {line.map((cell, ci) => (
+                    <BrailleCell key={ci} dots={cell} />
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Tactile illustration */}
+            <div className="absolute bottom-8 left-0 right-0 px-10">
+              <div style={{ borderTop: "1px dashed rgba(10,10,12,0.18)", paddingTop: 16 }}>
+                <ShapeSilhouette shape={p.shape} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — story text + actions */}
+        <div className="col-span-5 flex flex-col gap-6 rise-slow">
+          <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--muted)" }}>
+            {t.yourStory}
+          </div>
+          <div className="serif text-[34px] leading-[1.15]" style={{ letterSpacing: "-0.01em" }}>
+            "{p.text}"
+          </div>
+
+          {/* Page navigator */}
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage((x) => Math.max(0, x - 1)); }}
+              disabled={page === 0}
+              className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === 0 ? 0.35 : 1, cursor: page === 0 ? "default" : "pointer" }}
+              aria-label="Previous page"
+            >‹</button>
+            <div className="flex gap-1.5">
+              {pages.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i)}
+                  aria-label={`Page ${i + 1}`}
+                  style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6, background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)", transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage((x) => Math.min(pages.length - 1, x + 1)); }}
+              disabled={page === pages.length - 1}
+              className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === pages.length - 1 ? 0.35 : 1, cursor: page === pages.length - 1 ? "default" : "pointer" }}
+              aria-label="Next page"
+            >›</button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            <button className="btn" onClick={() => window.SFX && window.SFX.play("download")}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
+              </svg>
+              {t.download}
+              <span className="mono text-[10px] opacity-60 ml-1">.STL</span>
+            </button>
+            <button className="btn btn-ghost" onClick={onAgain}>{t.again}</button>
+          </div>
+
+          {/* Tiny meta */}
+          <div className="mono text-[10px] uppercase tracking-[0.22em] flex gap-4 mt-2" style={{ color: "var(--muted-soft)" }}>
+            <span>● {lang === "it" ? "Italiano · Grado 1" : "English · Grade 1 UEB"}</span>
+            <span>● 220 × 220 mm</span>
+            <span>● TPU / PETG</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main app ─────────────────────────────────────────────────────────────────
+function App() {
+  const [lang,  setLang]  = useState("en");
+  const [sound, setSound] = useState(window.SFX ? window.SFX.isEnabled() : true);
+  const [phase, setPhase] = useState("idle");
+  const [text,  setText]  = useState("");
+  const [pages, setPages] = useState(null);
+  const t = COPY[lang];
+  const inputRef = useRef(null);
+  const padRef   = useRef(null);
+
+  const toggleListen = () => {
+    if (phase === "listening") {
+      window.SFX && window.SFX.play("listenEnd");
+      const phrase = lang === "it"
+        ? "un gatto pirata che naviga verso la luna"
+        : "a pirate cat who sails to the moon";
+      setText(phrase);
+      submit(phrase);
+    } else {
+      window.SFX && window.SFX.play("listenStart");
+      setPhase("listening");
+      setTimeout(() => {
+        window.SFX && window.SFX.play("listenEnd");
+        const phrase = lang === "it"
+          ? "un gatto pirata che naviga verso la luna"
+          : "a pirate cat who sails to the moon";
+        setText(phrase);
+        submit(phrase);
+      }, 3500);
+    }
+  };
+
+  const submit = (q) => {
+    setPhase("loading");
+    if (window.SFX && window.SFX.startLoader) {
+      try { padRef.current = window.SFX.startLoader(); } catch (e) {}
+    }
+    setTimeout(() => {
+      if (padRef.current && padRef.current.stop) { padRef.current.stop(); padRef.current = null; }
+      window.SFX && window.SFX.play("ready");
+      setPages(fakeStory(q, lang));
+      setPhase("result");
+    }, 5000);
+  };
+
+  const reset = () => {
+    if (padRef.current && padRef.current.stop) { padRef.current.stop(); padRef.current = null; }
+    window.SFX && window.SFX.play("tap");
+    setPages(null); setText(""); setPhase("idle");
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} />
+
+      {/* Idle / listening */}
+      {(phase === "idle" || phase === "listening") && (
+        <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
+          <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center">
+            <div className="mono text-[11px] tracking-[0.24em] uppercase rise" style={{ color: "var(--muted)" }}>
+              {t.eyebrow}
+            </div>
+            <h1 className="serif rise" style={{ fontSize: "clamp(44px, 6vw, 76px)", lineHeight: 1.05, letterSpacing: "-0.02em", maxWidth: 720, whiteSpace: "nowrap" }}>
+              {t.headline}
+            </h1>
+            <p className="rise-slow text-[16px] leading-[1.55] max-w-[520px]" style={{ color: "var(--muted)" }}>
+              {t.sub}
+            </p>
+
+            <div className="flex flex-col items-center gap-4 rise-slow mt-2">
+              <MicButton state={phase === "listening" ? "listening" : "idle"} onClick={toggleListen} t={t} />
+              <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: phase === "listening" ? "var(--ink)" : "var(--muted)" }}>
+                {phase === "listening" ? t.listening : t.tap}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 w-full rise-slow">
+              <div className="mono text-[10px] tracking-[0.24em] uppercase" style={{ color: "var(--muted-soft)" }}>
+                — {t.or} —
+              </div>
+              <form
+                className="w-full max-w-[520px] flex items-center gap-2 px-2 py-2 rounded-full"
+                style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}
+                onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={t.placeholder}
+                  className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
+                  style={{ color: "var(--ink)" }}
+                />
+                <button
+                  type="submit"
+                  disabled={!text.trim()}
+                  className="btn"
+                  style={{ padding: "10px 18px", opacity: text.trim() ? 1 : 0.4, cursor: text.trim() ? "pointer" : "default" }}
+                >
+                  {t.submit}
+                </button>
+              </form>
+            </div>
+
+            <div className="w-full mt-2">
+              <HintMarquee hints={t.hints} onPick={(h) => { setText(h); inputRef.current && inputRef.current.focus(); }} />
+            </div>
+          </div>
+
+          <div className="mono text-[10px] tracking-[0.22em] uppercase absolute bottom-6 left-1/2 -translate-x-1/2" style={{ color: "var(--muted-soft)" }}>
+            {t.footer}
+          </div>
+        </main>
+      )}
+
+      {phase === "loading" && <LoadingScreen t={t} />}
+      {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
