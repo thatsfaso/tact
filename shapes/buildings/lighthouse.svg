@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: lighthouse | category: buildings | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 72,180 L 64,90 L 136,90 L 128,180 Z"/>
+  <path d="M 66,130 L 67,118 L 133,118 L 134,130 Z"/>
+  <path d="M 69,152 L 70,140 L 130,140 L 131,152 Z"/>
+  <rect x="60" y="68" width="80" height="24" rx="4"/>
+  <path d="M 56,68 L 100,34 L 144,68 Z"/>
+  <circle cx="100" cy="80" r="12"/>
+  <line x1="56" y1="90" x2="144" y2="90"/>
+  <path d="M 52,180 L 52,192 Q 52,196 60,196 L 140,196 Q 148,196 148,192 L 148,180 Z"/>
+  <path d="M 88,196 L 88,178 Q 88,170 100,170 Q 112,170 112,178 L 112,196"/>
+</g>
+</svg>

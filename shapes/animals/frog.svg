@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: frog | category: animals | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse cx="100" cy="118" rx="56" ry="44"/>
+  <circle cx="74" cy="80" r="18"/>
+  <circle cx="126" cy="80" r="18"/>
+  <circle cx="74" cy="80" r="9"/>
+  <circle cx="126" cy="80" r="9"/>
+  <path d="M 50,104 Q 30,96 18,108 Q 14,120 24,124 Q 34,128 42,118"/>
+  <path d="M 150,104 Q 170,96 182,108 Q 186,120 176,124 Q 166,128 158,118"/>
+  <path d="M 56,148 Q 28,158 18,176 Q 24,188 40,180 Q 52,172 56,158"/>
+  <path d="M 144,148 Q 172,158 182,176 Q 176,188 160,180 Q 148,172 144,158"/>
+  <path d="M 74,100 Q 100,108 126,100"/>
+  <circle cx="92" cy="88" r="4"/>
+  <circle cx="108" cy="88" r="4"/>
+</g>
+</svg>

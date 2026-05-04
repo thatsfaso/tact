@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: hat_pirate | category: objects | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 14,128 Q 14,116 28,112 L 172,112 Q 186,116 186,128 Q 186,140 172,140 L 28,140 Q 14,140 14,128 Z"/>
+  <path d="M 38,112 Q 34,88 44,68 Q 54,46 100,40 Q 146,46 156,68 Q 166,88 162,112"/>
+  <circle cx="100" cy="80" r="18"/>
+  <line x1="74" y1="100" x2="126" y2="60"/>
+  <line x1="74" y1="60" x2="126" y2="100"/>
+  <circle cx="74" cy="100" r="5"/>
+  <circle cx="126" cy="60" r="5"/>
+  <circle cx="74" cy="60" r="5"/>
+  <circle cx="126" cy="100" r="5"/>
+</g>
+</svg>

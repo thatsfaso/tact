@@ -81,6 +81,18 @@ This file records every significant design decision made, why it was made, and w
 **Decision:** Project name is TACT — Tactile Accessible Content Tool.
 **Rationale:** Previous working name was "Tocca" (Italian for "touch"). TACT works equally well in Italian and English, is an acronym that describes the tool, and has appropriate thematic resonance (touch/tact).
 
+### D016 — Primary LLM backend: WebLLM (in-browser), Ollama as future option
+**Decision:** WebLLM is the primary LLM backend in the web app. Ollama is a planned future option, presented with a terminal tutorial (paste-to-run commands), not required for MVP.
+**Rationale:** WebLLM runs small models (Llama 3.2 1B, Phi-3 mini) entirely in-browser via WebGPU — zero cost, no API key, no server, works on any modern laptop (2020+). This preserves the zero-mandatory-cost constraint and zero-backend-infrastructure constraint simultaneously. Ollama is the right next tier for users who want larger models or have older hardware, but requires terminal access — justified with a clear tutorial.
+**Implementation:**
+- Detect WebGPU at runtime; if available, download and cache model on first use (browser IndexedDB)
+- System prompt from `docs/json-schema.md` LLM section; parse JSON response; retry once on parse failure
+- Fallback chain: WebLLM → (future) Ollama at `localhost:11434` → user API key → manual text input
+- Ollama tutorial: one-liner `curl -fsSL https://ollama.com/install.sh | sh && ollama pull llama3.2:3b` shown in a copyable terminal block in the settings panel
+**Rejected alternatives:**
+- Ollama-first: requires terminal access, harder barrier for non-technical parents/teachers
+- Claude/OpenAI API-first: violates zero-cost constraint, requires account creation
+
 ---
 
 ## Pending (Must Decide Before Full Implementation)

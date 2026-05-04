@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: moon | category: nature | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="108" cy="100" r="70"/>
+  <path d="M 108,30 A 70,70 0 1,1 108,170 A 54,54 0 1,0 108,30 Z"/>
+</g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: boat_sailboat | category: vehicles | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 28,138 Q 100,168 172,138 L 158,158 Q 100,182 42,158 Z"/>
+  <line x1="100" y1="28" x2="100" y2="140"/>
+  <path d="M 100,34 L 152,132 L 100,132 Z"/>
+  <path d="M 100,50 L 56,128 L 100,128 Z"/>
+  <line x1="100" y1="132" x2="152" y2="132"/>
+  <path d="M 18,172 Q 36,162 54,172 Q 72,182 90,172 Q 108,162 126,172 Q 144,182 164,172"/>
+</g>
+</svg>
