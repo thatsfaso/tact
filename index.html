@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TACT — tell me a story</title>
+<title>Tact — tell me a story</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -798,24 +798,33 @@ function ShapeRenderer({ illustration }) {
     if (!relPath) return;
     fetch('shapes/' + relPath + '.svg')
       .then(r => r.ok ? r.text() : Promise.reject())
-      .then(txt => setSvgMarkup(txt))
+      .then(txt => {
+        // Remove fixed pixel dimensions so the SVG scales with its container
+        const normalized = txt
+          .replace(/\swidth="[^"]*"/, ' width="100%"')
+          .replace(/\sheight="[^"]*"/, ' height="100%"');
+        setSvgMarkup(normalized);
+      })
       .catch(() => {});
   }, [shape]);
 
   if (svgMarkup) {
     return (
-      <div
-        dangerouslySetInnerHTML={{ __html: svgMarkup }}
-        style={{ maxWidth: 240, margin: '0 auto', lineHeight: 0 }}
-      />
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div
+          dangerouslySetInnerHTML={{ __html: svgMarkup }}
+          style={{ width: 180, height: 180, lineHeight: 0 }}
+        />
+      </div>
     );
   }
 
   // Inline fallback for the 3 shapes used in demo pages
   const stroke = "#0a0a0c", sw = 3;
+  let fallbackSvg;
   if (shape === 'cat_sitting' || shape === 'cat_standing') {
-    return (
-      <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="180" height="180">
         <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
           <path d="M 60 70 L 78 42 L 92 60 Q 110 54 128 60 L 142 42 L 160 70 Q 170 92 160 112 Q 140 134 110 134 Q 80 134 60 112 Q 50 92 60 70 Z" />
           <circle cx="98" cy="86" r="4" fill={stroke} /><circle cx="122" cy="86" r="4" fill={stroke} />
@@ -824,10 +833,9 @@ function ShapeRenderer({ illustration }) {
         </g>
       </svg>
     );
-  }
-  if (shape === 'boat_sailboat' || shape === 'boat_small') {
-    return (
-      <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
+  } else if (shape === 'boat_sailboat' || shape === 'boat_small') {
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="180" height="180">
         <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
           <path d="M 36 110 Q 110 140 184 110 L 168 130 Q 110 150 52 130 Z" />
           <path d="M 110 30 L 110 110" /><path d="M 110 36 L 158 100 L 110 100 Z" />
@@ -835,15 +843,17 @@ function ShapeRenderer({ illustration }) {
         </g>
       </svg>
     );
+  } else {
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="180" height="180">
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
+          <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
+        </g>
+      </svg>
+    );
   }
-  return (
-    <svg viewBox="0 0 220 180" width="100%" style={{ maxWidth: 240 }}>
-      <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
-        <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
-      </g>
-    </svg>
-  );
+  return <div style={{ display: 'flex', justifyContent: 'center' }}>{fallbackSvg}</div>;
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -856,7 +866,7 @@ function Header({ lang, setLang, sound, setSound }) {
           <div className="bd"></div><div className="bd"></div>
           <div className="bd off"></div><div className="bd"></div>
         </div>
-        <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>TACT</div>
+        <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>Tact</div>
         <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>prototype</div>
       </div>
       <div className="flex items-center gap-2">
