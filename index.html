@@ -566,6 +566,171 @@ window.TACT = (function () {
 })();
 </script>
 
+<!-- ─── STL Generator ─────────────────────────────────────────────────────── -->
+<!-- Option A layout from docs/page-format-spec.md + geometry from stl-geometry-spec.md -->
+<script>
+(function () {
+  var PAGE_W=150, PAGE_H=200, BASE_H=0.5;
+  var DOT_R=0.8, DOT_TOTAL_H=0.85, CYL_H=0.35;
+  // Option A text zone
+  var TZ_X=10, TZ_Y=136, TZ_H=54, CELL_W=6.0, LINE_H=10.0, CPL=21;
+  // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
+  var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
+  // Illustration zone (Option A): below text zone, 2mm margins
+  var ILL_X=10, ILL_Y=10, ILL_W=130, ILL_H=116, ILL_ABOVE=0.9, ILL_PIX=2;
+
+  function layoutLines(cells) {
+    var lines=[],line=[],ls=-1;
+    for(var i=0;i<cells.length;i++){
+      var c=cells[i];
+      if(c==='BR'){lines.push(line);line=[];ls=-1;continue;}
+      line.push(c);
+      if(Array.isArray(c)&&c.length===0)ls=line.length-1;
+      if(line.length>=CPL){
+        if(ls>0){lines.push(line.slice(0,ls));line=line.slice(ls+1);ls=-1;}
+        else{lines.push(line);line=[];ls=-1;}
+      }
+    }
+    if(line.length)lines.push(line);
+    return lines;
+  }
+
+  function tri(tris,a,b,c){
+    var ax=b[0]-a[0],ay=b[1]-a[1],az=b[2]-a[2];
+    var bx=c[0]-a[0],by=c[1]-a[1],bz=c[2]-a[2];
+    var nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+    var l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    tris.push([nx/l,ny/l,nz/l,a[0],a[1],a[2],b[0],b[1],b[2],c[0],c[1],c[2]]);
+  }
+
+  function box(tris,x0,y0,z0,x1,y1,z1){
+    var T=tri.bind(null,tris);
+    T([x0,y0,z0],[x1,y1,z0],[x1,y0,z0]);T([x0,y0,z0],[x0,y1,z0],[x1,y1,z0]); // bottom
+    T([x0,y0,z1],[x1,y0,z1],[x1,y1,z1]);T([x0,y0,z1],[x1,y1,z1],[x0,y1,z1]); // top
+    T([x0,y0,z0],[x1,y0,z0],[x1,y0,z1]);T([x0,y0,z0],[x1,y0,z1],[x0,y0,z1]); // front
+    T([x0,y1,z0],[x1,y1,z1],[x1,y1,z0]);T([x0,y1,z0],[x0,y1,z1],[x1,y1,z1]); // back
+    T([x0,y0,z0],[x0,y0,z1],[x0,y1,z1]);T([x0,y0,z0],[x0,y1,z1],[x0,y1,z0]); // left
+    T([x1,y0,z0],[x1,y1,z0],[x1,y1,z1]);T([x1,y0,z0],[x1,y1,z1],[x1,y0,z1]); // right
+  }
+
+  function dot(tris,cx,cy){
+    var T=tri.bind(null,tris),PI2=Math.PI*2;
+    var S=8,R=4,zB=BASE_H,zC=zB+CYL_H,hH=DOT_TOTAL_H-CYL_H;
+    // Bottom disc
+    for(var i=0;i<S;i++){
+      var a0=(i/S)*PI2,a1=((i+1)/S)*PI2;
+      T([cx,cy,zB],[cx+DOT_R*Math.cos(a0),cy+DOT_R*Math.sin(a0),zB],[cx+DOT_R*Math.cos(a1),cy+DOT_R*Math.sin(a1),zB]);
+    }
+    // Cylinder sides
+    for(var i=0;i<S;i++){
+      var a0=(i/S)*PI2,a1=((i+1)/S)*PI2;
+      var x0=cx+DOT_R*Math.cos(a0),y0=cy+DOT_R*Math.sin(a0);
+      var x1=cx+DOT_R*Math.cos(a1),y1=cy+DOT_R*Math.sin(a1);
+      T([x0,y0,zB],[x0,y0,zC],[x1,y1,zC]);
+      T([x0,y0,zB],[x1,y1,zC],[x1,y1,zB]);
+    }
+    // Oblate hemisphere cap: x=r*cos(φ)*cos(θ), y=r*cos(φ)*sin(θ), z=zC+hH*sin(φ)
+    // φ=0 → equator (r=DOT_R, z=zC), φ=π/2 → pole (r=0, z=zC+hH)
+    var vH=function(p,t){return[cx+DOT_R*Math.cos(p)*Math.cos(t),cy+DOT_R*Math.cos(p)*Math.sin(t),zC+hH*Math.sin(p)];};
+    for(var ring=0;ring<R;ring++){
+      var p0=(ring/R)*(Math.PI/2),p1=((ring+1)/R)*(Math.PI/2);
+      for(var i=0;i<S;i++){
+        var t0=(i/S)*PI2,t1=((i+1)/S)*PI2;
+        if(ring===R-1){ T(vH(p0,t0),vH(p0,t1),[cx,cy,zC+hH]); }
+        else{ var v00=vH(p0,t0),v01=vH(p0,t1),v10=vH(p1,t0),v11=vH(p1,t1); T(v00,v10,v11);T(v00,v11,v01); }
+      }
+    }
+  }
+
+  // Rasterize an SVG string onto a canvas and return flat [x,y,...] pillar coords (mm).
+  // 1 pixel = ILL_PIX mm. Canvas y is flipped to match STL y-up convention.
+  function rasterizeIll(svgText,cb){
+    var pw=Math.round(ILL_W/ILL_PIX),ph=Math.round(ILL_H/ILL_PIX);
+    var canvas=document.createElement('canvas');
+    canvas.width=pw;canvas.height=ph;
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,pw,ph);
+    var blobUrl=URL.createObjectURL(new Blob([svgText],{type:'image/svg+xml'}));
+    var img=new Image();
+    img.onload=function(){
+      ctx.drawImage(img,0,0,pw,ph);
+      URL.revokeObjectURL(blobUrl);
+      var d=ctx.getImageData(0,0,pw,ph).data,pil=[];
+      for(var py=0;py<ph;py++){
+        for(var px=0;px<pw;px++){
+          var i=(py*pw+px)*4;
+          var lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+          if(d[i+3]>32&&lum<160){
+            pil.push(ILL_X+px*ILL_PIX, ILL_Y+(ph-1-py)*ILL_PIX);
+          }
+        }
+      }
+      cb(pil);
+    };
+    img.onerror=function(){cb([]);};
+    img.src=blobUrl;
+  }
+
+  function generateSTL(brailleCells,pageNum,slug,illPillars){
+    var tris=[];
+    box(tris,0,0,0,PAGE_W,PAGE_H,BASE_H);
+    var lines=layoutLines(brailleCells);
+    var lineY0=TZ_Y+TZ_H-LINE_H; // first line y = 136+54-10 = 180
+    lines.slice(0,5).forEach(function(line,li){
+      var cy=lineY0-li*LINE_H;
+      line.forEach(function(cell,ci){
+        if(!cell||!cell.length)return;
+        var cx=TZ_X+ci*CELL_W;
+        cell.forEach(function(d){ var o=DOFF[d]; if(o)dot(tris,cx+o[0],cy+o[1]); });
+      });
+    });
+    // Illustration pillars (SVG rasterized at ILL_PIX mm/px)
+    if(illPillars&&illPillars.length){
+      for(var i=0;i<illPillars.length;i+=2){
+        box(tris,illPillars[i],illPillars[i+1],BASE_H,
+            illPillars[i]+ILL_PIX,illPillars[i+1]+ILL_PIX,BASE_H+ILL_ABOVE);
+      }
+    }
+    // Binary STL
+    var buf=new ArrayBuffer(80+4+tris.length*50);
+    var dv=new DataView(buf);
+    var h='TACT Braille page - thatsfaso/tact';
+    for(var i=0;i<80;i++)dv.setUint8(i,h.charCodeAt(i)||0);
+    dv.setUint32(80,tris.length,true);
+    var off=84;
+    for(var ti=0;ti<tris.length;ti++){
+      var t=tris[ti];
+      for(var fi=0;fi<12;fi++){dv.setFloat32(off,t[fi],true);off+=4;}
+      dv.setUint16(off,0,true);off+=2;
+    }
+    return buf;
+  }
+
+  window.TACT.generateSTL=generateSTL;
+
+  window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl){
+    function finish(pil){
+      var buf=generateSTL(brailleCells,pageNum,slug,pil);
+      var blob=new Blob([buf],{type:'application/octet-stream'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download=(slug||'tact')+'_page_'+String(pageNum).padStart(2,'0')+'.stl';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    }
+    if(svgUrl){
+      fetch(svgUrl)
+        .then(function(r){return r.ok?r.text():Promise.reject();})
+        .then(function(txt){rasterizeIll(txt,finish);})
+        .catch(function(){finish([]);});
+    } else {
+      finish([]);
+    }
+  };
+})();
+</script>
+
 <!-- ─── React app ────────────────────────────────────────────────────────── -->
 <script type="text/babel">
 const { useState, useEffect, useRef, useMemo } = React;
@@ -1047,7 +1212,12 @@ function StoryResult({ pages, lang, t, onAgain }) {
           </div>
 
           <div className="flex flex-wrap gap-3 mt-4">
-            <button className="btn" onClick={() => window.SFX && window.SFX.play("download")}>
+            <button className="btn" onClick={() => {
+              window.SFX && window.SFX.play("download");
+              const shape = p.illustration?.elements?.[0]?.shape || 'star';
+              const relPath = SHAPE_PATHS[shape] || 'objects/star';
+              window.TACT.downloadSTL(cells, page + 1, 'tact', 'shapes/' + relPath + '.svg');
+            }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               {t.download}
               <span className="mono text-[10px] opacity-60 ml-1">.STL</span>
@@ -1064,6 +1234,47 @@ function StoryResult({ pages, lang, t, onAgain }) {
       </div>
     </div>
   );
+}
+
+// ─── Fallback helpers (no WebGPU path) ─────────────────────────────────────────
+function pickShapeFromText(text, lang) {
+  const keywords = lang === 'it' ? {
+    rabbit: ['coniglio', 'lepre'],
+    cat_sitting: ['gatto', 'gattino', 'micio'],
+    dog_sitting: ['cane', 'cucciolo', 'cagnolino'],
+    bird_flying: ['uccello', 'passero', 'colomba'],
+    fish: ['pesce', 'pesciolino'],
+    boat_sailboat: ['barca', 'nave', 'vela', 'barcone'],
+    moon: ['luna', 'lunare'],
+    star: ['stella', 'stellina'],
+    flower_simple: ['fiore', 'rosa', 'margherita'],
+    butterfly: ['farfalla', 'farfallina']
+  } : {
+    rabbit: ['rabbit', 'bunny', 'hare'],
+    cat_sitting: ['cat', 'kitten', 'kitty'],
+    dog_sitting: ['dog', 'puppy', 'pup'],
+    bird_flying: ['bird', 'sparrow', 'pigeon'],
+    fish: ['fish', 'fishy'],
+    boat_sailboat: ['boat', 'ship', 'sail'],
+    moon: ['moon', 'moonlight'],
+    star: ['star', 'wish'],
+    flower_simple: ['flower', 'rose', 'daisy'],
+    butterfly: ['butterfly', 'moth']
+  };
+  const lower = text.toLowerCase();
+  for (const [shape, words] of Object.entries(keywords)) {
+    if (words.some(w => lower.includes(w))) return shape;
+  }
+  return 'star';
+}
+
+function splitTextIntoPages(text, wordsPerPage = 20) {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  const pages = [];
+  for (let i = 0; i < words.length; i += wordsPerPage) {
+    pages.push(words.slice(i, i + wordsPerPage).join(' '));
+  }
+  return pages.length ? pages : [text];
 }
 
 // ─── Main app ─────────────────────────────────────────────────────────────────
@@ -1132,36 +1343,65 @@ function App() {
 
     try {
       let rawPages;
+      let isDemo = false;
 
       if (!window.TACT.webgpuSupported) {
-        await new Promise(r => setTimeout(r, 1600));
-        rawPages = DEMO_PAGES[lang];
-        const demoResult = rawPages.map(p => ({ ...p, brailleCells: null, demo: true }));
-        stopLoader();
-        window.SFX && window.SFX.play("ready");
-        setPages(demoResult);
-        setPhase("result");
-        return;
-      }
-
-      // Real LLM path
-      let storyJSON = null;
-      try {
-        storyJSON = await window.TACT.generateStory(q, lang, (pct, statusText) => {
-          if (pct < 1) {
-            setLoadingMsg(t.modelDownloading);
-            setLoadingProgress(pct);
-          } else {
-            setLoadingMsg(t.generating);
-            setLoadingProgress(null);
+        // No WebGPU: use keyword heuristic instead of demo
+        setLoadingMsg(t.brailleTranslating);
+        await new Promise(r => setTimeout(r, 800));
+        const pageTexts = splitTextIntoPages(q, 20);
+        rawPages = pageTexts.map((text, idx) => ({
+          page_number: idx + 1,
+          text: text,
+          illustration: {
+            scene: text,
+            layout_hint: "center",
+            elements: [{
+              shape: pickShapeFromText(text, lang),
+              scale: 1.0,
+              position: "center",
+              mirror: false
+            }]
           }
-        });
-      } catch (llmErr) {
-        console.warn('[TACT] LLM failed, falling back to demo:', llmErr.message);
-      }
+        }));
+      } else {
+        // Real LLM path
+        let storyJSON = null;
+        try {
+          storyJSON = await window.TACT.generateStory(q, lang, (pct, statusText) => {
+            if (pct < 1) {
+              setLoadingMsg(t.modelDownloading);
+              setLoadingProgress(pct);
+            } else {
+              setLoadingMsg(t.generating);
+              setLoadingProgress(null);
+            }
+          });
+        } catch (llmErr) {
+          console.warn('[TACT] LLM failed, falling back to keyword heuristic:', llmErr.message);
+          const pageTexts = splitTextIntoPages(q, 20);
+          storyJSON = {
+            pages: pageTexts.map((text, idx) => ({
+              page_number: idx + 1,
+              text: text,
+              illustration: {
+                scene: text,
+                layout_hint: "center",
+                elements: [{
+                  shape: pickShapeFromText(text, lang),
+                  scale: 1.0,
+                  position: "center",
+                  mirror: false
+                }]
+              }
+            }))
+          };
+          isDemo = true;
+        }
 
-      rawPages = storyJSON ? storyJSON.pages : DEMO_PAGES[lang];
-      const isDemo = !storyJSON;
+        rawPages = storyJSON ? storyJSON.pages : DEMO_PAGES[lang];
+        if (!storyJSON) isDemo = true;
+      }
 
       setLoadingMsg(t.brailleTranslating);
       setLoadingProgress(null);
