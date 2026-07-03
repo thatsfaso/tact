@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: fox | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 74,56 L 56,18 L 90,48"/>
+  <path d="M 126,56 L 144,18 L 110,48"/>
+  <path d="M 72,54 Q 100,44 128,54 Q 130,84 100,118 Q 70,84 72,54 Z"/>
+  <ellipse cx="100" cy="150" rx="34" ry="34"/>
+  <path d="M 130,168 Q 174,168 176,120 Q 174,96 152,112 Q 168,140 138,150"/>
+  <circle cx="85" cy="80" r="5" fill="#000000"/>
+  <circle cx="115" cy="80" r="5" fill="#000000"/>
+  <path d="M 94,104 Q 100,110 106,104"/>
+  <circle cx="100" cy="100" r="4" fill="#000000"/>
+</g>
+</svg>

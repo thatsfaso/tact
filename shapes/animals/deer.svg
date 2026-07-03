@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: deer | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 60,56 L 50,30 M 60,50 L 38,40 M 60,44 L 44,26"/>
+  <path d="M 92,56 L 102,30 M 92,50 L 114,40 M 92,44 L 108,26"/>
+  <path d="M 64,66 Q 50,66 50,52 Q 62,46 76,52"/>
+  <ellipse cx="76" cy="74" rx="20" ry="22"/>
+  <circle cx="70" cy="72" r="3.5" fill="#000000"/>
+  <path d="M 60,90 L 62,98"/>
+  <path d="M 92,84 Q 140,76 150,108 Q 154,128 140,140 L 150,176 M 140,140 L 134,176"/>
+  <path d="M 96,96 Q 92,138 92,176 M 110,98 L 112,176"/>
+  <path d="M 92,96 Q 116,108 140,100"/>
+</g>
+</svg>

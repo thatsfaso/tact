@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: squirrel | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="78" cy="64" r="24"/>
+  <path d="M 62,46 Q 54,32 64,30 Q 74,32 72,48"/>
+  <path d="M 94,46 Q 102,32 92,30 Q 82,32 84,48"/>
+  <circle cx="72" cy="62" r="4" fill="#000000"/>
+  <circle cx="88" cy="62" r="4" fill="#000000"/>
+  <path d="M 76,74 L 80,78 L 84,74"/>
+  <path d="M 70,88 Q 60,120 78,150 Q 96,166 116,150 Q 128,132 120,108 Q 110,92 92,96"/>
+  <path d="M 120,108 Q 168,108 172,60 Q 174,30 148,40 Q 166,64 138,80 Q 158,96 128,104"/>
+  <path d="M 82,150 L 78,170 M 110,152 L 116,172"/>
+</g>
+</svg>

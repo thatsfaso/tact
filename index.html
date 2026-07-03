@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Tact — tell me a story</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0c;
+    --ink-soft: #1a1a1e;
+    --paper: #fafaf7;
+    --paper-warm: #f4f2ec;
+    --hairline: rgba(10, 10, 12, 0.08);
+    --hairline-strong: rgba(10, 10, 12, 0.14);
+    --muted: rgba(10, 10, 12, 0.55);
+    --muted-soft: rgba(10, 10, 12, 0.35);
+  }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+  .serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif; font-weight: 400; }
+  .mono { font-family: "Geist Mono", "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
+
+  #chrome-bg {
+    position: fixed; inset: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 1;
+  }
+  .grain {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.07  0 0 0 0.42 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+
+  @keyframes drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .drift { animation: drift 60s linear infinite; }
+
+  @keyframes mic-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
+  .mic-pulse::before, .mic-pulse::after {
+    content: ""; position: absolute; inset: 0; border-radius: 999px;
+    border: 1.5px solid rgba(10,10,12,0.4);
+    animation: mic-pulse 2.4s ease-out infinite;
+  }
+  .mic-pulse::after { animation-delay: 1.2s; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.35); }
+    50%      { transform: scaleY(1); }
+  }
+  .wbar { animation: wave 1.1s ease-in-out infinite; transform-origin: center; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise { animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes rise-slow {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .rise-slow { animation: rise-slow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+  .btn {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.2s ease;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 22px rgba(10,10,12,0.18);
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 14px 36px rgba(10,10,12,0.22); }
+  .btn:active { transform: translateY(0); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: 0 0 0 1px var(--hairline-strong) inset;
+  }
+  .btn-ghost:hover { background: rgba(10,10,12,0.04); }
+
+  .card {
+    background: rgba(250,250,247,0.82);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-radius: 22px;
+    box-shadow: 0 0 0 1px var(--hairline) inset, 0 30px 80px -30px rgba(10,10,12,0.18);
+  }
+
+  .bd {
+    width: 7px; height: 7px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #2a2a2e, #08080a 70%);
+    box-shadow: 0 1px 1.5px rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.18);
+  }
+  .bd.off { background: transparent; box-shadow: 0 0 0 1px rgba(10,10,12,0.06) inset; }
+
+  .nice-scroll::-webkit-scrollbar { width: 6px; }
+  .nice-scroll::-webkit-scrollbar-thumb { background: rgba(10,10,12,0.18); border-radius: 999px; }
+
+  @keyframes float-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .float-soft { animation: float-soft 8s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<canvas id="chrome-bg"></canvas>
+<div class="grain"></div>
+<div id="root" class="relative" style="z-index:2;"></div>
+
+<!-- ─── Sound system ─────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  let ctx = null;
+  let master = null;
+  let enabled = (function() {
+    try { return localStorage.getItem("tact-sound") !== "off"; }
+    catch (e) { return true; }
+  })();
+
+  function ensure() {
+    if (ctx) return ctx;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.18;
+    master.connect(ctx.destination);
+    return ctx;
+  }
+
+  ["pointerdown", "keydown", "touchstart"].forEach(function(ev) {
+    window.addEventListener(ev, function() {
+      var c = ensure();
+      if (c && c.state === "suspended") c.resume();
+    }, { once: false, passive: true });
+  });
+
+  function envelope(node, t0, attack, hold, release, peak) {
+    peak = peak || 1;
+    node.gain.cancelScheduledValues(t0);
+    node.gain.setValueAtTime(0.0001, t0);
+    node.gain.exponentialRampToValueAtTime(peak, t0 + attack);
+    node.gain.setValueAtTime(peak, t0 + attack + hold);
+    node.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + hold + release);
+  }
+
+  function chime(freqs, opts) {
+    opts = opts || {};
+    var gain = opts.gain !== undefined ? opts.gain : 0.5;
+    var attack = opts.attack !== undefined ? opts.attack : 0.01;
+    var hold = opts.hold !== undefined ? opts.hold : 0.04;
+    var release = opts.release !== undefined ? opts.release : 0.5;
+    var detune = opts.detune || 0;
+    if (!enabled) return;
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime;
+    var out = c.createGain();
+    out.gain.value = gain;
+    var lpf = c.createBiquadFilter();
+    lpf.type = "lowpass";
+    lpf.frequency.value = 4800;
+    lpf.Q.value = 0.4;
+    out.connect(lpf);
+    lpf.connect(master);
+    freqs.forEach(function(f, i) {
+      var o = c.createOscillator();
+      o.type = "sine";
+      o.frequency.value = f;
+      o.detune.value = detune + (i - freqs.length / 2) * 1.5;
+      var g = c.createGain();
+      g.gain.value = 0;
+      o.connect(g);
+      g.connect(out);
+      envelope(g, t, attack, hold, release, 1 / freqs.length);
+      o.start(t);
+      o.stop(t + attack + hold + release + 0.05);
+    });
+  }
+
+  function noiseBurst(opts) {
+    opts = opts || {};
+    var duration = opts.duration !== undefined ? opts.duration : 0.2;
+    var gain = opts.gain !== undefined ? opts.gain : 0.15;
+    var freq = opts.freq !== undefined ? opts.freq : 2000;
+    var q = opts.q !== undefined ? opts.q : 1.2;
+    var type = opts.type || "bandpass";
+    if (!enabled) return;
+    var c = ensure(); if (!c) return;
+    var t = c.currentTime;
+    var len = Math.max(1, Math.floor(c.sampleRate * duration));
+    var buf = c.createBuffer(1, len, c.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    var src = c.createBufferSource();
+    src.buffer = buf;
+    var f = c.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    f.Q.value = q;
+    var g = c.createGain();
+    g.gain.value = 0;
+    src.connect(f);
+    f.connect(g);
+    g.connect(master);
+    envelope(g, t, 0.005, 0.02, duration, gain);
+    src.start(t);
+    src.stop(t + duration + 0.05);
+  }
+
+  function startPad() {
+    if (!enabled) return null;
+    var c = ensure(); if (!c) return null;
+    var t = c.currentTime;
+    var g = c.createGain();
+    g.gain.value = 0;
+    var lpf = c.createBiquadFilter();
+    lpf.type = "lowpass";
+    lpf.frequency.value = 1200;
+    g.connect(lpf);
+    lpf.connect(master);
+    var o1 = c.createOscillator();
+    o1.type = "sine"; o1.frequency.value = 220; o1.detune.value = -4;
+    var o2 = c.createOscillator();
+    o2.type = "sine"; o2.frequency.value = 330; o2.detune.value = +5;
+    var o3 = c.createOscillator();
+    o3.type = "sine"; o3.frequency.value = 165; o3.detune.value = +2;
+    var tremolo = c.createOscillator();
+    tremolo.frequency.value = 0.18;
+    var tremGain = c.createGain();
+    tremGain.gain.value = 0.06;
+    tremolo.connect(tremGain);
+    tremGain.connect(g.gain);
+    [o1, o2, o3].forEach(function(o) { o.connect(g); });
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 1.2);
+    o1.start(t); o2.start(t); o3.start(t); tremolo.start(t);
+    return {
+      stop: function() {
+        var now = c.currentTime;
+        g.gain.cancelScheduledValues(now);
+        g.gain.setValueAtTime(g.gain.value, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        [o1, o2, o3, tremolo].forEach(function(o) { o.stop(now + 0.7); });
+      }
+    };
+  }
+
+  var sounds = {
+    tap:        function() { chime([880, 1320], { gain: 0.18, attack: 0.005, hold: 0.02, release: 0.18 }); },
+    hover:      function() { chime([1760], { gain: 0.05, attack: 0.005, hold: 0.01, release: 0.12 }); },
+    listenStart: function() {
+      chime([523, 659], { gain: 0.28, attack: 0.01, hold: 0.05, release: 0.45 });
+      setTimeout(function() { chime([784, 988], { gain: 0.22, attack: 0.01, hold: 0.04, release: 0.5 }); }, 110);
+    },
+    listenEnd: function() {
+      chime([987], { gain: 0.22, attack: 0.01, hold: 0.04, release: 0.3 });
+      setTimeout(function() { chime([659.25, 783.99], { gain: 0.24, attack: 0.01, hold: 0.05, release: 0.6 }); }, 130);
+    },
+    ready: function() {
+      chime([220], { gain: 0.10, attack: 0.04, hold: 0.06, release: 0.5 });
+      setTimeout(function() { chime([277, 329.6], { gain: 0.12, attack: 0.04, hold: 0.07, release: 0.7 }); }, 110);
+      setTimeout(function() { chime([440, 554], { gain: 0.10, attack: 0.04, hold: 0.07, release: 0.85 }); }, 280);
+    },
+    pageTurn: function() {
+      chime([240], { gain: 0.32, attack: 0.001, hold: 0.005, release: 0.18 });
+    },
+    download: function() {
+      noiseBurst({ duration: 0.04, gain: 0.32, freq: 280, q: 6, type: "bandpass" });
+      setTimeout(function() { chime([180], { gain: 0.18, attack: 0.001, hold: 0.005, release: 0.12 }); }, 8);
+    },
+    startLoader: function() {
+      if (!enabled) return null;
+      var alive = true;
+      var tick = function() {
+        if (!alive || !enabled) return;
+        chime([110], { gain: 0.12, attack: 0.005, hold: 0.04, release: 0.35 });
+        setTimeout(function() { if (alive && enabled) chime([138], { gain: 0.08, attack: 0.005, hold: 0.03, release: 0.3 }); }, 140);
+      };
+      tick();
+      var id = setInterval(tick, 1400);
+      return { stop: function() { alive = false; clearInterval(id); } };
+    },
+    toggle: function() { chime([1175], { gain: 0.16, attack: 0.005, hold: 0.02, release: 0.18 }); },
+    type:   function() { noiseBurst({ duration: 0.025, gain: 0.06, freq: 3200, q: 8, type: "bandpass" }); },
+    startPad: startPad,
+  };
+
+  window.SFX = {
+    play: function(name) { if (sounds[name]) sounds[name](); },
+    startPad: function() { return sounds.startPad(); },
+    startLoader: function() { return sounds.startLoader(); },
+    isEnabled: function() { return enabled; },
+    setEnabled: function(v) {
+      enabled = !!v;
+      try { localStorage.setItem("tact-sound", v ? "on" : "off"); } catch (e) {}
+    },
+  };
+})();
+</script>
+
+<!-- ─── Liquid chrome WebGL background ──────────────────────────────────── -->
+<script>
+(function () {
+  var canvas = document.getElementById("chrome-bg");
+  if (!canvas) return;
+  var gl = canvas.getContext("webgl", { antialias: true, premultipliedAlpha: false });
+  if (!gl) return;
+
+  var vert = "\n    attribute vec2 a_pos;\n    void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }\n  ";
+  var frag = "\n    precision highp float;\n    uniform vec2  u_res;\n    uniform float u_time;\n    uniform vec2  u_mouse;\n\n    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\n    float noise(vec2 p){\n      vec2 i = floor(p), f = fract(p);\n      float a = hash(i);\n      float b = hash(i + vec2(1.0,0.0));\n      float c = hash(i + vec2(0.0,1.0));\n      float d = hash(i + vec2(1.0,1.0));\n      vec2 u = f*f*(3.0-2.0*f);\n      return mix(a,b,u.x) + (c-a)*u.y*(1.0-u.x) + (d-b)*u.x*u.y;\n    }\n    float fbm(vec2 p){\n      float v = 0.0; float a = 0.5;\n      for(int i=0;i<5;i++){ v += a*noise(p); p *= 2.02; a *= 0.5; }\n      return v;\n    }\n\n    void main(){\n      vec2 uv = (gl_FragCoord.xy - 0.5*u_res) / min(u_res.x, u_res.y);\n      vec2 p = uv * 1.4;\n      float t = u_time * 0.06;\n\n      vec2 m = (u_mouse - 0.5*u_res)/min(u_res.x,u_res.y);\n      vec2 q = p + 0.18*vec2(fbm(p + t), fbm(p - t + 3.1));\n      vec2 r = q + 0.22*vec2(fbm(q + 1.7*m + t*1.3), fbm(q + 4.2 - t));\n\n      float f = fbm(r * 1.2 + t*0.5);\n\n      float ridge = sin( (r.x*2.4 + r.y*1.1) * 3.14159 + f*5.0 + t*1.2 );\n      ridge = 0.5 + 0.5 * ridge;\n      ridge = pow(ridge, 1.8);\n\n      vec3 ivory  = vec3(0.972, 0.964, 0.945);\n      vec3 bone   = vec3(0.918, 0.906, 0.879);\n      vec3 pearl  = vec3(0.835, 0.835, 0.842);\n      vec3 ink    = vec3(0.760, 0.748, 0.735);\n\n      vec3 col = mix(ivory, bone, smoothstep(0.15, 0.85, f));\n      col = mix(col, pearl, ridge*0.55);\n      col = mix(col, ink, smoothstep(0.7, 1.05, ridge*0.9 + f*0.4) * 0.35);\n\n      col += 0.012 * sin(vec3(0.0, 0.6, 1.2) + t*1.4 + f*3.0);\n\n      float v = smoothstep(1.25, 0.35, length(uv*vec2(1.0, 0.95)));\n      col *= mix(0.9, 1.0, v);\n\n      gl_FragColor = vec4(col, 1.0);\n    }\n  ";
+
+  function compile(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vert));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, frag));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+  var a_pos = gl.getAttribLocation(prog, "a_pos");
+  gl.enableVertexAttribArray(a_pos);
+  gl.vertexAttribPointer(a_pos, 2, gl.FLOAT, false, 0, 0);
+
+  var u_res   = gl.getUniformLocation(prog, "u_res");
+  var u_time  = gl.getUniformLocation(prog, "u_time");
+  var u_mouse = gl.getUniformLocation(prog, "u_mouse");
+
+  var mouse = [window.innerWidth * 0.5, window.innerHeight * 0.5];
+  var target = mouse.slice();
+  window.addEventListener("pointermove", function(e) {
+    target = [e.clientX, window.innerHeight - e.clientY];
+  });
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = Math.floor(window.innerWidth  * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width  = window.innerWidth  + "px";
+    canvas.style.height = window.innerHeight + "px";
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  var start = performance.now();
+  function frame() {
+    mouse[0] += (target[0] - mouse[0]) * 0.05;
+    mouse[1] += (target[1] - mouse[1]) * 0.05;
+    gl.uniform2f(u_res,   canvas.width, canvas.height);
+    gl.uniform1f(u_time,  (performance.now() - start) / 1000);
+    gl.uniform2f(u_mouse, mouse[0] * (window.devicePixelRatio || 1), mouse[1] * (window.devicePixelRatio || 1));
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+
+<!-- ─── TACT: Liblouis Web Worker + WebLLM ──────────────────────────────── -->
+<script>
+window.TACT = (function () {
+  "use strict";
+
+  // ── Braille translation (Grade 1 / uncontracted, pure JS) ────────────────
+  // This project uses Grade 1 Braille only for both Italian and English
+  // (decisions D004 / D005), which is a deterministic character→cell mapping
+  // with no contractions. A pure-JS translator is therefore exact, has zero
+  // dependencies, works offline and on file://, and avoids the fragile
+  // Liblouis WASM build (whose bundled English tables fail to compile and whose
+  // translate calls intermittently abort the WASM heap).
+  //
+  // Letters a–z are identical between Italian 6-dot and English UEB Grade 1.
+  // Italian accented vowels and shared punctuation are included below.
+  var BRAILLE = {
+    a:[1], b:[1,2], c:[1,4], d:[1,4,5], e:[1,5], f:[1,2,4], g:[1,2,4,5],
+    h:[1,2,5], i:[2,4], j:[2,4,5], k:[1,3], l:[1,2,3], m:[1,3,4], n:[1,3,4,5],
+    o:[1,3,5], p:[1,2,3,4], q:[1,2,3,4,5], r:[1,2,3,5], s:[2,3,4], t:[2,3,4,5],
+    u:[1,3,6], v:[1,2,3,6], w:[2,4,5,6], x:[1,3,4,6], y:[1,3,4,5,6], z:[1,3,5,6],
+    'à':[1,2,3,5,6], 'è':[2,3,4,6], 'é':[1,2,3,4,5,6], 'ì':[3,4], 'ò':[3,4,6], 'ù':[2,3,4,5,6],
+    'â':[1,6], 'ê':[1,2,6], 'î':[1,4,6], 'ô':[1,4,5,6], 'û':[1,5,6],
+    'ç':[1,2,3,4,6], 'ñ':[1,2,4,5,6], 'ü':[1,2,5,6],
+    '.':[2,5,6], ',':[2], ';':[2,3], ':':[2,5], '?':[2,6], '!':[2,3,5],
+    "'":[3], '-':[3,6], '"':[2,3,6], '(':[1,2,6], ')':[3,4,5], '/':[3,4],
+    '1':[1], '2':[1,2], '3':[1,4], '4':[1,4,5], '5':[1,5],
+    '6':[1,2,4], '7':[1,2,4,5], '8':[1,2,5], '9':[2,4], '0':[2,4,5],
+  };
+  var CAP_SIGN = [6];        // single-letter capital indicator (dot 6)
+  var NUM_SIGN = [3,4,5,6];  // number indicator
+
+  // Returns Promise<Array> — one entry per Braille cell.
+  // Cell forms: dots[] = a cell, [] = space (and word-wrap point), "BR" = line break.
+  function translateBraille(text, lang) {
+    return new Promise(function (resolve) {
+      var cells = [];
+      var inNumber = false;
+      var chars = Array.from(String(text));
+      for (var i = 0; i < chars.length; i++) {
+        var raw = chars[i];
+        if (raw === '\n') { cells.push('BR'); inNumber = false; continue; }
+        if (raw === ' ' || raw === '\t') { cells.push([]); inNumber = false; continue; }
+        if (raw >= '0' && raw <= '9') {
+          if (!inNumber) { cells.push(NUM_SIGN); inNumber = true; }
+          cells.push(BRAILLE[raw] || []);
+          continue;
+        }
+        inNumber = false;
+        var lower = raw.toLowerCase();
+        var glyph = BRAILLE[lower];
+        if (glyph === undefined) { cells.push([]); continue; } // unknown → blank cell
+        if (raw !== lower) cells.push(CAP_SIGN); // letter has an uppercase form
+        cells.push(glyph);
+      }
+      resolve(cells);
+    });
+  }
+
+  // ── WebLLM (adaptive, runs entirely in-browser) ──────────────────────────
+  var webgpuSupported = (typeof navigator !== 'undefined') && !!navigator.gpu;
+  var _engine = null;
+  var _activeModel = null;       // the tier actually loaded
+  var _preferredModelId = null;  // optional manual override (future UI hook)
+
+  // Candidate models, largest → smallest. vramMB / download from WebLLM's
+  // prebuiltAppConfig. We pick the best the device can run and fall back to a
+  // smaller one if init fails (out of memory). No model is required: if none
+  // load, the app uses the user's own words (keyword path).
+  var MODEL_TIERS = [
+    { id: 'Llama-3.1-8B-Instruct-q4f16_1-MLC-1k', vramMB: 4598, label: 'Llama 3.1 8B', dlGB: 3.5 },
+    { id: 'Qwen2.5-3B-Instruct-q4f16_1-MLC',      vramMB: 2505, label: 'Qwen2.5 3B',  dlGB: 2.0 },
+    { id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',    vramMB: 2264, label: 'Llama 3.2 3B', dlGB: 1.8 },
+    { id: 'gemma-2-2b-it-q4f16_1-MLC-1k',         vramMB: 1583, label: 'Gemma 2 2B',  dlGB: 1.3 },
+    { id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',    vramMB:  879, label: 'Llama 3.2 1B', dlGB: 0.7 },
+  ];
+
+  // Choose a STARTING tier from deviceMemory. We deliberately CAP automatic
+  // selection at Llama 3.2 3B (index 2): WebGPU cannot reveal true VRAM, and the
+  // common "deviceMemory=8 / maxBufferSize=4096MB" reading appears on countless
+  // ordinary laptops that could NOT run an 8B model. 3B is the sweet spot — a
+  // big quality jump that still runs on most WebGPU devices. The 8B tier stays
+  // available for MANUAL selection only (setPreferredModel), never auto-picked.
+  function _startTierIndex() {
+    if (_preferredModelId) {
+      for (var k = 0; k < MODEL_TIERS.length; k++)
+        if (MODEL_TIERS[k].id === _preferredModelId) return k;
+    }
+    var dev = navigator.deviceMemory || 4;
+    if (dev <= 2) return 4;        // very low memory → 1B
+    if (dev <= 4) return 3;        // modest → Gemma 2B
+    return 2;                      // 8GB+ (the common cap) → 3B
+  }
+
+  // Probe the adapter to DEMOTE (never auto-promote) when the GPU is clearly
+  // weak. A genuinely small maxBufferSize means even mid models won't fit, so we
+  // drop to a safe tier up front instead of failing after a wasted download.
+  function _resolveTierIndex(startIdx) {
+    if (_preferredModelId) return Promise.resolve(startIdx); // honour manual choice
+    return (navigator.gpu.requestAdapter ? navigator.gpu.requestAdapter() : Promise.resolve(null))
+      .then(function (adapter) {
+        if (!adapter) return MODEL_TIERS.length - 1;            // no adapter → 1B
+        var maxBufMB = adapter.limits.maxBufferSize / 1048576;
+        if (maxBufMB < 1300) return MODEL_TIERS.length - 1;     // tiny → 1B
+        if (maxBufMB < 1900 && startIdx < 3) return 3;          // small → Gemma 2B
+        return startIdx;
+      })
+      .catch(function () { return startIdx; });
+  }
+
+  // Create an engine, walking DOWN the tier list on failure.
+  function _createEngine(webllm, idx, onProgress) {
+    if (idx >= MODEL_TIERS.length) return Promise.reject(new Error('no model could load'));
+    var m = MODEL_TIERS[idx];
+    return webllm.CreateMLCEngine(m.id, {
+      initProgressCallback: function (report) {
+        if (onProgress) onProgress(typeof report.progress === 'number' ? report.progress : 0, report.text || '', m.label);
+      }
+    }).then(function (eng) {
+      _engine = eng; _activeModel = m; return eng;
+    }).catch(function (err) {
+      console.warn('[TACT] ' + m.id + ' failed (' + (err && err.message) + '); trying a smaller model');
+      return _createEngine(webllm, idx + 1, onProgress);
+    });
+  }
+
+  // We ask the model only for PLAIN STORY TEXT — not structured JSON. In-browser
+  // models write decent prose but are unreliable at strict JSON schemas. Page
+  // split and illustration-shape selection happen deterministically on the
+  // client (paginateByLines / pickShapeFromText).
+  //
+  // The craft brief is tuned for the audience: young BLIND children. We favour
+  // touch, sound, warmth and movement over colour and sight, give a clear
+  // little arc, and ask for gentle rhythm — the qualities that make a tactile
+  // story come alive under the fingers.
+  var SYSTEM_PROMPT =
+    'You are a beloved children\'s picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n' +
+    'Write a SHORT story from the user\'s idea. Craft it with care:\n' +
+    '- Give it a clear arc: a calm beginning, one small wish or problem, and a warm, satisfying ending.\n' +
+    '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
+    '- Use concrete, simple words a 6-year-old knows. Keep sentences short.\n' +
+    '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n' +
+    '- About 65 to 75 words, in 7 to 9 short sentences — enough to fill the page well.\n\n' +
+    'Output ONLY the story prose — no title, no quotation marks, no notes, no markdown. Write in the SAME language as the request.\n\n' +
+    'Example of the warmth and style to aim for (English):\n' +
+    'The little snail felt the cool dew on her shell. Today I will climb the tall leaf, she whispered. Slowly, slowly, she went up, her belly feeling every bump of the stem. Birds sang somewhere warm and near. At the top, the sun hugged her tight. Slowly, slowly, she smiled.';
+
+  // Strip anything that isn't story prose (a stray title line, quotes, fences).
+  function _cleanStoryText(raw) {
+    var t = String(raw || '').trim();
+    t = t.replace(/```[\s\S]*?```/g, ' ');           // code fences
+    t = t.replace(/^\s*(title|story)\s*:.*$/gim, ' ');  // "Title: ..." lines
+    t = t.replace(/^["'\s]+|["'\s]+$/g, '');            // wrapping quotes/space
+    t = t.replace(/\s+/g, ' ').trim();
+    return t;
+  }
+
+  // Resolves to the story TEXT (a plain string).
+  // onProgress(progress 0-1, statusText, modelLabel).
+  function generateStory(prompt, lang, onProgress) {
+    if (!webgpuSupported) return Promise.reject(new Error('no-webgpu'));
+
+    return import('https://esm.run/@mlc-ai/web-llm').then(function (webllm) {
+      var enginePromise = _engine
+        ? Promise.resolve(_engine)
+        : _resolveTierIndex(_startTierIndex()).then(function (idx) {
+            return _createEngine(webllm, idx, onProgress);
+          });
+
+      return enginePromise.then(function (engine) {
+        if (onProgress) onProgress(1, 'ready', _activeModel ? _activeModel.label : '');
+        var userLang = lang === 'it' ? 'Italian' : 'English';
+        return engine.chat.completions.create({
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user',   content: 'Write the story in ' + userLang + ' about: ' + prompt }
+          ],
+          temperature: 0.85,
+          top_p: 0.9,
+          frequency_penalty: 0.3,
+          max_tokens: 320
+        });
+      }).then(function (reply) {
+        var text = _cleanStoryText(reply.choices[0].message.content);
+        if (!text || text.length < 8) throw new Error('empty-story');
+        return text;
+      });
+    });
+  }
+
+  return {
+    webgpuSupported: webgpuSupported,
+    translateBraille: translateBraille,
+    generateStory: generateStory,
+    // ── Model controls (used now internally; future manual-selection UI hooks)
+    models: MODEL_TIERS,
+    getActiveModel: function () { return _activeModel; },
+    setPreferredModel: function (id) { _preferredModelId = id; if (_engine) { _engine = null; _activeModel = null; } },
+  };
+})();
+</script>
+
+<!-- ─── STL Generator ─────────────────────────────────────────────────────── -->
+<!-- Option A layout from docs/page-format-spec.md + geometry from stl-geometry-spec.md -->
+<script>
+(function () {
+  // Square page (fits the 220×220 bed with margins). Matches the square page the
+  // design sketches assume; the preview mirrors this exactly.
+  var PAGE_W=150, PAGE_H=150, BASE_H=0.5;
+  var DOT_R=0.8, DOT_TOTAL_H=0.85, CYL_H=0.35;
+  // L-shaped text layout — MIRRORS the React LINE_WIDTHS profile so the print
+  // matches the preview: full-width rows on top, narrower rows running down the
+  // left BESIDE a bottom-right corner illustration. Lines lay top-down from
+  // LINE_Y0, left-aligned at TZ_X.
+  var TZ_X=10, CELL_W=6.0, LINE_H=10.0, LINE_Y0=135;
+  var LINE_WIDTHS=[21,21,21,21,21,21,21,12,12,12,12,12,12]; // 7 full + 6 narrow
+  // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
+  var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
+  // Illustration zone: bottom-right corner, with the 6 narrow rows (12-cell text
+  // ends at x≤82) running down its left side at the same height.
+  var ILL_X=86, ILL_Y=12, ILL_W=54, ILL_H=54, ILL_ABOVE=0.9, ILL_PIX=2;
+
+  // Wrap cells into lines whose max width varies per line (LINE_WIDTHS).
+  function layoutLines(cells) {
+    var lines=[],line=[],ls=-1;
+    var cap=function(){ var i=lines.length; return LINE_WIDTHS[i<LINE_WIDTHS.length?i:LINE_WIDTHS.length-1]; };
+    for(var i=0;i<cells.length;i++){
+      var c=cells[i];
+      if(c==='BR'){lines.push(line);line=[];ls=-1;continue;}
+      line.push(c);
+      if(Array.isArray(c)&&c.length===0)ls=line.length-1;
+      if(line.length>=cap()){
+        if(ls>0){lines.push(line.slice(0,ls));line=line.slice(ls+1);ls=-1;}
+        else{lines.push(line);line=[];ls=-1;}
+      }
+    }
+    if(line.length)lines.push(line);
+    return lines;
+  }
+
+  function tri(tris,a,b,c){
+    var ax=b[0]-a[0],ay=b[1]-a[1],az=b[2]-a[2];
+    var bx=c[0]-a[0],by=c[1]-a[1],bz=c[2]-a[2];
+    var nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+    var l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    tris.push([nx/l,ny/l,nz/l,a[0],a[1],a[2],b[0],b[1],b[2],c[0],c[1],c[2]]);
+  }
+
+  function box(tris,x0,y0,z0,x1,y1,z1){
+    var T=tri.bind(null,tris);
+    T([x0,y0,z0],[x1,y1,z0],[x1,y0,z0]);T([x0,y0,z0],[x0,y1,z0],[x1,y1,z0]); // bottom
+    T([x0,y0,z1],[x1,y0,z1],[x1,y1,z1]);T([x0,y0,z1],[x1,y1,z1],[x0,y1,z1]); // top
+    T([x0,y0,z0],[x1,y0,z0],[x1,y0,z1]);T([x0,y0,z0],[x1,y0,z1],[x0,y0,z1]); // front
+    T([x0,y1,z0],[x1,y1,z1],[x1,y1,z0]);T([x0,y1,z0],[x0,y1,z1],[x1,y1,z1]); // back
+    T([x0,y0,z0],[x0,y0,z1],[x0,y1,z1]);T([x0,y0,z0],[x0,y1,z1],[x0,y1,z0]); // left
+    T([x1,y0,z0],[x1,y1,z0],[x1,y1,z1]);T([x1,y0,z0],[x1,y1,z1],[x1,y0,z1]); // right
+  }
+
+  function dot(tris,cx,cy){
+    var T=tri.bind(null,tris),PI2=Math.PI*2;
+    var S=8,R=4,zB=BASE_H,zC=zB+CYL_H,hH=DOT_TOTAL_H-CYL_H;
+    // Bottom disc
+    for(var i=0;i<S;i++){
+      var a0=(i/S)*PI2,a1=((i+1)/S)*PI2;
+      T([cx,cy,zB],[cx+DOT_R*Math.cos(a0),cy+DOT_R*Math.sin(a0),zB],[cx+DOT_R*Math.cos(a1),cy+DOT_R*Math.sin(a1),zB]);
+    }
+    // Cylinder sides
+    for(var i=0;i<S;i++){
+      var a0=(i/S)*PI2,a1=((i+1)/S)*PI2;
+      var x0=cx+DOT_R*Math.cos(a0),y0=cy+DOT_R*Math.sin(a0);
+      var x1=cx+DOT_R*Math.cos(a1),y1=cy+DOT_R*Math.sin(a1);
+      T([x0,y0,zB],[x0,y0,zC],[x1,y1,zC]);
+      T([x0,y0,zB],[x1,y1,zC],[x1,y1,zB]);
+    }
+    // Oblate hemisphere cap: x=r*cos(φ)*cos(θ), y=r*cos(φ)*sin(θ), z=zC+hH*sin(φ)
+    // φ=0 → equator (r=DOT_R, z=zC), φ=π/2 → pole (r=0, z=zC+hH)
+    var vH=function(p,t){return[cx+DOT_R*Math.cos(p)*Math.cos(t),cy+DOT_R*Math.cos(p)*Math.sin(t),zC+hH*Math.sin(p)];};
+    for(var ring=0;ring<R;ring++){
+      var p0=(ring/R)*(Math.PI/2),p1=((ring+1)/R)*(Math.PI/2);
+      for(var i=0;i<S;i++){
+        var t0=(i/S)*PI2,t1=((i+1)/S)*PI2;
+        if(ring===R-1){ T(vH(p0,t0),vH(p0,t1),[cx,cy,zC+hH]); }
+        else{ var v00=vH(p0,t0),v01=vH(p0,t1),v10=vH(p1,t0),v11=vH(p1,t1); T(v00,v10,v11);T(v00,v11,v01); }
+      }
+    }
+  }
+
+  // Rasterize an SVG string onto a canvas and return flat [x,y,...] pillar coords (mm).
+  // 1 pixel = ILL_PIX mm. Canvas y is flipped to match STL y-up convention.
+  // The shape is drawn aspect-preserving (contain) and centred in the zone, so a
+  // tall/narrow corner zone never stretches the illustration.
+  function rasterizeIll(svgText,cb){
+    var pw=Math.round(ILL_W/ILL_PIX),ph=Math.round(ILL_H/ILL_PIX);
+    var canvas=document.createElement('canvas');
+    canvas.width=pw;canvas.height=ph;
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,pw,ph);
+    var blobUrl=URL.createObjectURL(new Blob([svgText],{type:'image/svg+xml'}));
+    var img=new Image();
+    img.onload=function(){
+      var iw=img.width||1, ih=img.height||1;
+      var s=Math.min(pw/iw, ph/ih);
+      var dw=iw*s, dh=ih*s, dx=(pw-dw)/2, dy=(ph-dh)/2;
+      ctx.drawImage(img,dx,dy,dw,dh);
+      URL.revokeObjectURL(blobUrl);
+      var d=ctx.getImageData(0,0,pw,ph).data,pil=[];
+      for(var py=0;py<ph;py++){
+        for(var px=0;px<pw;px++){
+          var i=(py*pw+px)*4;
+          var lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+          if(d[i+3]>32&&lum<160){
+            pil.push(ILL_X+px*ILL_PIX, ILL_Y+(ph-1-py)*ILL_PIX);
+          }
+        }
+      }
+      cb(pil);
+    };
+    img.onerror=function(){cb([]);};
+    img.src=blobUrl;
+  }
+
+  function generateSTL(brailleCells,pageNum,slug,illPillars){
+    var tris=[];
+    box(tris,0,0,0,PAGE_W,PAGE_H,BASE_H);
+    var lines=layoutLines(brailleCells);
+    lines.slice(0,LINE_WIDTHS.length).forEach(function(line,li){
+      var cy=LINE_Y0-li*LINE_H;
+      line.forEach(function(cell,ci){
+        if(!cell||!cell.length)return;
+        var cx=TZ_X+ci*CELL_W;
+        cell.forEach(function(d){ var o=DOFF[d]; if(o)dot(tris,cx+o[0],cy+o[1]); });
+      });
+    });
+    // Illustration pillars (SVG rasterized at ILL_PIX mm/px)
+    if(illPillars&&illPillars.length){
+      for(var i=0;i<illPillars.length;i+=2){
+        box(tris,illPillars[i],illPillars[i+1],BASE_H,
+            illPillars[i]+ILL_PIX,illPillars[i+1]+ILL_PIX,BASE_H+ILL_ABOVE);
+      }
+    }
+    // Binary STL
+    var buf=new ArrayBuffer(80+4+tris.length*50);
+    var dv=new DataView(buf);
+    var h='TACT Braille page - thatsfaso/tact';
+    for(var i=0;i<80;i++)dv.setUint8(i,h.charCodeAt(i)||0);
+    dv.setUint32(80,tris.length,true);
+    var off=84;
+    for(var ti=0;ti<tris.length;ti++){
+      var t=tris[ti];
+      for(var fi=0;fi<12;fi++){dv.setFloat32(off,t[fi],true);off+=4;}
+      dv.setUint16(off,0,true);off+=2;
+    }
+    return buf;
+  }
+
+  window.TACT.generateSTL=generateSTL;
+
+  window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl){
+    function finish(pil){
+      var buf=generateSTL(brailleCells,pageNum,slug,pil);
+      var blob=new Blob([buf],{type:'application/octet-stream'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download=(slug||'tact')+'_page_'+String(pageNum).padStart(2,'0')+'.stl';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    }
+    if(svgUrl){
+      fetch(svgUrl)
+        .then(function(r){return r.ok?r.text():Promise.reject();})
+        .then(function(txt){rasterizeIll(txt,finish);})
+        .catch(function(){finish([]);});
+    } else {
+      finish([]);
+    }
+  };
+
+  // Single source of truth for page geometry (mm), shared with the on-screen
+  // preview so the preview is a true-to-scale mirror of the printed page.
+  window.TACT_LAYOUT = {
+    PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H,
+    TZ_X: TZ_X, CELL_W: CELL_W, LINE_H: LINE_H, LINE_Y0: LINE_Y0,
+    LINE_WIDTHS: LINE_WIDTHS, DOFF: DOFF, DOT_R: DOT_R,
+    ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H
+  };
+})();
+</script>
+
+<!-- ─── React app ────────────────────────────────────────────────────────── -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ─── Shape → file path lookup ─────────────────────────────────────────────────
+const SHAPE_PATHS = {
+  cat_sitting:'animals/cat_sitting', cat_standing:'animals/cat_standing',
+  dog_sitting:'animals/dog_sitting', dog_standing:'animals/dog_standing',
+  bird_flying:'animals/bird_flying', bird_perched:'animals/bird_perched',
+  fish:'animals/fish', butterfly:'animals/butterfly', rabbit:'animals/rabbit',
+  elephant:'animals/elephant', bear:'animals/bear', lion:'animals/lion',
+  owl:'animals/owl', horse:'animals/horse', duck:'animals/duck',
+  frog:'animals/frog', turtle:'animals/turtle',
+  boat_small:'vehicles/boat_small', boat_sailboat:'vehicles/boat_sailboat',
+  car_simple:'vehicles/car_simple', bicycle:'vehicles/bicycle',
+  airplane:'vehicles/airplane', train_simple:'vehicles/train_simple', rocket:'vehicles/rocket',
+  tree_simple:'nature/tree_simple', flower_simple:'nature/flower_simple',
+  sun:'nature/sun', moon:'nature/moon', star:'nature/star',
+  cloud:'nature/cloud', mountain:'nature/mountain', wave:'nature/wave', leaf:'nature/leaf',
+  house_simple:'buildings/house_simple', castle_tower:'buildings/castle_tower',
+  lighthouse:'buildings/lighthouse',
+  person_standing:'people/person_standing', person_child:'people/person_child',
+  person_waving:'people/person_waving',
+  book:'objects/book', hat_pirate:'objects/hat_pirate', crown:'objects/crown',
+  key:'objects/key', heart:'objects/heart', apple:'objects/apple', umbrella:'objects/umbrella',
+  // ── fairy-tale / bedtime additions ──
+  wolf:'animals/wolf', fox:'animals/fox', pig:'animals/pig', mouse:'animals/mouse',
+  sheep:'animals/sheep', bee:'animals/bee', ladybug:'animals/ladybug', snail:'animals/snail',
+  dragon:'animals/dragon', unicorn:'animals/unicorn',
+  princess:'people/princess', king:'people/king', queen:'people/queen',
+  witch:'people/witch', fairy:'people/fairy', mermaid:'people/mermaid',
+  magic_wand:'objects/magic_wand', sword:'objects/sword', treasure_chest:'objects/treasure_chest',
+  pumpkin:'objects/pumpkin', mushroom:'objects/mushroom', teddy_bear:'objects/teddy_bear',
+  rainbow:'nature/rainbow',
+  // ── batch 2 ──
+  swan:'animals/swan', deer:'animals/deer', squirrel:'animals/squirrel', hedgehog:'animals/hedgehog',
+  snake:'animals/snake', monkey:'animals/monkey', cow:'animals/cow',
+  knight:'people/knight', wizard:'people/wizard', ghost:'people/ghost',
+  bell:'objects/bell', lantern:'objects/lantern', candle:'objects/candle', mirror:'objects/mirror',
+  gift:'objects/gift', balloon:'objects/balloon', ball:'objects/ball', kite:'objects/kite',
+  snowflake:'nature/snowflake', bridge:'buildings/bridge',
+};
+
+// ─── Demo pages (shown when WebGPU/LLM unavailable) ──────────────────────────
+const DEMO_PAGES = {
+  en: [
+    { text: "Once upon a time, a brave cat named Whiskers wore a tiny eyepatch and dreamed of the moon.",
+      illustration: { scene: "A cat with an eyepatch looking at the sky", layout_hint: "center",
+        elements: [{ shape: "cat_sitting", scale: 1.2, position: "center", mirror: false }] } },
+    { text: "He built a small wooden boat and sailed across a sea of silver clouds, all the way to the stars.",
+      illustration: { scene: "A sailboat on silver clouds, stars above", layout_hint: "distributed",
+        elements: [{ shape: "boat_sailboat", scale: 1.1, position: "center", mirror: false },
+                   { shape: "star", scale: 0.8, position: "top", mirror: false }] } },
+    { text: "There he found a quiet garden where the moon kept her gentlest songs.",
+      illustration: { scene: "A crescent moon with small flowers", layout_hint: "center",
+        elements: [{ shape: "moon", scale: 1.3, position: "center", mirror: false },
+                   { shape: "flower_simple", scale: 0.7, position: "left", mirror: false }] } },
+  ],
+  it: [
+    { text: "C'era una volta un gatto coraggioso di nome Baffi, con una piccola benda sull'occhio, che sognava la luna.",
+      illustration: { scene: "Un gatto con una benda che guarda il cielo", layout_hint: "center",
+        elements: [{ shape: "cat_sitting", scale: 1.2, position: "center", mirror: false }] } },
+    { text: "Costruì una piccola barca di legno e navigò un mare di nuvole d'argento, fino alle stelle.",
+      illustration: { scene: "Una barca a vela tra le nuvole con stelle", layout_hint: "distributed",
+        elements: [{ shape: "boat_sailboat", scale: 1.1, position: "center", mirror: false },
+                   { shape: "star", scale: 0.8, position: "top", mirror: false }] } },
+    { text: "Là trovò un giardino silenzioso dove la luna custodiva le sue canzoni più dolci.",
+      illustration: { scene: "Una luna crescente con piccoli fiori", layout_hint: "center",
+        elements: [{ shape: "moon", scale: 1.3, position: "center", mirror: false },
+                   { shape: "flower_simple", scale: 0.7, position: "left", mirror: false }] } },
+  ],
+};
+
+// ─── Blob loader ─────────────────────────────────────────────────────────────
+function BlobLoader({ size = 220 }) {
+  const [t, setT] = useState(0);
+  const raf = useRef(0);
+  useEffect(() => {
+    let start = performance.now();
+    const tick = () => { setT((performance.now() - start) / 1000); raf.current = requestAnimationFrame(tick); };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, []);
+
+  const N = 9, cx = 100, cy = 100, baseR = 56;
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    const wob = Math.sin(t * 0.9 + i * 1.7) * 6 + Math.sin(t * 1.4 + i * 0.6) * 4 + Math.cos(t * 0.5 + i * 2.1) * 5;
+    pts.push([cx + Math.cos(a) * (baseR + wob), cy + Math.sin(a) * (baseR + wob)]);
+  }
+  const path = (() => {
+    const p = pts, n = p.length;
+    let d = `M ${p[0][0].toFixed(2)},${p[0][1].toFixed(2)} `;
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i-1+n)%n], p1 = p[i], p2 = p[(i+1)%n], p3 = p[(i+2)%n];
+      const c1x = p1[0]+(p2[0]-p0[0])/6, c1y = p1[1]+(p2[1]-p0[1])/6;
+      const c2x = p2[0]-(p3[0]-p1[0])/6, c2y = p2[1]-(p3[1]-p1[1])/6;
+      d += `C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)} `;
+    }
+    return d + "Z";
+  })();
+  const sat = (phase, dist, r) => {
+    const a = t * 0.6 + phase;
+    return { cx: cx+Math.cos(a)*dist+Math.sin(t*1.3+phase)*3, cy: cy+Math.sin(a)*dist+Math.cos(t*0.9+phase)*3, r: r+Math.sin(t*1.7+phase)*2 };
+  };
+  const s1 = sat(0, 44, 14), s2 = sat(2.1, 40, 11), s3 = sat(4.3, 48, 9);
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" /><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" /></filter>
+        <radialGradient id="blobFill" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#0a0a0c" /><stop offset="100%" stopColor="#0a0a0c" /></radialGradient>
+      </defs>
+      <g filter="url(#goo)">
+        <path d={path} fill="url(#blobFill)" />
+        <circle cx={s1.cx} cy={s1.cy} r={s1.r} fill="url(#blobFill)" />
+        <circle cx={s2.cx} cy={s2.cy} r={s2.r} fill="url(#blobFill)" />
+        <circle cx={s3.cx} cy={s3.cy} r={s3.r} fill="url(#blobFill)" />
+      </g>
+    </svg>
+  );
+}
+
+// ─── Braille JS fallback (used when Liblouis WASM is unavailable) ─────────────
+const BRAILLE_MAP = {
+  a:[1],b:[1,2],c:[1,4],d:[1,4,5],e:[1,5],f:[1,2,4],g:[1,2,4,5],
+  h:[1,2,5],i:[2,4],j:[2,4,5],k:[1,3],l:[1,2,3],m:[1,3,4],n:[1,3,4,5],
+  o:[1,3,5],p:[1,2,3,4],q:[1,2,3,4,5],r:[1,2,3,5],s:[2,3,4],t:[2,3,4,5],
+  u:[1,3,6],v:[1,2,3,6],w:[2,4,5,6],x:[1,3,4,6],y:[1,3,4,5,6],z:[1,3,5,6],
+  "à":[1,2,3,5,6],"è":[2,3,4,6],"é":[1,2,3,4,5,6],"ì":[3,4],"ò":[3,4,6],"ù":[2,3,4,5,6],
+  ".":[2,5,6],",":[2],";":[2,3],":":[2,5],"?":[2,6],"!":[2,3,5],
+  "'":[3],"-":[3,6],'"':[2,3,6],
+  "1":[1],"2":[1,2],"3":[1,4],"4":[1,4,5],"5":[1,5],
+  "6":[1,2,4],"7":[1,2,4,5],"8":[1,2,5],"9":[2,4],"0":[2,4,5],
+};
+const CAP_INDICATOR = [6];
+const NUM_INDICATOR = [3,4,5,6];
+
+function textToBrailleCells(text) {
+  const cells = [];
+  let inNumber = false;
+  for (const raw of text) {
+    if (raw === " ") { cells.push([]); inNumber = false; continue; }
+    if (raw === "\n") { cells.push("BR"); inNumber = false; continue; }
+    if (/[0-9]/.test(raw)) {
+      if (!inNumber) { cells.push(NUM_INDICATOR); inNumber = true; }
+      cells.push(BRAILLE_MAP[raw] || []);
+      continue;
+    }
+    inNumber = false;
+    const lower = raw.toLowerCase();
+    if (raw !== lower && BRAILLE_MAP[lower]) { cells.push(CAP_INDICATOR); cells.push(BRAILLE_MAP[lower]); }
+    else cells.push(BRAILLE_MAP[lower] || []);
+  }
+  return cells;
+}
+
+function layoutBrailleLines(cells, cellsPerLine = 22) {
+  const lines = [];
+  let line = [], lastSpace = -1;
+  for (const c of cells) {
+    if (c === "BR") { lines.push(line); line = []; lastSpace = -1; continue; }
+    line.push(c);
+    if (Array.isArray(c) && c.length === 0) lastSpace = line.length - 1;
+    if (line.length >= cellsPerLine) {
+      if (lastSpace > 0) { const rest = line.slice(lastSpace + 1); lines.push(line.slice(0, lastSpace)); line = rest; lastSpace = -1; }
+      else { lines.push(line); line = []; lastSpace = -1; }
+    }
+  }
+  if (line.length) lines.push(line);
+  return lines;
+}
+
+// ─── L-shaped page layout ─────────────────────────────────────────────────────
+// Full-width lines on top, then narrower lines that run BESIDE a corner
+// illustration (bottom-right). One page holds more Braille (→ fewer pages) while
+// the illustration tucks into the corner. These numbers are mirrored by the STL
+// generator (window.TACT_LAYOUT) so the print matches the preview exactly.
+// Page geometry (mm) — single source of truth, shared with the STL generator
+// (window.TACT_LAYOUT) so the on-screen preview is a true-to-scale mirror of the
+// printed page. Full-width rows on top, then narrow rows down the left side
+// beside (and below) the bottom-right corner illustration.
+const LAYOUT = window.TACT_LAYOUT;
+const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;
+const FULL_LINE_CELLS = LINE_WIDTHS[0];
+
+// Like layoutBrailleLines but each line's max width comes from LINE_WIDTHS.
+function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS) {
+  const lines = [];
+  let line = [], lastSpace = -1;
+  const cap = () => widths[Math.min(lines.length, widths.length - 1)];
+  for (const c of cells) {
+    if (c === "BR") { lines.push(line); line = []; lastSpace = -1; continue; }
+    line.push(c);
+    if (Array.isArray(c) && c.length === 0) lastSpace = line.length - 1;
+    if (line.length >= cap()) {
+      if (lastSpace > 0) { const rest = line.slice(lastSpace + 1); lines.push(line.slice(0, lastSpace)); line = rest; lastSpace = -1; }
+      else { lines.push(line); line = []; lastSpace = -1; }
+    }
+  }
+  if (line.length) lines.push(line);
+  return lines;
+}
+
+function BrailleCell({ dots }) {
+  const has = (n) => dots && dots.includes(n);
+  return (
+    <div className="grid grid-cols-2 gap-[5px]" style={{ width: 19 }}>
+      <div className={"bd " + (has(1) ? "" : "off")}></div>
+      <div className={"bd " + (has(4) ? "" : "off")}></div>
+      <div className={"bd " + (has(2) ? "" : "off")}></div>
+      <div className={"bd " + (has(5) ? "" : "off")}></div>
+      <div className={"bd " + (has(3) ? "" : "off")}></div>
+      <div className={"bd " + (has(6) ? "" : "off")}></div>
+    </div>
+  );
+}
+
+// ─── i18n ─────────────────────────────────────────────────────────────────────
+const COPY = {
+  en: {
+    eyebrow:    "Stories you can read with your fingers",
+    headline:   "Tell me a story…",
+    sub:        "Speak your idea. We'll write it, translate it to Braille, and prepare a tactile page you can print at home.",
+    tap:        "Tap to speak",
+    listening:  "Listening…",
+    stop:       "Tap to stop",
+    or:         "or type below",
+    placeholder:"a pirate cat who sails to the moon",
+    submit:     "Make my story",
+    weaving:    "Weaving your story…",
+    generating: "Writing your story…",
+    modelDownloading: "Downloading AI model…",
+    brailleTranslating: "Translating to Braille…",
+    yourStory:  "Your story",
+    page:       "Page",
+    of:         "of",
+    download:   "Download print file",
+    again:      "Tell another",
+    demoNotice: "AI writing off · your own words become real Braille",
+    hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
+    footer: "Open source · No account · Works with any FDM 3D printer",
+  },
+  it: {
+    eyebrow:    "Storie da leggere con le dita",
+    headline:   "Raccontami una storia…",
+    sub:        "Dimmi la tua idea. La scriviamo, la traduciamo in Braille e prepariamo una pagina tattile da stampare a casa.",
+    tap:        "Tocca e parla",
+    listening:  "Ti ascolto…",
+    stop:       "Tocca per fermare",
+    or:         "oppure scrivi qui sotto",
+    placeholder:"un gatto pirata che naviga verso la luna",
+    submit:     "Crea la storia",
+    weaving:    "Sto creando la storia…",
+    generating: "Sto scrivendo la storia…",
+    modelDownloading: "Scarico il modello AI…",
+    brailleTranslating: "Traduco in Braille…",
+    yourStory:  "La tua storia",
+    page:       "Pagina",
+    of:         "di",
+    download:   "Scarica file di stampa",
+    again:      "Un'altra storia",
+    demoNotice: "Scrittura AI non attiva · le tue parole diventano Braille reale",
+    hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
+    footer: "Open source · Senza account · Funziona con ogni stampante FDM",
+  },
+};
+
+// ─── Shape renderer (fetches SVG from shapes/ dir, falls back to inline) ──────
+function ShapeRenderer({ illustration }) {
+  const shape = illustration?.elements?.[0]?.shape || 'star';
+  const [svgMarkup, setSvgMarkup] = useState(null);
+
+  useEffect(() => {
+    setSvgMarkup(null);
+    const relPath = SHAPE_PATHS[shape];
+    if (!relPath) return;
+    fetch('shapes/' + relPath + '.svg')
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(txt => {
+        // Remove fixed pixel dimensions so the SVG scales with its container
+        const normalized = txt
+          .replace(/\swidth="[^"]*"/, ' width="100%"')
+          .replace(/\sheight="[^"]*"/, ' height="100%"');
+        setSvgMarkup(normalized);
+      })
+      .catch(() => {});
+  }, [shape]);
+
+  if (svgMarkup) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: svgMarkup }}
+        style={{ width: '100%', height: '100%', lineHeight: 0, display: 'flex' }}
+      />
+    );
+  }
+
+  // Inline fallback for the 3 shapes used in demo pages
+  const stroke = "#0a0a0c", sw = 3;
+  let fallbackSvg;
+  if (shape === 'cat_sitting' || shape === 'cat_standing') {
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 60 70 L 78 42 L 92 60 Q 110 54 128 60 L 142 42 L 160 70 Q 170 92 160 112 Q 140 134 110 134 Q 80 134 60 112 Q 50 92 60 70 Z" />
+          <circle cx="98" cy="86" r="4" fill={stroke} /><circle cx="122" cy="86" r="4" fill={stroke} />
+          <path d="M 105 110 Q 110 116 115 110" />
+          <path d="M 80 102 L 60 100 M 80 108 L 58 112 M 140 102 L 162 100 M 140 108 L 162 112" />
+        </g>
+      </svg>
+    );
+  } else if (shape === 'boat_sailboat' || shape === 'boat_small') {
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 36 110 Q 110 140 184 110 L 168 130 Q 110 150 52 130 Z" />
+          <path d="M 110 30 L 110 110" /><path d="M 110 36 L 158 100 L 110 100 Z" />
+          <path d="M 24 146 Q 40 138 56 146 T 88 146 T 120 146 T 152 146 T 184 146" opacity="0.6" />
+        </g>
+      </svg>
+    );
+  } else {
+    fallbackSvg = (
+      <svg viewBox="0 0 220 180" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+        <g fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M 130 30 A 70 70 0 1 0 130 154 A 56 56 0 1 1 130 30 Z" />
+          <path d="M 50 56 L 54 48 L 58 56 L 66 60 L 58 64 L 54 72 L 50 64 L 42 60 Z" />
+        </g>
+      </svg>
+    );
+  }
+  return <div style={{ width: '100%', height: '100%', display: 'flex' }}>{fallbackSvg}</div>;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+function Header({ lang, setLang, sound, setSound }) {
+  return (
+    <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6" style={{ zIndex: 5 }}>
+      <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 gap-[3px]" style={{ width: 18 }}>
+          <div className="bd"></div><div className="bd off"></div>
+          <div className="bd"></div><div className="bd"></div>
+          <div className="bd off"></div><div className="bd"></div>
+        </div>
+        <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>Tact</div>
+        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>prototype</div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => { const v = !sound; setSound(v); window.SFX.setEnabled(v); }}
+          className="focus-ring w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+          style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)" }}
+          aria-label={sound ? "Mute sounds" : "Unmute sounds"} aria-pressed={sound}
+        >
+          {sound ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+          )}
+        </button>
+        <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}>
+          {["en", "it"].map((l) => (
+            <button key={l} onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
+              className="focus-ring mono text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full transition-colors"
+              style={{ background: lang === l ? "var(--ink)" : "transparent", color: lang === l ? "var(--paper)" : "var(--ink)" }}
+              aria-pressed={lang === l}>
+              {l === "en" ? "English" : "Italiano"}
+            </button>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── Mic button ───────────────────────────────────────────────────────────────
+function MicButton({ state, onClick, t }) {
+  const isListening = state === "listening";
+  return (
+    <button onClick={onClick} className="focus-ring relative inline-flex items-center justify-center"
+      aria-label={isListening ? t.stop : t.tap}
+      style={{ width: 96, height: 96, borderRadius: 999, background: "var(--ink)", color: "var(--paper)",
+        boxShadow: isListening
+          ? "0 0 0 8px rgba(10,10,12,0.06), 0 0 0 18px rgba(10,10,12,0.04), 0 18px 50px -12px rgba(10,10,12,0.5)"
+          : "0 1px 0 rgba(255,255,255,0.18) inset, 0 18px 50px -16px rgba(10,10,12,0.4)",
+        transition: "box-shadow 0.4s ease", cursor: "pointer" }}>
+      {!isListening && <span className="mic-pulse absolute inset-0 rounded-full"></span>}
+      {!isListening ? (
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><path d="M12 18v3" />
+        </svg>
+      ) : (
+        <div className="flex items-end gap-[4px]" style={{ height: 28 }}>
+          {[0.1, 0.3, 0.5, 0.3, 0.1].map((d, i) => (
+            <span key={i} className="wbar" style={{ width: 4, height: "100%", borderRadius: 4, background: "var(--paper)", animationDelay: `${d}s` }} />
+          ))}
+        </div>
+      )}
+    </button>
+  );
+}
+
+// ─── Hint marquee ─────────────────────────────────────────────────────────────
+function HintMarquee({ hints, onPick }) {
+  const doubled = [...hints, ...hints];
+  return (
+    <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)" }}>
+      <div className="drift flex gap-3 whitespace-nowrap py-1">
+        {doubled.map((h, i) => (
+          <button key={i} onClick={() => onPick(h)}
+            className="focus-ring px-4 py-2 rounded-full text-[13px] transition-colors"
+            style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}>
+            <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }}>↗</span>{h}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Loading screen ───────────────────────────────────────────────────────────
+function LoadingScreen({ msg, progress, t }) {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10" style={{ zIndex: 5 }}>
+      <BlobLoader size={240} />
+      <div className="flex flex-col items-center gap-4 rise" style={{ maxWidth: 400, width: '100%', padding: '0 32px' }}>
+        <div className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
+          {msg || t.weaving}
+        </div>
+        {progress !== null ? (
+          <div style={{ width: '100%' }}>
+            <div style={{ height: 2, borderRadius: 2, background: 'rgba(10,10,12,0.1)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 2, background: 'var(--ink)',
+                width: Math.round((progress || 0) * 100) + '%', transition: 'width 0.4s ease' }} />
+            </div>
+            <div className="mono text-center mt-2 text-[11px] tracking-[0.18em]" style={{ color: 'var(--muted)' }}>
+              {Math.round((progress || 0) * 100)}%
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2 mt-1">
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(10,10,12,0.35)',
+                animation: 'float-soft 1.2s ease-in-out infinite', animationDelay: i * 0.22 + 's' }} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Story result ─────────────────────────────────────────────────────────────
+// pages: Array<{ text, illustration, brailleCells: dots[][]|null, demo: bool }>
+function StoryResult({ pages, lang, t, onAgain }) {
+  const [page, setPage] = useState(0);
+  const p = pages[page];
+
+  // Use Liblouis cells when available, JS fallback otherwise
+  const cells = useMemo(() => p.brailleCells || textToBrailleCells(p.text), [p]);
+
+  // True-to-scale dot layout in page millimetres — computed from the SAME
+  // geometry the STL uses (window.TACT_LAYOUT), so the preview is an exact mirror
+  // of the printed page. Every cell shows all 6 dot positions; raised dots are
+  // dark, unraised are faint. Coordinates are converted to SVG space (y-down).
+  const dots = useMemo(() => {
+    const L = LAYOUT, out = [];
+    const lines = layoutBrailleLinesVar(cells);
+    lines.slice(0, L.LINE_WIDTHS.length).forEach((line, li) => {
+      const baseY = L.LINE_Y0 - li * L.LINE_H;
+      line.forEach((cell, ci) => {
+        const cellX = L.TZ_X + ci * L.CELL_W;
+        for (let d = 1; d <= 6; d++) {
+          const off = L.DOFF[d];
+          out.push({ x: cellX + off[0], y: L.PAGE_H - (baseY + off[1]),
+            on: Array.isArray(cell) && cell.includes(d) });
+        }
+      });
+    });
+    return out;
+  }, [cells]);
+
+  // Illustration zone as a percentage of the page (mm → %), matching the STL.
+  const L = LAYOUT;
+  const illBox = {
+    left:   (L.ILL_X / L.PAGE_W) * 100 + "%",
+    width:  (L.ILL_W / L.PAGE_W) * 100 + "%",
+    top:    ((L.PAGE_H - L.ILL_Y - L.ILL_H) / L.PAGE_H) * 100 + "%",
+    height: (L.ILL_H / L.PAGE_H) * 100 + "%",
+  };
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center px-6" style={{ zIndex: 5 }}>
+      <div className="w-full max-w-[1100px] grid grid-cols-12 gap-8 items-center">
+
+        {/* Left — physical page preview, true-to-scale (mm) mirror of the print */}
+        <div className="col-span-7 rise">
+          <div className="relative mx-auto"
+            style={{ width: "100%", maxWidth: 520, aspectRatio: `${L.PAGE_W} / ${L.PAGE_H}`, borderRadius: 8,
+              background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
+              boxShadow: "0 0 0 1px rgba(10,10,12,0.08) inset, 0 50px 90px -40px rgba(10,10,12,0.35), 0 18px 40px -20px rgba(10,10,12,0.15)",
+              transform: "rotate(-0.6deg)", overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, borderRadius: 8, pointerEvents: "none", opacity: 0.5,
+              backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+              mixBlendMode: "multiply" }} />
+            <div className="mono absolute top-3 right-4 text-[9px] tracking-[0.2em] uppercase" style={{ color: "rgba(10,10,12,0.35)", zIndex: 2 }}>
+              {t.page} {page + 1} {t.of} {pages.length}
+            </div>
+
+            {/* Braille dots, drawn at exact page-mm positions */}
+            <svg viewBox={`0 0 ${L.PAGE_W} ${L.PAGE_H}`} preserveAspectRatio="none"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+              {dots.map((dt, i) => (
+                <circle key={i} cx={dt.x} cy={dt.y} r={dt.on ? L.DOT_R : 0.5}
+                  fill={dt.on ? "rgba(10,10,12,0.9)" : "rgba(10,10,12,0.1)"} />
+              ))}
+            </svg>
+
+            {/* Illustration in its true mm zone (bottom-right), with the L-shaped
+                dotted divider (top + left edges) at the exact zone boundary. */}
+            <div style={{ position: "absolute", ...illBox,
+                borderTop: "1px dashed rgba(10,10,12,0.22)",
+                borderLeft: "1px dashed rgba(10,10,12,0.22)",
+                padding: "3%",
+                display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShapeRenderer illustration={p.illustration} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right — text + actions */}
+        <div className="col-span-5 flex flex-col gap-6 rise-slow">
+          {p.demo && (
+            <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full inline-block"
+              style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)', alignSelf: 'flex-start' }}>
+              {t.demoNotice}
+            </div>
+          )}
+          <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--muted)" }}>{t.yourStory}</div>
+          <div className="serif text-[32px] leading-[1.18]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</div>
+
+          <div className="flex items-center gap-3 mt-2">
+            <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.max(0, x-1)); }}
+              disabled={page === 0} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === 0 ? 0.35 : 1, cursor: page === 0 ? "default" : "pointer" }}
+              aria-label="Previous page">‹</button>
+            <div className="flex gap-1.5">
+              {pages.map((_, i) => (
+                <button key={i} onClick={() => setPage(i)} aria-label={`Page ${i+1}`}
+                  style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6,
+                    background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)",
+                    transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }} />
+              ))}
+            </div>
+            <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.min(pages.length-1, x+1)); }}
+              disabled={page === pages.length-1} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === pages.length-1 ? 0.35 : 1, cursor: page === pages.length-1 ? "default" : "pointer" }}
+              aria-label="Next page">›</button>
+          </div>
+
+          <div className="flex flex-wrap gap-3 mt-4">
+            <button className="btn" onClick={() => {
+              window.SFX && window.SFX.play("download");
+              const shape = p.illustration?.elements?.[0]?.shape || 'star';
+              const relPath = SHAPE_PATHS[shape] || 'objects/star';
+              window.TACT.downloadSTL(cells, page + 1, 'tact', 'shapes/' + relPath + '.svg');
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              {t.download}
+              <span className="mono text-[10px] opacity-60 ml-1">.STL</span>
+            </button>
+            <button className="btn btn-ghost" onClick={onAgain}>{t.again}</button>
+          </div>
+
+          <div className="mono text-[10px] uppercase tracking-[0.22em] flex gap-4 mt-2" style={{ color: "var(--muted-soft)" }}>
+            <span>● {lang === "it" ? "Italiano · Grado 1" : "English · Grade 1 UEB"}</span>
+            <span>● 220 × 220 mm</span>
+            <span>● TPU / PETG</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Fallback helpers (no WebGPU path) ─────────────────────────────────────────
+function pickShapeFromText(text, lang) {
+  // Ordered most-specific → most-general; whole-word match (a keyword must equal
+  // a full word, so "mare"/sea never matches "re"/king). Plurals/diminutives are
+  // listed explicitly. First matching shape wins.
+  const keywords = lang === 'it' ? {
+    teddy_bear:['orsacchiotto','orsacchiotti','peluche'],
+    unicorn:['unicorno','unicorni'], dragon:['drago','draghi','draghetto'],
+    mermaid:['sirena','sirene'], fairy:['fata','fate','fatina'],
+    witch:['strega','streghe','befana'], wizard:['mago','maghi','stregone'],
+    knight:['cavaliere','cavalieri'], ghost:['fantasma','fantasmi','spettro'],
+    princess:['principessa','principesse'],
+    queen:['regina','regine'], king:['re','sovrano','regno','reame'],
+    wolf:['lupo','lupi','lupetto'], fox:['volpe','volpi'],
+    swan:['cigno','cigni'], deer:['cervo','cervi','cerbiatto'],
+    squirrel:['scoiattolo','scoiattoli'], hedgehog:['riccio','ricci','porcospino'],
+    snake:['serpente','serpenti','serpe','biscia'], monkey:['scimmia','scimmie','scimmietta'],
+    cow:['mucca','mucche','vacca'],
+    pig:['maiale','maiali','maialino','porcellino'], mouse:['topo','topi','topolino'],
+    sheep:['pecora','pecore','pecorella','agnello'], bee:['ape','api','apetta'],
+    ladybug:['coccinella','coccinelle'], snail:['lumaca','lumache','chiocciola'],
+    rabbit:['coniglio','conigli','coniglietto','lepre'],
+    cat_sitting:['gatto','gatti','gattino','micio','micia'],
+    dog_sitting:['cane','cani','cagnolino','cucciolo'], owl:['gufo','gufi','civetta'],
+    horse:['cavallo','cavalli','cavallino','pony','puledro'],
+    duck:['anatra','anatre','anatroccolo','papera'], frog:['rana','rane','ranocchio','rospo'],
+    turtle:['tartaruga','tartarughe'], elephant:['elefante','elefanti'],
+    lion:['leone','leoni','leoncino'], bear:['orso','orsi','orsetto'],
+    bird_flying:['uccello','uccelli','uccellino','passero','colomba'],
+    butterfly:['farfalla','farfalle','farfallina'], fish:['pesce','pesci','pesciolino'],
+    magic_wand:['bacchetta'], sword:['spada','spade'],
+    treasure_chest:['tesoro','forziere','scrigno','oro'], pumpkin:['zucca','zucche'],
+    mushroom:['fungo','funghi'], crown:['corona','corone'], key:['chiave','chiavi'],
+    apple:['mela','mele'], book:['libro','libri'], heart:['cuore','cuori'],
+    umbrella:['ombrello','ombrelli'], hat_pirate:['pirata','pirati'], rainbow:['arcobaleno'],
+    bell:['campana','campanella'], lantern:['lanterna','lanterne'], candle:['candela','candele'],
+    mirror:['specchio','specchi'], gift:['regalo','regali','dono'], balloon:['palloncino','palloncini'],
+    ball:['palla','palle','pallone'], kite:['aquilone','aquiloni'], snowflake:['fiocco','neve'],
+    bridge:['ponte','ponti'],
+    moon:['luna','lune'], sun:['sole'], star:['stella','stelle','stellina'],
+    cloud:['nuvola','nuvole','nube'], rocket:['razzo','razzi','astronave'],
+    boat_sailboat:['barca','barche','nave','navi','vela','veliero'],
+    car_simple:['auto','macchina','automobile'], train_simple:['treno','treni'],
+    airplane:['aereo','aerei','aeroplano'], bicycle:['bicicletta','bici'],
+    tree_simple:['albero','alberi','bosco','foresta'],
+    flower_simple:['fiore','fiori','rosa','margherita','giardino'],
+    mountain:['montagna','montagne','monte','collina'], wave:['onda','onde','mare','oceano'],
+    leaf:['foglia','foglie'], house_simple:['casa','case','casetta','capanna'],
+    castle_tower:['castello','castelli','palazzo','torre'], lighthouse:['faro','fari'],
+    person_child:['bambino','bambina','bimbo','bimba','bambini'],
+    person_standing:['persona','uomo','donna','amico','amica']
+  } : {
+    teddy_bear:['teddy'], unicorn:['unicorn','unicorns'], dragon:['dragon','dragons'],
+    mermaid:['mermaid','mermaids'], fairy:['fairy','fairies','pixie'],
+    witch:['witch','witches'], wizard:['wizard','wizards','sorcerer'],
+    knight:['knight','knights'], ghost:['ghost','ghosts'],
+    princess:['princess','princesses'],
+    queen:['queen','queens'], king:['king','kings','kingdom'],
+    wolf:['wolf','wolves'], fox:['fox','foxes'], pig:['pig','pigs','piglet','hog'],
+    mouse:['mouse','mice'], sheep:['sheep','lamb','lambs'], bee:['bee','bees','bumblebee'],
+    ladybug:['ladybug','ladybird'], snail:['snail','snails'],
+    swan:['swan','swans'], deer:['deer','fawn'], squirrel:['squirrel','squirrels'],
+    hedgehog:['hedgehog','hedgehogs'], snake:['snake','snakes','serpent'],
+    monkey:['monkey','monkeys'], cow:['cow','cows','calf'],
+    rabbit:['rabbit','rabbits','bunny','bunnies','hare'],
+    cat_sitting:['cat','cats','kitten','kitty'], dog_sitting:['dog','dogs','puppy','pup'],
+    owl:['owl','owls'], horse:['horse','horses','pony','foal'], duck:['duck','ducks','duckling'],
+    frog:['frog','frogs','toad'], turtle:['turtle','turtles','tortoise'],
+    elephant:['elephant','elephants'], lion:['lion','lions'], bear:['bear','bears'],
+    bird_flying:['bird','birds','sparrow','robin','pigeon'],
+    butterfly:['butterfly','butterflies','moth'], fish:['fish','fishes'],
+    magic_wand:['wand','wands'], sword:['sword','swords'],
+    treasure_chest:['treasure','chest','gold','jewels'], pumpkin:['pumpkin','pumpkins'],
+    mushroom:['mushroom','mushrooms','toadstool'], crown:['crown','crowns'], key:['key','keys'],
+    apple:['apple','apples'], book:['book','books'], heart:['heart','hearts'],
+    umbrella:['umbrella'], hat_pirate:['pirate','pirates'], rainbow:['rainbow','rainbows'],
+    bell:['bell','bells'], lantern:['lantern','lanterns'], candle:['candle','candles'],
+    mirror:['mirror','mirrors'], gift:['gift','gifts','present'], balloon:['balloon','balloons'],
+    ball:['ball','balls'], kite:['kite','kites'], snowflake:['snowflake','snow','snowy'],
+    bridge:['bridge','bridges'],
+    moon:['moon'], sun:['sun','sunny','sunshine','sunbeam'], star:['star','stars','wish'],
+    cloud:['cloud','clouds'], rocket:['rocket','spaceship'],
+    boat_sailboat:['boat','boats','ship','sail'], car_simple:['car','cars'],
+    train_simple:['train','trains'], airplane:['airplane','plane','jet'],
+    bicycle:['bicycle','bike'], tree_simple:['tree','trees','forest','woods'],
+    flower_simple:['flower','flowers','rose','daisy','garden'],
+    mountain:['mountain','mountains','hill'], wave:['wave','waves','sea','ocean'],
+    leaf:['leaf','leaves'], house_simple:['house','home','cottage'],
+    castle_tower:['castle','castles','palace','tower'], lighthouse:['lighthouse'],
+    person_child:['child','girl','boy','kid'], person_standing:['person','man','woman','friend']
+  };
+  const wset = new Set(text.toLowerCase().split(/[^a-zàèéìòù]+/).filter(Boolean));
+  for (const [shape, keys] of Object.entries(keywords)) {
+    if (keys.some(k => wset.has(k))) return shape;
+  }
+  return 'star';
+}
+
+// Does the given list of words fit within `maxLines` Braille rows?
+function wordsFit(words, maxLines) {
+  return layoutBrailleLinesVar(textToBrailleCells(words.join(' '))).length <= maxLines;
+}
+
+// Paginate by Braille line capacity AND balance words across pages, so a story
+// never leaves a near-empty last page (e.g. 50 words → [25,25], not [37,13]).
+// We find the fewest pages P whose EVEN split fits every page, then split evenly.
+// Even, well-filled pages read as intentional instead of an orphaned tail.
+function paginateByLines(text) {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  if (!words.length) return [text];
+  const maxLines = LINE_WIDTHS.length;
+
+  // Lower bound: greedy fill tells us the minimum number of pages needed.
+  let minPages = 0, cur = [];
+  for (const w of words) {
+    if (cur.length && !wordsFit(cur.concat(w), maxLines)) { minPages++; cur = [w]; }
+    else cur.push(w);
+  }
+  if (cur.length) minPages++;
+  minPages = Math.max(minPages, 1);
+
+  // Grow P until an even split fits every page, then return that balanced split.
+  for (let P = minPages; P <= words.length; P++) {
+    const per = Math.ceil(words.length / P);
+    const groups = [];
+    for (let i = 0; i < words.length; i += per) groups.push(words.slice(i, i + per));
+    if (groups.length <= P && groups.every(g => wordsFit(g, maxLines))) {
+      return groups.map(g => g.join(' '));
+    }
+  }
+  return [words.join(' ')];
+}
+
+// Turn a block of story text into page objects (text + keyword-picked illustration).
+// Used for both the AI path (LLM-written story) and the no-AI path (user's own words).
+function buildPages(storyText, lang) {
+  return paginateByLines(storyText).map((text, idx) => ({
+    page_number: idx + 1,
+    text: text,
+    illustration: {
+      scene: text,
+      layout_hint: "center",
+      elements: [{ shape: pickShapeFromText(text, lang), scale: 1.0, position: "center", mirror: false }]
+    }
+  }));
+}
+
+// ─── Main app ─────────────────────────────────────────────────────────────────
+function App() {
+  const [lang,  setLang]  = useState("en");
+  const [sound, setSound] = useState(window.SFX ? window.SFX.isEnabled() : true);
+  const [phase, setPhase] = useState("idle");
+  const [text,  setText]  = useState("");
+  const [pages, setPages] = useState(null);
+  const [loadingMsg,      setLoadingMsg]      = useState("");
+  const [loadingProgress, setLoadingProgress] = useState(null);
+  const t = COPY[lang];
+
+  const inputRef  = useRef(null);
+  const loaderRef = useRef(null);
+  const srRef     = useRef(null);
+
+  const stopLoader = () => {
+    if (loaderRef.current) { loaderRef.current.stop(); loaderRef.current = null; }
+  };
+
+  const toggleListen = () => {
+    if (phase === "listening") {
+      if (srRef.current) { srRef.current.stop(); srRef.current = null; }
+      window.SFX && window.SFX.play("listenEnd");
+      setPhase("idle");
+      return;
+    }
+    window.SFX && window.SFX.play("listenStart");
+    setPhase("listening");
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      // No Web Speech API — simulate after 3s
+      setTimeout(() => {
+        const phrase = lang === "it" ? "un gatto pirata che naviga verso la luna" : "a pirate cat who sails to the moon";
+        setText(phrase);
+        window.SFX && window.SFX.play("listenEnd");
+        doSubmit(phrase);
+      }, 3000);
+      return;
+    }
+
+    const sr = new SR();
+    srRef.current = sr;
+    sr.lang = lang === "it" ? "it-IT" : "en-US";
+    sr.continuous = false;
+    sr.interimResults = false;
+    sr.onresult = (e) => {
+      const phrase = e.results[0][0].transcript;
+      setText(phrase);
+      srRef.current = null;
+      window.SFX && window.SFX.play("listenEnd");
+      doSubmit(phrase);
+    };
+    sr.onerror = () => { srRef.current = null; setPhase("idle"); window.SFX && window.SFX.play("listenEnd"); };
+    sr.onend   = () => { srRef.current = null; };
+    try {
+      sr.start();
+    } catch (err) {
+      // start() can throw synchronously (mic blocked, InvalidStateError, etc.)
+      // — recover instead of stranding the UI on the listening screen.
+      console.warn("[TACT] speech recognition could not start:", err && err.message);
+      srRef.current = null;
+      setPhase("idle");
+      window.SFX && window.SFX.play("listenEnd");
+    }
+  };
+
+  const doSubmit = async (q) => {
+    setPhase("loading");
+    setLoadingMsg(t.weaving);
+    setLoadingProgress(null);
+    loaderRef.current = window.SFX && window.SFX.startLoader ? window.SFX.startLoader() : null;
+
+    try {
+      let rawPages;
+      let isDemo = false;
+
+      if (!window.TACT.webgpuSupported) {
+        // No WebGPU: the user's own words become the story (real Braille, not a demo).
+        setLoadingMsg(t.brailleTranslating);
+        await new Promise(r => setTimeout(r, 800));
+        rawPages = buildPages(q, lang);
+      } else {
+        // AI path: the model writes the story TEXT, then we build pages deterministically.
+        let storyText = null;
+        try {
+          storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel) => {
+            if (pct < 1) {
+              setLoadingMsg(t.modelDownloading + (modelLabel ? " · " + modelLabel : ""));
+              setLoadingProgress(pct);
+            } else {
+              setLoadingMsg(t.generating);
+              setLoadingProgress(null);
+            }
+          });
+        } catch (llmErr) {
+          console.warn('[TACT] LLM unavailable, using the prompt text directly:', llmErr.message);
+          isDemo = true; // mark that the AI writing step didn't run
+        }
+        rawPages = buildPages(storyText || q, lang);
+      }
+
+      setLoadingMsg(t.brailleTranslating);
+      setLoadingProgress(null);
+
+      const storyPages = await Promise.all(rawPages.map(async (p) => {
+        let brailleCells = null;
+        try { brailleCells = await window.TACT.translateBraille(p.text, lang); }
+        catch (e) { /* JS fallback used in StoryResult */ }
+        return { text: p.text, illustration: p.illustration, brailleCells, demo: isDemo };
+      }));
+
+      stopLoader();
+      window.SFX && window.SFX.play("ready");
+      setPages(storyPages);
+      setPhase("result");
+
+    } catch (err) {
+      console.error('[TACT] submit failed:', err);
+      stopLoader();
+      const fallback = DEMO_PAGES[lang].map(p => ({ ...p, brailleCells: null, demo: true }));
+      window.SFX && window.SFX.play("ready");
+      setPages(fallback);
+      setPhase("result");
+    }
+  };
+
+  const submit = (q) => { if (q && q.trim()) doSubmit(q.trim()); };
+
+  const reset = () => {
+    stopLoader();
+    if (srRef.current) { srRef.current.stop(); srRef.current = null; }
+    window.SFX && window.SFX.play("tap");
+    setPages(null); setText(""); setPhase("idle");
+    setLoadingMsg(""); setLoadingProgress(null);
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} />
+
+      {(phase === "idle" || phase === "listening") && (
+        <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
+          <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center">
+
+            {!window.TACT.webgpuSupported && (
+              <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)' }}>
+                {t.demoNotice}
+              </div>
+            )}
+
+            <div className="mono text-[11px] tracking-[0.24em] uppercase rise" style={{ color: "var(--muted)" }}>
+              {t.eyebrow}
+            </div>
+            <h1 className="serif rise" style={{ fontSize: "clamp(44px, 6vw, 76px)", lineHeight: 1.05, letterSpacing: "-0.02em", maxWidth: 720, whiteSpace: "nowrap" }}>
+              {t.headline}
+            </h1>
+            <p className="rise-slow text-[16px] leading-[1.55] max-w-[520px]" style={{ color: "var(--muted)" }}>
+              {t.sub}
+            </p>
+
+            <div className="flex flex-col items-center gap-4 rise-slow mt-2">
+              <MicButton state={phase === "listening" ? "listening" : "idle"} onClick={toggleListen} t={t} />
+              <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: phase === "listening" ? "var(--ink)" : "var(--muted)" }}>
+                {phase === "listening" ? t.listening : t.tap}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 w-full rise-slow">
+              <div className="mono text-[10px] tracking-[0.24em] uppercase" style={{ color: "var(--muted-soft)" }}>— {t.or} —</div>
+              <form className="w-full max-w-[520px] flex items-center gap-2 px-2 py-2 rounded-full"
+                style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}
+                onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}>
+                <input ref={inputRef} type="text" value={text} onChange={(e) => setText(e.target.value)}
+                  placeholder={t.placeholder} className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
+                  style={{ color: "var(--ink)" }} />
+                <button type="submit" disabled={!text.trim()} className="btn"
+                  style={{ padding: "10px 18px", opacity: text.trim() ? 1 : 0.4, cursor: text.trim() ? "pointer" : "default" }}>
+                  {t.submit}
+                </button>
+              </form>
+            </div>
+
+            <div className="w-full mt-2">
+              <HintMarquee hints={t.hints} onPick={(h) => { setText(h); inputRef.current && inputRef.current.focus(); }} />
+            </div>
+          </div>
+
+          <div className="mono text-[10px] tracking-[0.22em] uppercase absolute bottom-6 left-1/2 -translate-x-1/2" style={{ color: "var(--muted-soft)" }}>
+            {t.footer}
+          </div>
+        </main>
+      )}
+
+      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} />}
+      {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

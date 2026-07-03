@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: pumpkin | category: objects | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 100,64 Q 70,60 54,80 Q 40,110 54,140 Q 70,168 100,168 Q 130,168 146,140 Q 160,110 146,80 Q 130,60 100,64 Z"/>
+  <path d="M 100,66 Q 86,108 100,166"/>
+  <path d="M 74,70 Q 64,110 76,160"/>
+  <path d="M 126,70 Q 136,110 124,160"/>
+  <path d="M 100,64 Q 102,44 118,38"/>
+  <path d="M 100,64 Q 96,48 84,44"/>
+</g>
+</svg>

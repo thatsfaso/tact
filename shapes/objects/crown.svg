@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: crown | category: objects | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 18,148 L 18,124 L 182,124 L 182,148 Q 182,156 174,156 L 26,156 Q 18,156 18,148 Z"/>
+  <path d="M 18,124 L 42,64 L 58,124"/>
+  <path d="M 58,124 L 78,84 L 100,64 L 122,84 L 142,124"/>
+  <path d="M 142,124 L 158,64 L 182,124"/>
+  <circle cx="100" cy="140" r="8"/>
+  <circle cx="58" cy="140" r="6"/>
+  <circle cx="142" cy="140" r="6"/>
+</g>
+</svg>

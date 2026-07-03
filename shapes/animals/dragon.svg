@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: dragon | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 70,42 L 64,24 L 78,38"/>
+  <path d="M 98,40 L 106,22 L 112,42"/>
+  <circle cx="86" cy="62" r="26"/>
+  <circle cx="80" cy="58" r="4.5" fill="#000000"/>
+  <path d="M 62,68 Q 54,68 56,60"/>
+  <ellipse cx="108" cy="138" rx="44" ry="40"/>
+  <path d="M 90,118 Q 108,166 128,122"/>
+  <path d="M 124,108 Q 166,82 182,104 Q 158,114 150,132 Q 170,128 178,146 Q 150,154 128,132 Z"/>
+  <path d="M 150,164 Q 186,166 184,126 Q 182,112 170,122"/>
+  <path d="M 90,176 L 90,188 M 122,176 L 122,188"/>
+</g>
+</svg>

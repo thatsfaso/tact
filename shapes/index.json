@@ -1,0 +1,1673 @@
+{
+  "version": "1.0",
+  "updated": "2026-07-01",
+  "notes": "Shape SVGs live at shapes/{category}/{name}.svg. Primitives (rectangle, triangle, oval, circle, line, wave) are generated at runtime.",
+  "shapes": [
+    {
+      "name": "cat_sitting",
+      "file": "animals/cat_sitting.svg",
+      "category": "animals",
+      "tags": [
+        "cat",
+        "kitten",
+        "animal",
+        "pet",
+        "sitting",
+        "domestic",
+        "feline",
+        "furry"
+      ],
+      "description": "Cat in a sitting position, facing forward-left. Clear ear silhouette, tail curled beside body. No facial detail beyond basic head shape.",
+      "natural_width_mm": 45,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "cat_standing",
+      "file": "animals/cat_standing.svg",
+      "category": "animals",
+      "tags": [
+        "cat",
+        "kitten",
+        "animal",
+        "pet",
+        "standing",
+        "walking",
+        "domestic",
+        "feline"
+      ],
+      "description": "Cat standing in profile, facing right. Four legs visible, tail raised. Ear and head shape clearly defined.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "dog_sitting",
+      "file": "animals/dog_sitting.svg",
+      "category": "animals",
+      "tags": [
+        "dog",
+        "puppy",
+        "animal",
+        "pet",
+        "sitting",
+        "domestic",
+        "canine"
+      ],
+      "description": "Dog sitting, facing forward. Floppy ears, rounded body. Simple silhouette, no breed-specific detail.",
+      "natural_width_mm": 45,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "dog_standing",
+      "file": "animals/dog_standing.svg",
+      "category": "animals",
+      "tags": [
+        "dog",
+        "puppy",
+        "animal",
+        "pet",
+        "standing",
+        "walking",
+        "domestic"
+      ],
+      "description": "Dog standing in profile, facing right. Four legs, tail up, ears visible.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bird_flying",
+      "file": "animals/bird_flying.svg",
+      "category": "animals",
+      "tags": [
+        "bird",
+        "flying",
+        "wings",
+        "sky",
+        "freedom",
+        "seagull",
+        "dove"
+      ],
+      "description": "Bird in flight, wings spread, seen from slightly above. Simple M-shape wings with body below.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 35,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bird_perched",
+      "file": "animals/bird_perched.svg",
+      "category": "animals",
+      "tags": [
+        "bird",
+        "sitting",
+        "perched",
+        "branch",
+        "owl",
+        "robin",
+        "sparrow"
+      ],
+      "description": "Small bird perched on a horizontal branch, facing right. Round body, beak, tail feathers.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "fish",
+      "file": "animals/fish.svg",
+      "category": "animals",
+      "tags": [
+        "fish",
+        "sea",
+        "ocean",
+        "water",
+        "swimming",
+        "marine"
+      ],
+      "description": "Simple fish in profile, facing right. Oval body, tail fin, single dorsal fin. No scales detail.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 35,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "butterfly",
+      "file": "animals/butterfly.svg",
+      "category": "animals",
+      "tags": [
+        "butterfly",
+        "insect",
+        "wings",
+        "flying",
+        "garden",
+        "flower"
+      ],
+      "description": "Butterfly, wings open, seen from above. Four wing lobes clearly separated. No wing pattern detail.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "rabbit",
+      "file": "animals/rabbit.svg",
+      "category": "animals",
+      "tags": [
+        "rabbit",
+        "bunny",
+        "hare",
+        "animal",
+        "pet",
+        "ears",
+        "fluffy"
+      ],
+      "description": "Rabbit sitting upright, facing forward. Tall ears, round body, small visible front paws.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "elephant",
+      "file": "animals/elephant.svg",
+      "category": "animals",
+      "tags": [
+        "elephant",
+        "trunk",
+        "tusks",
+        "big",
+        "grey",
+        "africa",
+        "jungle"
+      ],
+      "description": "Elephant in profile, facing right. Large body, distinct trunk curving downward, visible ear.",
+      "natural_width_mm": 70,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bear",
+      "file": "animals/bear.svg",
+      "category": "animals",
+      "tags": [
+        "bear",
+        "teddy",
+        "animal",
+        "forest",
+        "big",
+        "furry",
+        "grizzly",
+        "polar"
+      ],
+      "description": "Bear standing on all fours, profile view facing right. Rounded ears, large body, short legs.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "lion",
+      "file": "animals/lion.svg",
+      "category": "animals",
+      "tags": [
+        "lion",
+        "mane",
+        "big cat",
+        "africa",
+        "king",
+        "wild",
+        "roar"
+      ],
+      "description": "Lion facing forward, seated. Distinctive mane ring around head. Simple face, no fine detail.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "owl",
+      "file": "animals/owl.svg",
+      "category": "animals",
+      "tags": [
+        "owl",
+        "bird",
+        "night",
+        "wisdom",
+        "feathers",
+        "eyes",
+        "perched"
+      ],
+      "description": "Owl sitting upright, facing forward. Large circular eye sockets (empty — no iris detail), ear tufts, rounded body with wing outlines.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "horse",
+      "file": "animals/horse.svg",
+      "category": "animals",
+      "tags": [
+        "horse",
+        "pony",
+        "mane",
+        "gallop",
+        "running",
+        "trot",
+        "farm"
+      ],
+      "description": "Horse in profile, standing or mid-trot, facing right. Mane and tail clearly outlined. Four legs.",
+      "natural_width_mm": 70,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "duck",
+      "file": "animals/duck.svg",
+      "category": "animals",
+      "tags": [
+        "duck",
+        "bird",
+        "water",
+        "pond",
+        "quack",
+        "beak",
+        "swimming"
+      ],
+      "description": "Duck in profile on water, facing right. Distinct flat bill, round body, small tail. Optional water line below.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "frog",
+      "file": "animals/frog.svg",
+      "category": "animals",
+      "tags": [
+        "frog",
+        "toad",
+        "pond",
+        "jump",
+        "green",
+        "amphibian",
+        "lily pad"
+      ],
+      "description": "Frog seen from above, legs spread in mid-jump. Round body, four limbs extended, bulging eye bumps.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "turtle",
+      "file": "animals/turtle.svg",
+      "category": "animals",
+      "tags": [
+        "turtle",
+        "tortoise",
+        "shell",
+        "slow",
+        "ocean",
+        "sea",
+        "reptile"
+      ],
+      "description": "Turtle in profile, facing right. Domed hexagonal-patterned shell (simplified: dome outline only, no internal pattern), head and four limbs visible.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "boat_small",
+      "file": "vehicles/boat_small.svg",
+      "category": "vehicles",
+      "tags": [
+        "boat",
+        "ship",
+        "sea",
+        "water",
+        "sailing",
+        "small",
+        "wooden",
+        "hull"
+      ],
+      "description": "Small rowing or motorboat hull in profile. No mast. Simple curved hull, flat deck line.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 35,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "boat_sailboat",
+      "file": "vehicles/boat_sailboat.svg",
+      "category": "vehicles",
+      "tags": [
+        "boat",
+        "sailboat",
+        "sail",
+        "mast",
+        "sea",
+        "wind",
+        "ocean",
+        "pirate"
+      ],
+      "description": "Sailboat in profile. Hull, vertical mast, one large triangular sail. Optional small wave beneath hull.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 70,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "car_simple",
+      "file": "vehicles/car_simple.svg",
+      "category": "vehicles",
+      "tags": [
+        "car",
+        "vehicle",
+        "driving",
+        "road",
+        "wheels",
+        "automobile"
+      ],
+      "description": "Simple car in profile, facing right. Rounded cabin, two circular wheels (outline only), no window detail.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bicycle",
+      "file": "vehicles/bicycle.svg",
+      "category": "vehicles",
+      "tags": [
+        "bicycle",
+        "bike",
+        "cycling",
+        "wheels",
+        "pedal",
+        "ride"
+      ],
+      "description": "Bicycle in profile, facing right. Two large wheels (circle outlines), frame triangle, handlebars and seat visible.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "airplane",
+      "file": "vehicles/airplane.svg",
+      "category": "vehicles",
+      "tags": [
+        "airplane",
+        "plane",
+        "flying",
+        "sky",
+        "travel",
+        "wings",
+        "jet"
+      ],
+      "description": "Airplane in profile, facing right. Fuselage, two wings (one visible main wing, one tail wing), engine nacelle.",
+      "natural_width_mm": 75,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "train_simple",
+      "file": "vehicles/train_simple.svg",
+      "category": "vehicles",
+      "tags": [
+        "train",
+        "locomotive",
+        "railway",
+        "steam",
+        "engine",
+        "track"
+      ],
+      "description": "Steam locomotive in profile, facing right. Circular wheels, smokestack, cab. No fine mechanical detail.",
+      "natural_width_mm": 80,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "rocket",
+      "file": "vehicles/rocket.svg",
+      "category": "vehicles",
+      "tags": [
+        "rocket",
+        "space",
+        "launch",
+        "stars",
+        "astronaut",
+        "moon",
+        "blast"
+      ],
+      "description": "Rocket pointing upward. Cone nose, cylindrical body, three fins at base. Optional flame plume below.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 75,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "tree_simple",
+      "file": "nature/tree_simple.svg",
+      "category": "nature",
+      "tags": [
+        "tree",
+        "forest",
+        "nature",
+        "leaves",
+        "oak",
+        "pine",
+        "wood",
+        "green"
+      ],
+      "description": "Simple deciduous tree. Round or oval canopy outline, straight trunk. No internal branch detail.",
+      "natural_width_mm": 45,
+      "natural_height_mm": 65,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "flower_simple",
+      "file": "nature/flower_simple.svg",
+      "category": "nature",
+      "tags": [
+        "flower",
+        "daisy",
+        "petal",
+        "garden",
+        "spring",
+        "bloom",
+        "plant"
+      ],
+      "description": "Simple flower with 5-6 oval petals around a central circle, on a straight stem with two leaves.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 60,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "sun",
+      "file": "nature/sun.svg",
+      "category": "nature",
+      "tags": [
+        "sun",
+        "sunshine",
+        "rays",
+        "sky",
+        "warm",
+        "day",
+        "light",
+        "star"
+      ],
+      "description": "Sun: central circle with 8 evenly spaced rays radiating outward. Rays are straight lines or short triangles.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "moon",
+      "file": "nature/moon.svg",
+      "category": "nature",
+      "tags": [
+        "moon",
+        "crescent",
+        "night",
+        "sky",
+        "luna",
+        "stars",
+        "sleep"
+      ],
+      "description": "Crescent moon, horns pointing right. Thick crescent outline, no surface detail. Classic quarter-moon shape.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "star",
+      "file": "nature/star.svg",
+      "category": "nature",
+      "tags": [
+        "star",
+        "sky",
+        "night",
+        "sparkle",
+        "wish",
+        "shine",
+        "space"
+      ],
+      "description": "Five-pointed star outline. Equal-length points, classic symmetrical star shape.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "cloud",
+      "file": "nature/cloud.svg",
+      "category": "nature",
+      "tags": [
+        "cloud",
+        "sky",
+        "fluffy",
+        "rain",
+        "weather",
+        "white",
+        "cumulus"
+      ],
+      "description": "Fluffy cloud outline. Three or four overlapping rounded bumps forming the top, flat base. No internal detail.",
+      "natural_width_mm": 65,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "mountain",
+      "file": "nature/mountain.svg",
+      "category": "nature",
+      "tags": [
+        "mountain",
+        "peak",
+        "snow",
+        "hill",
+        "climb",
+        "nature",
+        "alps"
+      ],
+      "description": "Two overlapping mountain peaks. Larger peak in front, smaller behind. Optional snow cap triangle at each peak.",
+      "natural_width_mm": 75,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "wave",
+      "file": "nature/wave.svg",
+      "category": "nature",
+      "tags": [
+        "wave",
+        "ocean",
+        "sea",
+        "water",
+        "surf",
+        "beach",
+        "tide"
+      ],
+      "description": "Single ocean wave: a horizontal S-curve with a curling crest. Captures the feel of a breaking wave.",
+      "natural_width_mm": 75,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "leaf",
+      "file": "nature/leaf.svg",
+      "category": "nature",
+      "tags": [
+        "leaf",
+        "plant",
+        "nature",
+        "autumn",
+        "tree",
+        "green",
+        "organic"
+      ],
+      "description": "Single leaf, roughly oval with pointed tip, on a short stem. One central vein line only.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "house_simple",
+      "file": "buildings/house_simple.svg",
+      "category": "buildings",
+      "tags": [
+        "house",
+        "home",
+        "building",
+        "roof",
+        "door",
+        "family",
+        "village"
+      ],
+      "description": "Simple house: square body, triangular roof, one central door rectangle. No windows (too small for tactile).",
+      "natural_width_mm": 55,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "castle_tower",
+      "file": "buildings/castle_tower.svg",
+      "category": "buildings",
+      "tags": [
+        "castle",
+        "tower",
+        "medieval",
+        "fortress",
+        "knight",
+        "princess",
+        "battlement"
+      ],
+      "description": "Single castle tower: rectangular body with battlements (merlons) at top. Optional arched doorway at base.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 70,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "lighthouse",
+      "file": "buildings/lighthouse.svg",
+      "category": "buildings",
+      "tags": [
+        "lighthouse",
+        "sea",
+        "coast",
+        "light",
+        "tower",
+        "nautical",
+        "beacon"
+      ],
+      "description": "Lighthouse: tapered cylindrical tower, lantern room near top (small square or hexagon), horizontal stripe band on tower body.",
+      "natural_width_mm": 35,
+      "natural_height_mm": 75,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "person_standing",
+      "file": "people/person_standing.svg",
+      "category": "people",
+      "tags": [
+        "person",
+        "human",
+        "figure",
+        "standing",
+        "adult",
+        "child",
+        "body"
+      ],
+      "description": "Stick-figure-adjacent person: circular head, oval body, two arms out, two legs down. No facial detail.",
+      "natural_width_mm": 35,
+      "natural_height_mm": 65,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "person_child",
+      "file": "people/person_child.svg",
+      "category": "people",
+      "tags": [
+        "child",
+        "kid",
+        "boy",
+        "girl",
+        "small",
+        "young",
+        "person"
+      ],
+      "description": "Small person figure: proportionally larger head than adult figure, shorter body. Standing upright.",
+      "natural_width_mm": 30,
+      "natural_height_mm": 55,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "person_waving",
+      "file": "people/person_waving.svg",
+      "category": "people",
+      "tags": [
+        "waving",
+        "hello",
+        "goodbye",
+        "greeting",
+        "person",
+        "arm",
+        "raised"
+      ],
+      "description": "Person figure with one arm raised and slightly bent in a wave gesture. Same proportions as person_standing.",
+      "natural_width_mm": 40,
+      "natural_height_mm": 65,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "book",
+      "file": "objects/book.svg",
+      "category": "objects",
+      "tags": [
+        "book",
+        "reading",
+        "story",
+        "library",
+        "open",
+        "pages",
+        "learning"
+      ],
+      "description": "Open book, seen from slightly above. Two rectangular pages, central spine, pages slightly curved.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "hat_pirate",
+      "file": "objects/hat_pirate.svg",
+      "category": "objects",
+      "tags": [
+        "hat",
+        "pirate",
+        "bicorne",
+        "captain",
+        "sea",
+        "skull",
+        "tricorn"
+      ],
+      "description": "Classic pirate bicorne hat in profile. Wide brim curving up on both sides, skull-and-crossbones emblem outline on front (simplified: two crossed bones, no skull detail).",
+      "natural_width_mm": 60,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "crown",
+      "file": "objects/crown.svg",
+      "category": "objects",
+      "tags": [
+        "crown",
+        "king",
+        "queen",
+        "royal",
+        "princess",
+        "prince",
+        "gold"
+      ],
+      "description": "Crown with five points. Rectangular base band, five upward triangular points. No gemstone detail.",
+      "natural_width_mm": 60,
+      "natural_height_mm": 40,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "key",
+      "file": "objects/key.svg",
+      "category": "objects",
+      "tags": [
+        "key",
+        "door",
+        "lock",
+        "secret",
+        "treasure",
+        "open",
+        "magic"
+      ],
+      "description": "Skeleton key in profile. Round bow (loop) at top, straight shank, two or three teeth at bottom.",
+      "natural_width_mm": 30,
+      "natural_height_mm": 60,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "heart",
+      "file": "objects/heart.svg",
+      "category": "objects",
+      "tags": [
+        "heart",
+        "love",
+        "friendship",
+        "valentine",
+        "warm",
+        "family"
+      ],
+      "description": "Classic heart shape outline. Two rounded lobes at top, pointed bottom.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 45,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "apple",
+      "file": "objects/apple.svg",
+      "category": "objects",
+      "tags": [
+        "apple",
+        "fruit",
+        "food",
+        "red",
+        "healthy",
+        "school",
+        "teacher"
+      ],
+      "description": "Apple outline: rounded body with slight indent at top where stem attaches. Short stem and one leaf.",
+      "natural_width_mm": 45,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "umbrella",
+      "file": "objects/umbrella.svg",
+      "category": "objects",
+      "tags": [
+        "umbrella",
+        "rain",
+        "weather",
+        "shelter",
+        "storm",
+        "parasol"
+      ],
+      "description": "Umbrella open, seen from the side. Semicircular canopy with scalloped edge, straight handle with hook at bottom.",
+      "natural_width_mm": 55,
+      "natural_height_mm": 60,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "wolf",
+      "file": "animals/wolf.svg",
+      "category": "animals",
+      "tags": [
+        "wolf",
+        "wolves",
+        "animal",
+        "wild",
+        "forest"
+      ],
+      "description": "Sitting wolf with pointed ears, snout and bushy tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "fox",
+      "file": "animals/fox.svg",
+      "category": "animals",
+      "tags": [
+        "fox",
+        "foxes",
+        "animal",
+        "wild",
+        "clever"
+      ],
+      "description": "Sitting fox with big pointed ears, pointed snout and bushy tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "pig",
+      "file": "animals/pig.svg",
+      "category": "animals",
+      "tags": [
+        "pig",
+        "piglet",
+        "hog",
+        "animal",
+        "farm"
+      ],
+      "description": "Pig face and body with snout, ears and curly tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "mouse",
+      "file": "animals/mouse.svg",
+      "category": "animals",
+      "tags": [
+        "mouse",
+        "mice",
+        "animal",
+        "small"
+      ],
+      "description": "Mouse with big round ears, whiskers and long tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "sheep",
+      "file": "animals/sheep.svg",
+      "category": "animals",
+      "tags": [
+        "sheep",
+        "lamb",
+        "animal",
+        "farm",
+        "fluffy",
+        "wool"
+      ],
+      "description": "Fluffy sheep with woolly body, head and legs.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bee",
+      "file": "animals/bee.svg",
+      "category": "animals",
+      "tags": [
+        "bee",
+        "bumblebee",
+        "insect",
+        "honey"
+      ],
+      "description": "Striped bee with two wings, antennae and stinger.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "ladybug",
+      "file": "animals/ladybug.svg",
+      "category": "animals",
+      "tags": [
+        "ladybug",
+        "ladybird",
+        "insect",
+        "spots"
+      ],
+      "description": "Round ladybug with spots, head and antennae.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "snail",
+      "file": "animals/snail.svg",
+      "category": "animals",
+      "tags": [
+        "snail",
+        "shell",
+        "slow",
+        "garden"
+      ],
+      "description": "Snail with spiral shell, body and two eye stalks.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "dragon",
+      "file": "animals/dragon.svg",
+      "category": "animals",
+      "tags": [
+        "dragon",
+        "creature",
+        "fantasy",
+        "fairy tale"
+      ],
+      "description": "Cute sitting dragon with horns, wing, belly and curly tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "unicorn",
+      "file": "animals/unicorn.svg",
+      "category": "animals",
+      "tags": [
+        "unicorn",
+        "horse",
+        "fantasy",
+        "magic",
+        "horn"
+      ],
+      "description": "Unicorn with horn, flowing mane and tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "princess",
+      "file": "people/princess.svg",
+      "category": "people",
+      "tags": [
+        "princess",
+        "tiara",
+        "royal",
+        "girl",
+        "fairy tale"
+      ],
+      "description": "Princess with a small tiara and a flowing gown.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "king",
+      "file": "people/king.svg",
+      "category": "people",
+      "tags": [
+        "king",
+        "crown",
+        "royal",
+        "ruler"
+      ],
+      "description": "King with a crown and a regal robe.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "queen",
+      "file": "people/queen.svg",
+      "category": "people",
+      "tags": [
+        "queen",
+        "crown",
+        "royal",
+        "ruler"
+      ],
+      "description": "Queen with a crown, long hair and a gown.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "witch",
+      "file": "people/witch.svg",
+      "category": "people",
+      "tags": [
+        "witch",
+        "hat",
+        "magic",
+        "fairy tale"
+      ],
+      "description": "Witch with a pointed hat and a cloak.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "fairy",
+      "file": "people/fairy.svg",
+      "category": "people",
+      "tags": [
+        "fairy",
+        "wings",
+        "magic",
+        "wand",
+        "pixie"
+      ],
+      "description": "Fairy with wings, a dress and a little star wand.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "mermaid",
+      "file": "people/mermaid.svg",
+      "category": "people",
+      "tags": [
+        "mermaid",
+        "sea",
+        "fish tail",
+        "ocean"
+      ],
+      "description": "Mermaid with upper body and a scaled fish tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "magic_wand",
+      "file": "objects/magic_wand.svg",
+      "category": "objects",
+      "tags": [
+        "wand",
+        "magic",
+        "star",
+        "spell"
+      ],
+      "description": "Magic wand with a star tip and sparkles.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "sword",
+      "file": "objects/sword.svg",
+      "category": "objects",
+      "tags": [
+        "sword",
+        "blade",
+        "knight",
+        "brave"
+      ],
+      "description": "Sword with blade, crossguard, handle and pommel.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "treasure_chest",
+      "file": "objects/treasure_chest.svg",
+      "category": "objects",
+      "tags": [
+        "treasure",
+        "chest",
+        "gold",
+        "pirate",
+        "jewels"
+      ],
+      "description": "Treasure chest with a rounded lid and a lock.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "pumpkin",
+      "file": "objects/pumpkin.svg",
+      "category": "objects",
+      "tags": [
+        "pumpkin",
+        "gourd",
+        "autumn",
+        "cinderella"
+      ],
+      "description": "Ribbed pumpkin with a curly stem and leaves.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "mushroom",
+      "file": "objects/mushroom.svg",
+      "category": "objects",
+      "tags": [
+        "mushroom",
+        "toadstool",
+        "forest",
+        "spots"
+      ],
+      "description": "Mushroom with a spotted cap and stem.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "teddy_bear",
+      "file": "objects/teddy_bear.svg",
+      "category": "objects",
+      "tags": [
+        "teddy",
+        "bear",
+        "toy",
+        "cuddle",
+        "bedtime"
+      ],
+      "description": "Teddy bear with round ears, belly, arms and legs.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "rainbow",
+      "file": "nature/rainbow.svg",
+      "category": "nature",
+      "tags": [
+        "rainbow",
+        "arc",
+        "colours",
+        "sky",
+        "clouds"
+      ],
+      "description": "Rainbow arcs with a small cloud at each end.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "swan",
+      "file": "animals/swan.svg",
+      "category": "animals",
+      "tags": [
+        "swan",
+        "bird",
+        "graceful",
+        "lake"
+      ],
+      "description": "Swan with curved neck on water.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "deer",
+      "file": "animals/deer.svg",
+      "category": "animals",
+      "tags": [
+        "deer",
+        "fawn",
+        "antlers",
+        "forest"
+      ],
+      "description": "Deer with antlers, ears and slender body.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "squirrel",
+      "file": "animals/squirrel.svg",
+      "category": "animals",
+      "tags": [
+        "squirrel",
+        "tail",
+        "forest",
+        "acorn"
+      ],
+      "description": "Squirrel with a big bushy tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "hedgehog",
+      "file": "animals/hedgehog.svg",
+      "category": "animals",
+      "tags": [
+        "hedgehog",
+        "spines",
+        "prickly",
+        "forest"
+      ],
+      "description": "Hedgehog with spiky back and pointed face.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "snake",
+      "file": "animals/snake.svg",
+      "category": "animals",
+      "tags": [
+        "snake",
+        "serpent",
+        "coil",
+        "slither"
+      ],
+      "description": "Snake in an S-curve with tongue out.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "monkey",
+      "file": "animals/monkey.svg",
+      "category": "animals",
+      "tags": [
+        "monkey",
+        "ape",
+        "jungle",
+        "tail"
+      ],
+      "description": "Monkey with big ears, round face and curly tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "cow",
+      "file": "animals/cow.svg",
+      "category": "animals",
+      "tags": [
+        "cow",
+        "calf",
+        "farm",
+        "horns",
+        "moo"
+      ],
+      "description": "Cow with horns, snout and spots.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "knight",
+      "file": "people/knight.svg",
+      "category": "people",
+      "tags": [
+        "knight",
+        "armor",
+        "shield",
+        "sword",
+        "brave"
+      ],
+      "description": "Knight with helmet, shield and sword.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "wizard",
+      "file": "people/wizard.svg",
+      "category": "people",
+      "tags": [
+        "wizard",
+        "sorcerer",
+        "hat",
+        "staff",
+        "magic"
+      ],
+      "description": "Wizard with a starry hat, beard and staff.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "ghost",
+      "file": "people/ghost.svg",
+      "category": "people",
+      "tags": [
+        "ghost",
+        "spooky",
+        "wavy",
+        "spirit"
+      ],
+      "description": "Friendly sheet ghost with a wavy hem.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bell",
+      "file": "objects/bell.svg",
+      "category": "objects",
+      "tags": [
+        "bell",
+        "ring",
+        "chime"
+      ],
+      "description": "Bell with clapper and top loop.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "lantern",
+      "file": "objects/lantern.svg",
+      "category": "objects",
+      "tags": [
+        "lantern",
+        "light",
+        "flame",
+        "glow"
+      ],
+      "description": "Lantern with a flame inside and a handle.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "candle",
+      "file": "objects/candle.svg",
+      "category": "objects",
+      "tags": [
+        "candle",
+        "flame",
+        "light",
+        "bedtime"
+      ],
+      "description": "Lit candle on a holder.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "mirror",
+      "file": "objects/mirror.svg",
+      "category": "objects",
+      "tags": [
+        "mirror",
+        "reflection",
+        "magic"
+      ],
+      "description": "Hand mirror with frame, handle and sparkle.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "gift",
+      "file": "objects/gift.svg",
+      "category": "objects",
+      "tags": [
+        "gift",
+        "present",
+        "box",
+        "ribbon",
+        "bow"
+      ],
+      "description": "Wrapped gift box with a bow.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "balloon",
+      "file": "objects/balloon.svg",
+      "category": "objects",
+      "tags": [
+        "balloon",
+        "party",
+        "float",
+        "string"
+      ],
+      "description": "Balloon with a curly string.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "ball",
+      "file": "objects/ball.svg",
+      "category": "objects",
+      "tags": [
+        "ball",
+        "play",
+        "round",
+        "golden"
+      ],
+      "description": "Round ball with segment lines.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "kite",
+      "file": "objects/kite.svg",
+      "category": "objects",
+      "tags": [
+        "kite",
+        "fly",
+        "wind",
+        "tail"
+      ],
+      "description": "Diamond kite with a bowed tail.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "snowflake",
+      "file": "nature/snowflake.svg",
+      "category": "nature",
+      "tags": [
+        "snowflake",
+        "snow",
+        "winter",
+        "ice",
+        "frost"
+      ],
+      "description": "Six-fold snowflake crystal.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    },
+    {
+      "name": "bridge",
+      "file": "buildings/bridge.svg",
+      "category": "buildings",
+      "tags": [
+        "bridge",
+        "arch",
+        "cross",
+        "river",
+        "troll"
+      ],
+      "description": "Arched bridge with railings over water.",
+      "natural_width_mm": 50,
+      "natural_height_mm": 50,
+      "has_fill": false,
+      "source_url": "",
+      "license": "CC0"
+    }
+  ]
+}

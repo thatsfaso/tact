@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: hedgehog | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 44,130 Q 40,80 96,76 Q 156,80 160,130 Q 120,150 100,150 Q 80,150 44,130 Z"/>
+  <path d="M 50,96 L 38,76 M 70,82 L 62,58 M 96,78 L 96,52 M 122,82 L 130,58 M 146,96 L 158,76 M 56,116 L 40,108 M 150,116 L 166,108"/>
+  <path d="M 44,130 Q 26,128 22,116 Q 30,110 44,118"/>
+  <path d="M 30,120 Q 18,122 16,114"/>
+  <circle cx="34" cy="116" r="3.5" fill="#000000"/>
+  <circle cx="20" cy="118" r="2.5" fill="#000000"/>
+  <path d="M 64,150 L 64,164 M 96,152 L 96,166 M 128,150 L 128,164"/>
+</g>
+</svg>

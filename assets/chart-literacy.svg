@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" width="720" height="420">
+  <title>Braille literacy among legally blind school-age children, 1960 vs. present day</title>
+  <rect width="720" height="420" fill="#fafaf7"/>
+  <text x="360" y="42" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#0a0a0c">Braille literacy among blind school-age children</text>
+  <text x="360" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8a8a86">United States, legally blind students — commonly cited figures</text>
+
+  <!-- axes -->
+  <line x1="90" y1="340" x2="650" y2="340" stroke="#0a0a0c" stroke-opacity="0.25"/>
+  <line x1="90" y1="340" x2="90" y2="100" stroke="#0a0a0c" stroke-opacity="0.25"/>
+  <!-- gridlines every 25% -->
+  <g stroke="#0a0a0c" stroke-opacity="0.08">
+    <line x1="90" y1="290" x2="650" y2="290"/>
+    <line x1="90" y1="240" x2="650" y2="240"/>
+    <line x1="90" y1="190" x2="650" y2="190"/>
+    <line x1="90" y1="140" x2="650" y2="140"/>
+  </g>
+  <g font-family="'Courier New', monospace" font-size="11" fill="#8a8a86" text-anchor="end">
+    <text x="80" y="344">0%</text>
+    <text x="80" y="294">25%</text>
+    <text x="80" y="244">50%</text>
+    <text x="80" y="194">75%</text>
+    <text x="80" y="144">100%</text>
+  </g>
+
+  <!-- scale: y=340 -> 0%, y=140 -> 100% (2px per 1%) -->
+  <!-- bar 1960: 50% -->
+  <rect x="210" y="240" width="120" height="100" fill="#0a0a0c"/>
+  <text x="270" y="226" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#0a0a0c">~50%</text>
+  <text x="270" y="368" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#0a0a0c">1960</text>
+
+  <!-- bar today: 8.5% -->
+  <rect x="410" y="323" width="120" height="17" fill="#0a0a0c" opacity="0.85"/>
+  <text x="470" y="309" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#0a0a0c">~8.5%</text>
+  <text x="470" y="368" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#0a0a0c">Today</text>
+
+  <text x="360" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#8a8a86">Share of legally blind school-age children reading Braille fluently. Over half of today's blind students are identified as non-readers.</text>
+</svg>

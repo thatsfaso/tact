@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: wolf | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 72,52 L 60,20 L 88,44"/>
+  <path d="M 128,52 L 140,20 L 112,44"/>
+  <path d="M 70,52 Q 100,40 130,52 Q 140,78 128,96 L 116,118 Q 100,128 84,118 L 72,96 Q 60,78 70,52 Z"/>
+  <path d="M 84,118 L 84,150"/>
+  <path d="M 116,118 L 116,150"/>
+  <ellipse cx="100" cy="160" rx="40" ry="26"/>
+  <path d="M 138,168 Q 172,160 170,128 Q 166,106 150,120"/>
+  <circle cx="86" cy="78" r="5" fill="#000000"/>
+  <circle cx="114" cy="78" r="5" fill="#000000"/>
+  <path d="M 92,100 L 100,108 L 108,100 Z"/>
+  <path d="M 100,108 L 100,116"/>
+</g>
+</svg>

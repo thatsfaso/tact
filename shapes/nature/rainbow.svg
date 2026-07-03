@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: rainbow | category: nature | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 24,150 A 76,76 0 0 1 176,150"/>
+  <path d="M 48,150 A 52,52 0 0 1 152,150"/>
+  <path d="M 72,150 A 28,28 0 0 1 128,150"/>
+  <path d="M 24,150 Q 30,136 44,134 Q 48,122 62,124 Q 70,132 66,144 Q 76,148 72,160 Q 40,164 24,158 Z"/>
+  <path d="M 176,150 Q 170,136 156,134 Q 152,122 138,124 Q 130,132 134,144 Q 124,148 128,160 Q 160,164 176,158 Z"/>
+</g>
+</svg>

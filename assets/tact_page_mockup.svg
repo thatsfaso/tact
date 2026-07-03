@@ -1,0 +1,99 @@
+<svg width="100%" viewBox="0 0 680 600" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>TACT story page mockup</title>
+<desc>A mockup showing the shipped square 150 by 150mm tactile Braille page: an L-shaped Braille region of seven full-width rows and six narrower rows wrapping a bottom-right corner illustration, plus a cross-section showing the physical profile of the domed Braille dots and the flat-topped tactile graphic.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#73726c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+<pattern id="bdots" width="12" height="19.4" patternUnits="userSpaceOnUse">
+<circle cx="2" cy="4" r="1.6" fill="#73726c" opacity="0.7"/>
+<circle cx="2" cy="9" r="1.6" fill="#73726c" opacity="0.5"/>
+<circle cx="7" cy="4" r="1.6" fill="#73726c" opacity="0.6"/>
+<circle cx="7" cy="13" r="1.6" fill="#73726c" opacity="0.6"/>
+</pattern>
+<pattern id="bdots2" width="12" height="20.7" patternUnits="userSpaceOnUse">
+<circle cx="2" cy="4" r="1.6" fill="#73726c" opacity="0.6"/>
+<circle cx="2" cy="9" r="1.6" fill="#73726c" opacity="0.7"/>
+<circle cx="7" cy="4" r="1.6" fill="#73726c" opacity="0.5"/>
+<circle cx="7" cy="14" r="1.6" fill="#73726c" opacity="0.6"/>
+</pattern>
+</defs>
+
+<text x="50" y="20" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F1E1D">Top view — 150 × 150mm page (2px/mm)</text>
+
+<rect x="50" y="30" width="300" height="300" rx="4" fill="#F5F4ED" stroke="#1F1E1D" stroke-opacity="0.3" stroke-width="1"/>
+<rect x="70" y="50" width="260" height="260" fill="none" stroke="#73726c" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.5"/>
+
+<rect x="70" y="53" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="72" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="92" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="111" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="130" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="150" width="252" height="14" fill="url(#bdots)" rx="1"/>
+<rect x="70" y="169" width="200" height="14" fill="url(#bdots)" rx="1"/>
+
+<rect x="70" y="189" width="144" height="14" fill="url(#bdots2)" rx="1"/>
+<rect x="70" y="210" width="144" height="14" fill="url(#bdots2)" rx="1"/>
+<rect x="70" y="230" width="144" height="14" fill="url(#bdots2)" rx="1"/>
+<rect x="70" y="251" width="144" height="14" fill="url(#bdots2)" rx="1"/>
+<rect x="70" y="272" width="144" height="14" fill="url(#bdots2)" rx="1"/>
+<rect x="70" y="292" width="110" height="14" fill="url(#bdots2)" rx="1"/>
+
+<rect x="222" y="198" width="108" height="108" fill="none" stroke="#1F1E1D" stroke-opacity="0.25" stroke-width="0.5" stroke-dasharray="2 2"/>
+<ellipse cx="270" cy="264" rx="28" ry="18" fill="none" stroke="#5F5E5A" stroke-width="1.5"/>
+<circle cx="296" cy="246" r="12" fill="none" stroke="#5F5E5A" stroke-width="1.5"/>
+
+<rect x="298" y="42" width="18" height="10" fill="url(#bdots)" rx="1" opacity="0.7"/>
+<text x="290" y="40" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A">page no.</text>
+
+<line x1="70" y1="20" x2="70" y2="46" stroke="#73726c" stroke-width="0.5" opacity="0.5"/>
+<line x1="330" y1="20" x2="330" y2="46" stroke="#73726c" stroke-width="0.5" opacity="0.5"/>
+<line x1="70" y1="24" x2="330" y2="24" stroke="#73726c" stroke-width="0.5" marker-start="url(#arrow)" marker-end="url(#arrow)" opacity="0.5"/>
+
+<line x1="370" y1="61" x2="440" y2="80" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="370" cy="61" r="2" fill="#73726c"/>
+<text x="446" y="84" font-family="sans-serif" font-size="12" fill="#3D3D3A">Full rows</text>
+<text x="446" y="98" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">7 rows × 21 cells (x 10 → 136)</text>
+
+<line x1="214" y1="250" x2="440" y2="200" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="214" cy="250" r="2" fill="#73726c"/>
+<text x="446" y="204" font-family="sans-serif" font-size="12" fill="#3D3D3A">Narrow rows</text>
+<text x="446" y="218" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">6 rows × 12 cells, beside illustration</text>
+
+<line x1="300" y1="306" x2="440" y2="290" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="300" cy="306" r="2" fill="#73726c"/>
+<text x="446" y="294" font-family="sans-serif" font-size="12" fill="#3D3D3A">Illustration zone</text>
+<text x="446" y="308" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">54 × 54mm, origin (86, 12)</text>
+
+<text x="50" y="356" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F1E1D">Cross-section — side view (not to scale)</text>
+
+<rect x="80" y="440" width="500" height="10" rx="2" fill="#F5F4ED" stroke="#1F1E1D" stroke-opacity="0.3" stroke-width="0.5"/>
+
+<path d="M120 440 L120 430 Q120 422 128 422 Q136 422 136 430 L136 440 Z" fill="#73726c" opacity="0.55"/>
+<path d="M148 440 L148 430 Q148 422 156 422 Q164 422 164 430 L164 440 Z" fill="#73726c" opacity="0.55"/>
+<path d="M176 440 L176 430 Q176 422 184 422 Q192 422 192 430 L192 440 Z" fill="#73726c" opacity="0.55"/>
+<path d="M204 440 L204 430 Q204 422 212 422 Q220 422 220 430 L220 440 Z" fill="#73726c" opacity="0.55"/>
+
+<path d="M350 440 C350 420 370 410 390 412 C410 410 430 415 450 420 C465 425 475 430 480 440" fill="none" stroke="#3D3D3A" stroke-width="2.5"/>
+
+<line x1="90" y1="480" x2="90" y2="418" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<line x1="86" y1="440" x2="90" y2="440" stroke="#73726c" stroke-width="0.5"/>
+<line x1="86" y1="422" x2="90" y2="422" stroke="#73726c" stroke-width="0.5"/>
+<text x="76" y="446" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">0.5mm</text>
+<text x="76" y="426" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">0.85mm</text>
+
+<text x="120" y="480" font-family="sans-serif" font-size="12" fill="#3D3D3A">Braille dots</text>
+<text x="120" y="494" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">Cylinder + dome, 0.85mm designed</text>
+<text x="120" y="508" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">(≈0.6mm printed, ISO-compliant)</text>
+
+<text x="330" y="480" font-family="sans-serif" font-size="12" fill="#3D3D3A">Tactile graphic outline</text>
+<text x="330" y="494" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">Flat-topped extrusion, 1.0mm</text>
+<text x="330" y="508" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">(0.15mm above the dots)</text>
+
+<text x="500" y="470" text-anchor="start" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">Base plate</text>
+<text x="500" y="484" text-anchor="start" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">0.5mm, 2mm corners</text>
+
+<text x="80" y="540" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.55">Material: TPU 95A / PETG</text>
+<text x="80" y="554" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.55">Print bed: 220 × 220mm · page: 150 × 150mm</text>
+<text x="80" y="568" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.55">Layer height 0.20mm · 25–35mm/s · no supports</text>
+</svg>

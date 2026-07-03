@@ -1,0 +1,76 @@
+<svg width="100%" viewBox="0 0 680 620" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>TACT page layout geometry — square corner layout</title>
+<desc>Dimensioned diagram of the single shipped TACT page layout: a 150 by 150mm square page with a 10mm margin, an L-shaped Braille region of seven full rows and six narrow rows, and a 54 by 54mm illustration zone in the bottom-right corner at origin 86, 12. This single layout superseded the earlier three-option A, B, C comparison.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#73726c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<text x="90" y="20" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F1E1D">Square corner layout (D019) — the single shipped layout</text>
+
+<line x1="90" y1="32" x2="390" y2="32" stroke="#73726c" stroke-width="0.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<line x1="90" y1="34" x2="90" y2="60" stroke="#73726c" stroke-width="0.5"/>
+<line x1="390" y1="34" x2="390" y2="60" stroke="#73726c" stroke-width="0.5"/>
+<text x="240" y="46" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#82817A">150mm</text>
+
+<line x1="56" y1="60" x2="56" y2="360" stroke="#73726c" stroke-width="0.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<line x1="58" y1="60" x2="90" y2="60" stroke="#73726c" stroke-width="0.5"/>
+<line x1="58" y1="360" x2="90" y2="360" stroke="#73726c" stroke-width="0.5"/>
+<text x="50" y="214" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A">150mm</text>
+
+<rect x="90" y="60" width="300" height="300" rx="4" fill="#F5F4ED" stroke="#1F1E1D" stroke-opacity="0.3" stroke-width="1"/>
+<rect x="110" y="80" width="260" height="260" fill="none" stroke="#73726c" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.5"/>
+<text x="118" y="94" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">10mm margin</text>
+
+<rect x="110" y="80" width="252" height="136" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5" opacity="0.85"/>
+<text x="236" y="150" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="500" fill="#085041">7 full rows</text>
+<text x="236" y="164" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#0F6E56">21 cells each</text>
+
+<rect x="110" y="216" width="144" height="124" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5" opacity="0.6"/>
+<text x="182" y="272" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="500" fill="#085041">6 narrow</text>
+<text x="182" y="286" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#0F6E56">12 cells each</text>
+
+<rect x="262" y="228" width="108" height="108" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="316" y="278" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="500" fill="#712B13">Illustration</text>
+<text x="316" y="292" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#993C1D">54 × 54mm</text>
+
+<line x1="370" y1="228" x2="440" y2="216" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="370" cy="228" r="2" fill="#73726c"/>
+<text x="446" y="212" font-family="sans-serif" font-size="12" fill="#3D3D3A">Origin (86, 12)</text>
+<text x="446" y="226" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">bottom-left of zone</text>
+
+<line x1="254" y1="216" x2="440" y2="130" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="254" cy="216" r="2" fill="#73726c"/>
+<text x="446" y="126" font-family="sans-serif" font-size="12" fill="#3D3D3A">Narrow rows clear x ≥ 86</text>
+<text x="446" y="140" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">4mm gap to illustration</text>
+
+<line x1="362" y1="150" x2="440" y2="60" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
+<circle cx="362" cy="150" r="2" fill="#73726c"/>
+<text x="446" y="56" font-family="sans-serif" font-size="12" fill="#3D3D3A">Full rows: x 10 → 136</text>
+<text x="446" y="70" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">~37 words/page total</text>
+
+<text x="90" y="400" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F1E1D">window.TACT_LAYOUT constants</text>
+
+<text x="90" y="426" font-family="monospace" font-size="12" fill="#3D3D3A">PAGE_W, PAGE_H</text>
+<text x="270" y="426" font-family="monospace" font-size="12" fill="#82817A">150, 150</text>
+<text x="90" y="446" font-family="monospace" font-size="12" fill="#3D3D3A">MARGIN</text>
+<text x="270" y="446" font-family="monospace" font-size="12" fill="#82817A">10</text>
+<text x="90" y="466" font-family="monospace" font-size="12" fill="#3D3D3A">TZ_X</text>
+<text x="270" y="466" font-family="monospace" font-size="12" fill="#82817A">10</text>
+<text x="90" y="486" font-family="monospace" font-size="12" fill="#3D3D3A">LINE_Y0</text>
+<text x="270" y="486" font-family="monospace" font-size="12" fill="#82817A">135</text>
+
+<text x="380" y="426" font-family="monospace" font-size="12" fill="#3D3D3A">LINE_H, CELL_W</text>
+<text x="560" y="426" font-family="monospace" font-size="12" fill="#82817A">10, 6</text>
+<text x="380" y="446" font-family="monospace" font-size="12" fill="#3D3D3A">LINE_WIDTHS</text>
+<text x="560" y="446" font-family="monospace" font-size="12" fill="#82817A">[21×7, 12×6]</text>
+<text x="380" y="466" font-family="monospace" font-size="12" fill="#3D3D3A">ILL_X, ILL_Y</text>
+<text x="560" y="466" font-family="monospace" font-size="12" fill="#82817A">86, 12</text>
+<text x="380" y="486" font-family="monospace" font-size="12" fill="#3D3D3A">ILL_W, ILL_H</text>
+<text x="560" y="486" font-family="monospace" font-size="12" fill="#82817A">54, 54</text>
+
+<line x1="90" y1="510" x2="590" y2="510" stroke="#73726c" stroke-width="0.5" opacity="0.3"/>
+<text x="90" y="534" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">Supersedes the earlier three-option (A picture-book, B cards, C full-bed) comparison — D019</text>
+<text x="90" y="550" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">Single source of truth in index.html; the on-screen preview and STL generator both read from it</text>
+</svg>

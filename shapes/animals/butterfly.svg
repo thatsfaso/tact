@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: butterfly | category: animals | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse cx="100" cy="100" rx="7" ry="38"/>
+  <path d="M 96,88 Q 52,42 28,60 Q 18,90 52,104 Q 76,112 96,104"/>
+  <path d="M 104,88 Q 148,42 172,60 Q 182,90 148,104 Q 124,112 104,104"/>
+  <path d="M 96,108 Q 55,118 42,140 Q 48,162 76,152 Q 94,142 96,122"/>
+  <path d="M 104,108 Q 145,118 158,140 Q 152,162 124,152 Q 106,142 104,122"/>
+  <path d="M 96,64 Q 80,42 72,28"/>
+  <path d="M 104,64 Q 120,42 128,28"/>
+  <circle cx="72" cy="28" r="5"/>
+  <circle cx="128" cy="28" r="5"/>
+</g>
+</svg>

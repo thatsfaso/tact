@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: sun | category: nature | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="100" cy="100" r="42"/>
+  <!-- 8 rays -->
+  <line x1="100" y1="40" x2="100" y2="18"/>
+  <line x1="100" y1="160" x2="100" y2="182"/>
+  <line x1="40" y1="100" x2="18" y2="100"/>
+  <line x1="160" y1="100" x2="182" y2="100"/>
+  <line x1="57.6" y1="57.6" x2="42" y2="42"/>
+  <line x1="142.4" y1="57.6" x2="158" y2="42"/>
+  <line x1="57.6" y1="142.4" x2="42" y2="158"/>
+  <line x1="142.4" y1="142.4" x2="158" y2="158"/>
+  <!-- gentle face -->
+  <circle cx="85" cy="92" r="3.5" stroke-width="3"/>
+  <circle cx="115" cy="92" r="3.5" stroke-width="3"/>
+  <path d="M 82,110 Q 100,124 118,110" stroke-width="4"/>
+</g>
+</svg>

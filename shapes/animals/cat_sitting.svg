@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: cat_sitting | category: animals | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="100" cy="75" r="38"/>
+  <path d="M 70,50 L 58,22 L 90,42 Z"/>
+  <path d="M 130,50 L 142,22 L 110,42 Z"/>
+  <ellipse cx="100" cy="148" rx="45" ry="38"/>
+  <path d="M 145,170 Q 175,155 168,130 Q 160,108 145,118"/>
+  <circle cx="85" cy="72" r="6" stroke-width="4"/>
+  <circle cx="115" cy="72" r="6" stroke-width="4"/>
+  <path d="M 97,88 L 100,92 L 103,88 Z"/>
+  <line x1="62" y1="85" x2="88" y2="88" stroke-width="4"/>
+  <line x1="60" y1="92" x2="87" y2="92" stroke-width="4"/>
+  <line x1="112" y1="88" x2="138" y2="85" stroke-width="4"/>
+  <line x1="113" y1="92" x2="140" y2="92" stroke-width="4"/>
+</g>
+</svg>

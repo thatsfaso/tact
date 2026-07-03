@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: gift | category: objects | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="44" y="86" width="112" height="84" rx="4"/>
+  <rect x="36" y="64" width="128" height="24" rx="4"/>
+  <line x1="100" y1="88" x2="100" y2="170"/>
+  <path d="M 100,64 Q 76,64 72,44 Q 70,28 86,30 Q 100,34 100,64"/>
+  <path d="M 100,64 Q 124,64 128,44 Q 130,28 114,30 Q 100,34 100,64"/>
+</g>
+</svg>

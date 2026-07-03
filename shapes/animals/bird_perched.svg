@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: bird_perched | category: animals | license: CC0 | source: parametric -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="30" y1="168" x2="175" y2="168"/>
+  <ellipse cx="100" cy="128" rx="28" ry="32"/>
+  <circle cx="100" cy="88" r="22"/>
+  <path d="M 80,90 L 64,96 L 80,102"/>
+  <path d="M 76,120 Q 68,140 80,158 Q 98,148 118,158 Q 130,140 124,120"/>
+  <path d="M 118,150 Q 135,162 142,172"/>
+  <path d="M 122,155 Q 138,168 140,178"/>
+  <path d="M 88,168 L 82,182 M 88,168 L 88,182 M 88,168 L 96,182"/>
+  <path d="M 112,168 L 106,182 M 112,168 L 112,182 M 112,168 L 120,182"/>
+  <circle cx="92" cy="84" r="7" stroke-width="4"/>
+</g>
+</svg>

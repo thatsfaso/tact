@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: balloon | category: objects | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 100,30 Q 58,30 58,82 Q 58,124 100,134 Q 142,124 142,82 Q 142,30 100,30 Z"/>
+  <path d="M 94,134 L 100,146 L 106,134 Z"/>
+  <path d="M 100,146 Q 90,160 100,174 Q 110,188 100,200" stroke-width="4"/>
+  <path d="M 80,56 Q 74,72 82,90" stroke-width="4" opacity="0.55"/>
+</g>
+</svg>
