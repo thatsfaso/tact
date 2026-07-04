@@ -1,14 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: witch | category: people | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 96,16 L 70,72 Q 100,62 130,72 Z"/>
-  <path d="M 60,72 Q 100,60 140,72"/>
-  <circle cx="100" cy="96" r="22"/>
-  <circle cx="93" cy="94" r="3" fill="#000000"/>
-  <circle cx="107" cy="94" r="3" fill="#000000"/>
-  <path d="M 92,104 Q 100,110 108,104"/>
-  <path d="M 100,116 L 100,124"/>
-  <path d="M 86,118 Q 70,140 64,182 Q 100,192 136,182 Q 130,140 114,118"/>
-  <path d="M 88,128 L 40,150 M 112,128 L 160,150"/>
+  <path d="M 58,54 L 92,46 L 96,14 L 110,42 L 142,50 Z"/>
+  <circle cx="100" cy="68" r="16"/>
+  <circle cx="94" cy="65" r="3.5" fill="#000000"/>
+  <circle cx="106" cy="65" r="3.5" fill="#000000"/>
+  <path d="M 94,74 Q 100,79 106,74" stroke-width="4"/>
+  <path d="M 86,84 L 114,84 Q 122,88 126,104 L 138,160 L 62,160 L 74,104 Q 78,88 86,84 Z"/>
+  <path d="M 80,108 L 52,132" stroke-width="4"/>
+  <path d="M 120,108 L 150,126" stroke-width="4"/>
+  <path d="M 160,80 L 140,170" />
+  <path d="M 136,162 L 128,186 M 140,164 L 138,188 M 144,166 L 148,188" stroke-width="4"/>
+  <path d="M 132,158 L 152,166" stroke-width="4"/>
 </g>
 </svg>

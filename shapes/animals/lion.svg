@@ -1,18 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: lion | category: animals | license: CC0 | source: parametric -->
+<!-- TACT shape: lion | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="100" cy="100" r="70"/>
-  <circle cx="100" cy="100" r="48"/>
-  <circle cx="74" cy="44" r="10"/>
-  <circle cx="126" cy="44" r="10"/>
-  <circle cx="82" cy="88" r="9"/>
-  <circle cx="118" cy="88" r="9"/>
-  <circle cx="82" cy="88" r="4" stroke-width="4"/>
-  <circle cx="118" cy="88" r="4" stroke-width="4"/>
-  <path d="M 95,108 L 100,116 L 105,108 Z"/>
-  <path d="M 100,116 Q 88,126 82,122"/>
-  <path d="M 100,116 Q 112,126 118,122"/>
-  <ellipse cx="78" cy="112" rx="12" ry="8"/>
-  <ellipse cx="122" cy="112" rx="12" ry="8"/>
+  <path d="M 100,72 Q 110,93 88,100 Q 81,122 60,112 Q 39,122 32,100 Q 10,93 20,72 Q 10,51 32,44 Q 39,22 60,32 Q 81,22 88,44 Q 110,51 100,72 Z"/>
+  <circle cx="60" cy="72" r="24"/>
+  <circle cx="52" cy="66" r="4" fill="#000000"/>
+  <circle cx="68" cy="66" r="4" fill="#000000"/>
+  <circle cx="60" cy="78" r="4" fill="#000000"/>
+  <path d="M 52,88 Q 60,94 68,88" stroke-width="4"/>
+  <path d="M 92,86 Q 128,76 152,86 Q 170,94 168,112 Q 167,126 156,132 L 158,168 L 144,168 L 141,138 Q 122,144 104,139 L 100,168 L 86,168 L 84,108"/>
+  <path d="M 166,116 Q 188,122 186,148"/>
+  <circle cx="186" cy="155" r="6"/>
 </g>
 </svg>

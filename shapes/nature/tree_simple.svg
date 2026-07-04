@@ -1,11 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: tree_simple | category: nature | license: CC0 | source: parametric -->
+<!-- TACT shape: tree_simple | category: nature | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="88" y="148" width="24" height="38" rx="3"/>
-  <ellipse cx="100" cy="120" rx="52" ry="36"/>
-  <ellipse cx="100" cy="90" rx="44" ry="32"/>
-  <ellipse cx="100" cy="62" rx="34" ry="28"/>
-  <path d="M 88,184 Q 76,188 72,196"/>
-  <path d="M 112,184 Q 124,188 128,196"/>
+  <path d="M 66,116 Q 42,116 40,94 Q 38,76 54,70 Q 50,48 72,44 Q 78,26 100,28 Q 122,26 128,44 Q 150,48 146,70 Q 162,76 160,94 Q 158,116 134,116 Z"/>
+  <path d="M 88,116 L 84,168 L 116,168 L 112,116"/>
+  <path d="M 100,132 L 100,152 M 100,140 Q 88,136 84,128" stroke-width="4"/>
+  <path d="M 64,176 L 136,176" stroke-width="4"/>
 </g>
 </svg>

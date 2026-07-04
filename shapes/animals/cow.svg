@@ -1,18 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: cow | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 70,52 Q 52,40 48,24 Q 64,26 74,44"/>
-  <path d="M 130,52 Q 148,40 152,24 Q 136,26 126,44"/>
-  <path d="M 66,58 Q 50,62 50,80 Q 52,94 66,90 M 134,58 Q 150,62 150,80 Q 148,94 134,90"/>
-  <ellipse cx="100" cy="78" rx="40" ry="36"/>
-  <ellipse cx="100" cy="96" rx="26" ry="20"/>
-  <circle cx="90" cy="96" r="3.5" fill="#000000"/>
-  <circle cx="110" cy="96" r="3.5" fill="#000000"/>
-  <circle cx="84" cy="66" r="4" fill="#000000"/>
-  <circle cx="116" cy="66" r="4" fill="#000000"/>
-  <ellipse cx="100" cy="148" rx="42" ry="34"/>
-  <path d="M 78,68 Q 70,58 80,56 Q 88,60 86,70"/>
-  <path d="M 76,180 L 76,192 M 124,180 L 124,192"/>
-  <path d="M 140,150 Q 158,154 156,172"/>
+  <path d="M 20,74 Q 16,60 30,56 L 42,52 Q 48,36 64,35 Q 80,34 87,47 L 93,55 Q 128,49 154,59 Q 174,67 172,90 Q 171,104 160,112 L 162,170 L 148,170 L 144,120 Q 120,128 98,122 L 94,170 L 80,170 L 78,116 Q 62,108 58,90 L 38,84 Q 24,82 20,74 Z"/>
+  <path d="M 52,36 Q 44,24 54,18"/>
+  <path d="M 76,38 Q 84,24 74,18"/>
+  <circle cx="43" cy="50" r="4" fill="#000000"/>
+  <circle cx="24" cy="64" r="4" fill="#000000"/>
+  <circle cx="34" cy="70" r="4" fill="#000000"/>
+  <path d="M 168,94 L 178,140 Q 180,152 170,154"/>
+  <path d="M 100,120 Q 100,136 116,136 Q 130,136 130,121" stroke-width="4"/>
 </g>
 </svg>

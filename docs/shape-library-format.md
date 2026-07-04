@@ -147,7 +147,7 @@ The library shipped with TACT is **hand-crafted tactile line art** (quality bar:
 
 **Shape selection (browser):** the illustration for a page is chosen from the story text by `pickShapeFromText` in `index.html`, using **whole-word** keyword matching (a keyword must equal a full word — so "mare"/sea never matches "re"/king) with comprehensive Italian + English lists (singular, plural, common diminutives) for every shape. Unmatched text falls back to `star`.
 
-**Note:** hand-crafted shapes (including the crescent `moon` and enriched `sun`) intentionally supersede the parametric `scripts/generate_shapes.py`. Do not regenerate over them — edit the SVGs directly or update the generator to match.
+**Note:** every shape in the library is hand-crafted. The early parametric generator has been removed from the repository — edit the SVGs directly.
 
 ---
 

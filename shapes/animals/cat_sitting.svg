@@ -1,17 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: cat_sitting | category: animals | license: CC0 | source: parametric -->
+<!-- TACT shape: cat_sitting | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="100" cy="75" r="38"/>
-  <path d="M 70,50 L 58,22 L 90,42 Z"/>
-  <path d="M 130,50 L 142,22 L 110,42 Z"/>
-  <ellipse cx="100" cy="148" rx="45" ry="38"/>
-  <path d="M 145,170 Q 175,155 168,130 Q 160,108 145,118"/>
-  <circle cx="85" cy="72" r="6" stroke-width="4"/>
-  <circle cx="115" cy="72" r="6" stroke-width="4"/>
-  <path d="M 97,88 L 100,92 L 103,88 Z"/>
-  <line x1="62" y1="85" x2="88" y2="88" stroke-width="4"/>
-  <line x1="60" y1="92" x2="87" y2="92" stroke-width="4"/>
-  <line x1="112" y1="88" x2="138" y2="85" stroke-width="4"/>
-  <line x1="113" y1="92" x2="140" y2="92" stroke-width="4"/>
+  <path d="M 62,52 L 50,20 L 76,38 Q 90,32 104,38 L 130,20 L 118,52 Q 130,66 126,82 Q 122,98 106,104 Q 128,118 136,146 Q 142,168 128,178 L 56,178 Q 44,168 46,146 Q 52,116 74,104 Q 58,98 54,82 Q 50,66 62,52 Z"/>
+  <path d="M 128,178 Q 158,178 164,152 Q 168,130 152,124 Q 138,120 136,136"/>
+  <circle cx="75" cy="68" r="4" fill="#000000"/>
+  <circle cx="105" cy="68" r="4" fill="#000000"/>
+  <path d="M 84,84 Q 90,90 96,84"/>
 </g>
 </svg>

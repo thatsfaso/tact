@@ -1,11 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: snail | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 40,150 Q 36,120 60,120 L 150,120 Q 170,120 170,138 Q 170,156 150,156 L 70,156"/>
-  <path d="M 60,156 Q 30,156 30,124 Q 30,70 84,70 Q 134,70 134,116 Q 134,150 100,150 Q 74,150 74,124 Q 74,104 92,104 Q 106,104 106,120"/>
-  <path d="M 150,120 L 158,96"/>
-  <path d="M 168,128 L 178,108"/>
-  <circle cx="158" cy="94" r="4" fill="#000000"/>
-  <circle cx="179" cy="106" r="4" fill="#000000"/>
+  <circle cx="118" cy="100" r="40"/>
+  <circle cx="118" cy="100" r="24" stroke-width="4"/>
+  <circle cx="118" cy="100" r="10" stroke-width="4"/>
+  <path d="M 44,92 Q 30,94 26,106 Q 22,120 34,128 Q 44,134 52,132 L 78,138 L 154,138 Q 170,136 168,126"/>
+  <path d="M 40,88 L 30,68"/>
+  <circle cx="29" cy="65" r="4" fill="#000000"/>
+  <path d="M 52,86 L 50,64"/>
+  <circle cx="50" cy="61" r="4" fill="#000000"/>
 </g>
 </svg>

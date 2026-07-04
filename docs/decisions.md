@@ -122,7 +122,7 @@ This file records every significant design decision made, why it was made, and w
 
 ### D021 — Shape library: hand-crafted tactile SVGs, expanded to ~89, whole-word keyword selection
 **Decision:** Ship ~89 hand-crafted line-art SVGs covering the most-cited fairy/bedtime subjects (creatures, animals, people, objects, nature). Illustration is chosen from story text by **whole-word** IT+EN keyword matching (not substring).
-**Rationale:** Hand-crafted shapes read far better under the fingers than parametric primitives (the cat is the quality bar). Whole-word matching fixes false positives (e.g. "mare"/sea no longer matches "re"/king) and covers plurals/diminutives, so most stories get a fitting illustration instead of the default star. **Note:** hand-crafted shapes (incl. the fixed crescent moon and enriched sun) diverge from `scripts/generate_shapes.py` — do not regenerate or they'll be overwritten.
+**Rationale:** Hand-crafted shapes read far better under the fingers than parametric primitives (the cat is the quality bar). Whole-word matching fixes false positives (e.g. "mare"/sea no longer matches "re"/king) and covers plurals/diminutives, so most stories get a fitting illustration instead of the default star. **Note:** the entire library is now hand-crafted and the early parametric generator has been removed from the repository.
 
 ---
 

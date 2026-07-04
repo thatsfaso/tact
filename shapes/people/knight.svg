@@ -1,16 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: knight | category: people | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 96,20 Q 78,28 80,52 M 96,20 Q 108,24 108,40"/>
-  <path d="M 78,48 Q 78,80 100,84 Q 122,80 122,48 Q 122,34 100,34 Q 78,34 78,48 Z"/>
-  <line x1="100" y1="44" x2="100" y2="76"/>
-  <path d="M 86,84 L 80,140 Q 100,148 120,140 L 114,84"/>
-  <path d="M 82,100 Q 64,108 60,146"/>
-  <path d="M 118,100 L 142,96"/>
-  <path d="M 142,40 L 150,96 L 134,96 Z"/>
-  <path d="M 142,40 L 142,30"/>
-  <path d="M 56,118 Q 36,122 36,150 Q 38,176 56,178 Q 74,176 76,150 Q 76,122 56,118 Z"/>
-  <line x1="56" y1="120" x2="56" y2="176"/>
-  <path d="M 80,150 L 76,184 M 116,150 L 122,184"/>
+  <path d="M 82,58 Q 78,32 100,30 Q 122,32 118,58 Z"/>
+  <path d="M 100,30 Q 96,18 104,8 Q 118,16 112,30" stroke-width="4"/>
+  <path d="M 84,48 L 116,48" stroke-width="4"/>
+  <circle cx="93" cy="42" r="3" fill="#000000"/>
+  <circle cx="107" cy="42" r="3" fill="#000000"/>
+  <path d="M 84,62 L 116,62 Q 126,66 130,84 L 138,160 L 62,160 L 70,84 Q 74,66 84,62 Z"/>
+  <path d="M 76,88 L 58,108" stroke-width="4"/>
+  <circle cx="52" cy="122" r="18"/>
+  <path d="M 52,110 L 52,134 M 40,122 L 64,122" stroke-width="4"/>
+  <path d="M 124,88 L 144,104" stroke-width="4"/>
+  <path d="M 148,102 L 168,58" stroke-width="4"/>
+  <path d="M 142,90 L 160,98" stroke-width="4"/>
 </g>
 </svg>

@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: sheep | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 70,90 Q 54,80 60,64 Q 66,48 84,52 Q 90,38 108,42 Q 126,40 132,56 Q 150,54 152,72 Q 166,80 158,96 Q 168,110 152,120 Q 152,138 132,136 Q 124,150 106,144 Q 88,150 80,136 Q 60,138 60,120 Q 46,110 56,96 Q 56,92 70,90 Z"/>
-  <ellipse cx="78" cy="100" rx="24" ry="26"/>
-  <path d="M 58,92 Q 44,88 46,104 Q 50,114 62,108"/>
-  <circle cx="74" cy="96" r="4" fill="#000000"/>
-  <circle cx="86" cy="96" r="4" fill="#000000"/>
-  <path d="M 92,148 L 92,168"/>
-  <path d="M 124,150 L 124,170"/>
+  <path d="M 56,124 Q 38,124 40,108 Q 28,102 36,88 Q 32,72 50,70 Q 54,54 72,58 Q 82,46 98,52 Q 114,44 124,56 Q 142,52 144,70 Q 160,74 154,90 Q 164,104 150,112 Q 152,126 134,124 Z"/>
+  <path d="M 46,84 Q 28,82 22,96 Q 18,110 32,114 Q 44,116 48,106"/>
+  <circle cx="32" cy="96" r="4" fill="#000000"/>
+  <path d="M 70,124 L 70,158"/>
+  <path d="M 122,124 L 122,158"/>
+  <path d="M 92,124 L 92,158"/>
+  <path d="M 142,122 L 144,156"/>
 </g>
 </svg>

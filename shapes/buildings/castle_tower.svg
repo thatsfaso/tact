@@ -1,16 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: castle_tower | category: buildings | license: CC0 | source: parametric -->
+<!-- TACT shape: castle_tower | category: buildings | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="56" y="88" width="88" height="100" rx="2"/>
-  <rect x="56" y="66" width="14" height="24"/>
-  <rect x="86" y="66" width="14" height="24"/>
-  <rect x="116" y="66" width="14" height="24"/>
-  <rect x="146" y="66" width="14" height="24"/>
-  <rect x="70" y="76" width="16" height="14"/>
-  <rect x="100" y="76" width="16" height="14"/>
-  <rect x="130" y="76" width="16" height="14"/>
-  <path d="M 76,188 L 76,152 Q 76,132 100,132 Q 124,132 124,152 L 124,188"/>
-  <rect x="92" y="104" width="16" height="28" rx="2"/>
-  <line x1="40" y1="188" x2="160" y2="188"/>
+  <path d="M 58,172 L 58,44 L 76,44 L 76,58 L 92,58 L 92,44 L 108,44 L 108,58 L 124,58 L 124,44 L 142,44 L 142,172 Z"/>
+  <path d="M 88,172 L 88,132 Q 88,118 100,118 Q 112,118 112,132 L 112,172"/>
+  <path d="M 92,84 L 108,84 L 108,100 L 92,100 Z" stroke-width="4"/>
+  <path d="M 100,44 L 100,14 L 128,22 L 100,30" stroke-width="4"/>
+  <path d="M 40,172 L 160,172"/>
 </g>
 </svg>

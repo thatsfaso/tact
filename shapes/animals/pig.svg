@@ -1,16 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: pig | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 64,66 L 54,42 Q 70,42 78,58"/>
-  <path d="M 136,66 L 146,42 Q 130,42 122,58"/>
-  <ellipse cx="100" cy="92" rx="56" ry="48"/>
-  <ellipse cx="100" cy="104" rx="22" ry="16"/>
-  <circle cx="92" cy="104" r="3.5" fill="#000000"/>
-  <circle cx="108" cy="104" r="3.5" fill="#000000"/>
-  <circle cx="80" cy="80" r="4" fill="#000000"/>
-  <circle cx="120" cy="80" r="4" fill="#000000"/>
-  <path d="M 70,138 L 70,160"/>
-  <path d="M 130,138 L 130,160"/>
-  <path d="M 150,120 Q 168,118 166,134 Q 164,146 152,140"/>
+  <path d="M 18,70 Q 26,60 38,62 L 44,48 L 56,58 Q 86,44 120,50 Q 156,56 162,86 Q 166,108 152,118 L 154,166 L 140,166 L 137,124 Q 114,130 92,126 L 88,166 L 74,166 L 72,120 Q 52,112 46,94 Q 32,94 22,88 Q 12,78 18,70 Z"/>
+  <ellipse cx="23" cy="78" rx="6" ry="9" stroke-width="4"/>
+  <circle cx="42" cy="70" r="4" fill="#000000"/>
+  <path d="M 158,98 Q 176,94 176,106 Q 176,116 164,112"/>
 </g>
 </svg>

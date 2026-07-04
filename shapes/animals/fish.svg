@@ -1,13 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: fish | category: animals | license: CC0 | source: parametric -->
+<!-- TACT shape: fish | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <ellipse cx="95" cy="100" rx="58" ry="32"/>
-  <path d="M 153,100 L 178,72 L 182,100 L 178,128 Z"/>
-  <path d="M 80,68 Q 100,48 120,68"/>
-  <path d="M 90,132 Q 100,150 112,132"/>
-  <circle cx="60" cy="96" r="9"/>
-  <circle cx="60" cy="96" r="4" stroke-width="4"/>
-  <path d="M 37,104 Q 32,100 37,96"/>
-  <path d="M 72,76 Q 68,100 72,124"/>
+  <path d="M 24,100 Q 56,64 104,64 Q 140,64 156,88 L 176,72 L 170,100 L 176,128 L 156,112 Q 140,136 104,136 Q 56,136 24,100 Z"/>
+  <path d="M 84,68 Q 96,48 116,52 Q 104,62 100,66" stroke-width="4"/>
+  <path d="M 88,134 Q 96,148 112,146 Q 104,138 102,133" stroke-width="4"/>
+  <circle cx="52" cy="92" r="5" fill="#000000"/>
+  <path d="M 74,78 Q 64,100 74,122" stroke-width="4"/>
 </g>
 </svg>

@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: bee | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <ellipse cx="100" cy="118" rx="42" ry="50"/>
-  <path d="M 66,96 Q 100,108 134,96"/>
-  <path d="M 60,124 Q 100,136 140,124"/>
-  <path d="M 70,150 Q 100,160 130,150"/>
-  <path d="M 100,168 L 100,182"/>
-  <ellipse cx="60" cy="78" rx="30" ry="20" transform="rotate(-28,60,78)"/>
-  <ellipse cx="140" cy="78" rx="30" ry="20" transform="rotate(28,140,78)"/>
-  <path d="M 84,72 Q 76,50 64,44"/>
-  <path d="M 116,72 Q 124,50 136,44"/>
-  <circle cx="62" cy="42" r="4" fill="#000000"/>
-  <circle cx="138" cy="42" r="4" fill="#000000"/>
+  <path d="M 52,104 Q 52,76 84,70 Q 128,64 148,84 Q 158,94 150,110 Q 134,134 96,134 Q 60,132 52,104 Z"/>
+  <path d="M 90,70 L 84,132" stroke-width="4"/>
+  <path d="M 114,68 L 110,133" stroke-width="4"/>
+  <circle cx="44" cy="96" r="15"/>
+  <circle cx="40" cy="92" r="3.5" fill="#000000"/>
+  <path d="M 38,82 Q 30,68 18,66" stroke-width="4"/>
+  <path d="M 48,80 Q 46,66 36,58" stroke-width="4"/>
+  <path d="M 86,66 Q 76,32 102,28 Q 120,26 104,62"/>
+  <path d="M 110,64 Q 114,36 136,40 Q 152,44 126,70"/>
+  <path d="M 152,102 L 168,108" stroke-width="4"/>
 </g>
 </svg>

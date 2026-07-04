@@ -1,16 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: leaf | category: nature | license: CC0 | source: parametric -->
+<!-- TACT shape: leaf | category: nature | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,28 Q 136,48 138,100 Q 136,148 100,172 Q 64,148 62,100 Q 64,48 100,28 Z"/>
-  <line x1="100" y1="30" x2="100" y2="170"/>
-  <line x1="100" y1="70" x2="72" y2="86"/>
-  <line x1="100" y1="70" x2="128" y2="86"/>
-  <line x1="100" y1="90" x2="68" y2="104"/>
-  <line x1="100" y1="90" x2="132" y2="104"/>
-  <line x1="100" y1="110" x2="70" y2="122"/>
-  <line x1="100" y1="110" x2="130" y2="122"/>
-  <line x1="100" y1="130" x2="74" y2="140"/>
-  <line x1="100" y1="130" x2="126" y2="140"/>
-  <line x1="100" y1="172" x2="100" y2="192"/>
+  <path d="M 100,20 Q 152,56 152,110 Q 152,158 100,176 Q 48,158 48,110 Q 48,56 100,20 Z"/>
+  <path d="M 100,32 L 100,176" stroke-width="4"/>
+  <path d="M 100,70 Q 122,76 134,92 M 100,70 Q 78,76 66,92" stroke-width="4"/>
+  <path d="M 100,110 Q 122,116 132,130 M 100,110 Q 78,116 68,130" stroke-width="4"/>
 </g>
 </svg>

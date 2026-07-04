@@ -1,19 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: bear | category: animals | license: CC0 | source: parametric -->
+<!-- TACT shape: bear | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <ellipse cx="106" cy="128" rx="58" ry="44"/>
-  <circle cx="62" cy="80" r="36"/>
-  <circle cx="44" cy="50" r="14"/>
-  <circle cx="80" cy="46" r="14"/>
-  <ellipse cx="56" cy="94" rx="20" ry="14"/>
-  <ellipse cx="56" cy="86" rx="8" ry="6"/>
-  <path d="M 68,166 L 64,194"/>
-  <path d="M 92,170 L 90,194"/>
-  <path d="M 120,170 L 118,194"/>
-  <path d="M 150,166 L 154,194"/>
-  <ellipse cx="64" cy="194" rx="12" ry="5"/>
-  <ellipse cx="90" cy="194" rx="12" ry="5"/>
-  <circle cx="52" cy="74" r="6" stroke-width="4"/>
-  <circle cx="162" cy="148" r="8"/>
+  <path d="M 22,64 Q 18,50 32,46 Q 34,30 47,30 Q 59,31 60,42 Q 90,36 122,44 Q 158,54 162,90 Q 164,112 150,120 L 152,168 L 136,168 L 133,126 Q 112,132 92,127 L 88,168 L 72,168 L 70,120 Q 52,112 48,92 Q 34,88 26,80 Q 20,72 22,64 Z"/>
+  <circle cx="36" cy="52" r="4" fill="#000000"/>
+  <circle cx="24" cy="60" r="5" fill="#000000"/>
+  <path d="M 158,104 Q 170,108 168,118"/>
 </g>
 </svg>

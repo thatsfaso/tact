@@ -1,14 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: snowflake | category: nature | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="100" y1="24" x2="100" y2="176"/>
-  <line x1="34" y1="62" x2="166" y2="138"/>
-  <line x1="166" y1="62" x2="34" y2="138"/>
-  <path d="M 100,40 L 88,54 M 100,40 L 112,54"/>
-  <path d="M 100,160 L 88,146 M 100,160 L 112,146"/>
-  <path d="M 48,70 L 48,86 M 48,70 L 62,66"/>
-  <path d="M 152,130 L 152,114 M 152,130 L 138,134"/>
-  <path d="M 152,70 L 152,86 M 152,70 L 138,66"/>
-  <path d="M 48,130 L 48,114 M 48,130 L 62,134"/>
+  <path d="M 100,100 L 100,34"/>
+  <path d="M 100,62 L 90,50" stroke-width="4"/>
+  <path d="M 100,62 L 110,50" stroke-width="4"/>
+  <path d="M 100,100 L 157,67"/>
+  <path d="M 133,81 L 138,66" stroke-width="4"/>
+  <path d="M 133,81 L 149,84" stroke-width="4"/>
+  <path d="M 100,100 L 157,133"/>
+  <path d="M 133,119 L 149,116" stroke-width="4"/>
+  <path d="M 133,119 L 138,134" stroke-width="4"/>
+  <path d="M 100,100 L 100,166"/>
+  <path d="M 100,138 L 110,150" stroke-width="4"/>
+  <path d="M 100,138 L 90,150" stroke-width="4"/>
+  <path d="M 100,100 L 43,133"/>
+  <path d="M 67,119 L 62,134" stroke-width="4"/>
+  <path d="M 67,119 L 51,116" stroke-width="4"/>
+  <path d="M 100,100 L 43,67"/>
+  <path d="M 67,81 L 51,84" stroke-width="4"/>
+  <path d="M 67,81 L 62,66" stroke-width="4"/>
+  <circle cx="100" cy="100" r="7" stroke-width="4"/>
 </g>
 </svg>

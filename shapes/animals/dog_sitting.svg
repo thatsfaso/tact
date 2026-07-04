@@ -1,15 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: dog_sitting | category: animals | license: CC0 | source: parametric -->
+<!-- TACT shape: dog_sitting | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <ellipse cx="100" cy="72" rx="42" ry="36"/>
-  <path d="M 60,58 Q 42,52 40,82 Q 42,100 60,96"/>
-  <path d="M 140,58 Q 158,52 160,82 Q 158,100 140,96"/>
-  <ellipse cx="100" cy="150" rx="48" ry="38"/>
-  <ellipse cx="78" cy="183" rx="14" ry="8"/>
-  <ellipse cx="122" cy="183" rx="14" ry="8"/>
-  <ellipse cx="100" cy="88" rx="20" ry="14"/>
-  <ellipse cx="100" cy="82" rx="8" ry="5"/>
-  <circle cx="82" cy="62" r="6" stroke-width="4"/>
-  <circle cx="118" cy="62" r="6" stroke-width="4"/>
+  <path d="M 66,40 Q 84,28 102,40 Q 118,34 124,48 Q 130,62 122,74 Q 132,86 126,98 Q 146,116 150,148 Q 154,172 140,180 L 62,180 Q 46,172 48,146 Q 52,114 72,98 Q 60,86 64,66 Q 66,50 66,40 Z"/>
+  <path d="M 66,40 Q 46,44 44,68 Q 43,86 56,90"/>
+  <path d="M 102,40 Q 122,36 130,56 Q 136,74 124,82"/>
+  <circle cx="80" cy="64" r="4" fill="#000000"/>
+  <circle cx="106" cy="64" r="4" fill="#000000"/>
+  <circle cx="93" cy="82" r="5" fill="#000000"/>
+  <path d="M 140,180 Q 166,174 168,150 Q 168,134 154,132"/>
 </g>
 </svg>
