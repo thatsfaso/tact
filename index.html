@@ -163,7 +163,7 @@
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.18;
+    master.gain.value = 0.4;
     master.connect(ctx.destination);
     return ctx;
   }
@@ -513,14 +513,56 @@ window.TACT = (function () {
       .catch(function () { return startIdx; });
   }
 
+  // Ask the browser to protect our storage from eviction, so the downloaded
+  // model survives between visits instead of being silently purged. Best-effort:
+  // some browsers deny it, and the Cache API still usually persists anyway.
+  function _requestPersistentStorage() {
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        return navigator.storage.persist().catch(function () { return false; });
+      }
+    } catch (e) { /* ignore */ }
+    return Promise.resolve(false);
+  }
+
+  // If any tier at or below the resolved one is ALREADY in the browser cache,
+  // prefer it: reusing a cached model is instant, re-downloading a "better" one
+  // costs the visitor gigabytes. Never auto-picks a tier LARGER than resolved
+  // (it was excluded for memory reasons, cached or not).
+  function _pickCachedTier(webllm, resolvedIdx) {
+    if (_preferredModelId || typeof webllm.hasModelInCache !== 'function') {
+      return Promise.resolve({ idx: resolvedIdx, cached: false });
+    }
+    var checks = [];
+    for (var k = resolvedIdx; k < MODEL_TIERS.length; k++) {
+      (function (i) {
+        checks.push(webllm.hasModelInCache(MODEL_TIERS[i].id)
+          .then(function (hit) { return hit ? i : -1; })
+          .catch(function () { return -1; }));
+      })(k);
+    }
+    return Promise.all(checks).then(function (hits) {
+      for (var j = 0; j < hits.length; j++) {
+        if (hits[j] !== -1) return { idx: hits[j], cached: true };
+      }
+      return { idx: resolvedIdx, cached: false };
+    });
+  }
+
   // Create an engine, walking DOWN the tier list on failure.
+  // onProgress(pct, statusText, modelLabel, fromCache)
   function _createEngine(webllm, idx, onProgress) {
     if (idx >= MODEL_TIERS.length) return Promise.reject(new Error('no model could load'));
     var m = MODEL_TIERS[idx];
-    return webllm.CreateMLCEngine(m.id, {
-      initProgressCallback: function (report) {
-        if (onProgress) onProgress(typeof report.progress === 'number' ? report.progress : 0, report.text || '', m.label);
-      }
+    var cachedCheck = (typeof webllm.hasModelInCache === 'function')
+      ? webllm.hasModelInCache(m.id).catch(function () { return false; })
+      : Promise.resolve(false);
+    return cachedCheck.then(function (fromCache) {
+      return webllm.CreateMLCEngine(m.id, {
+        initProgressCallback: function (report) {
+          if (onProgress) onProgress(typeof report.progress === 'number' ? report.progress : 0, report.text || '', m.label, fromCache);
+        }
+      });
     }).then(function (eng) {
       _engine = eng; _activeModel = m; return eng;
     }).catch(function (err) {
@@ -568,9 +610,10 @@ window.TACT = (function () {
     return import('https://esm.run/@mlc-ai/web-llm').then(function (webllm) {
       var enginePromise = _engine
         ? Promise.resolve(_engine)
-        : _resolveTierIndex(_startTierIndex()).then(function (idx) {
-            return _createEngine(webllm, idx, onProgress);
-          });
+        : _requestPersistentStorage()
+            .then(function () { return _resolveTierIndex(_startTierIndex()); })
+            .then(function (idx) { return _pickCachedTier(webllm, idx); })
+            .then(function (pick) { return _createEngine(webllm, pick.idx, onProgress); });
 
       return enginePromise.then(function (engine) {
         if (onProgress) onProgress(1, 'ready', _activeModel ? _activeModel.label : '');
@@ -1025,7 +1068,21 @@ const COPY = {
     weaving:    "Weaving your story…",
     generating: "Writing your story…",
     modelDownloading: "Downloading AI model…",
+    modelCached: "Loading AI model (already on your device)…",
+    firstTimeNote: "First visit only — next time it loads straight from your device.",
     brailleTranslating: "Translating to Braille…",
+    facts: [
+      "Braille was invented by Louis Braille when he was 15. Homework existed back then too.",
+      "Trained fingertips read Braille at up to 125 words a minute. Speedy little readers!",
+      "This story is being written inside YOUR device. No clouds were disturbed.",
+      "A 3D printer builds your page layer by layer, like a very thin lasagna.",
+      "The dots on your page will be about as tall as two sheets of paper stacked up.",
+      "Cats can't read Braille. They prefer to sit on it.",
+      "The very first Braille books were huge — bigger than a pizza box.",
+      "Each of your fingertips has about 3,000 touch sensors. Tiny superheroes.",
+      "Astronauts' fingers puff up in space, which makes reading Braille extra tricky.",
+      "An elephant's trunk is sensitive enough to pick up a single blade of grass. Great Braille potential.",
+    ],
     yourStory:  "Your story",
     page:       "Page",
     of:         "of",
@@ -1048,7 +1105,21 @@ const COPY = {
     weaving:    "Sto creando la storia…",
     generating: "Sto scrivendo la storia…",
     modelDownloading: "Scarico il modello AI…",
+    modelCached: "Carico il modello AI (già sul tuo dispositivo)…",
+    firstTimeNote: "Solo la prima visita — la prossima volta si carica subito dal tuo dispositivo.",
     brailleTranslating: "Traduco in Braille…",
+    facts: [
+      "Il Braille l'ha inventato Louis Braille a 15 anni. Sì, i compiti esistevano anche allora.",
+      "Le dita allenate leggono il Braille fino a 125 parole al minuto. Altro che occhi!",
+      "Questa storia nasce dentro il TUO dispositivo. Nessuna nuvola è stata disturbata.",
+      "La stampante 3D costruisce la pagina strato dopo strato, come una lasagna sottilissima.",
+      "I puntini della tua pagina saranno alti come due fogli di carta impilati.",
+      "I gatti non leggono il Braille: preferiscono sedercisi sopra.",
+      "I primi libri in Braille erano enormi, più grandi di una scatola della pizza.",
+      "Ogni tuo polpastrello ha circa 3.000 sensori del tatto. Piccoli supereroi.",
+      "Nello spazio le dita degli astronauti si gonfiano: leggere il Braille diventa difficilissimo.",
+      "La proboscide di un elefante sente anche un filo d'erba. Un talento naturale per il Braille.",
+    ],
     yourStory:  "La tua storia",
     page:       "Pagina",
     of:         "di",
@@ -1214,7 +1285,21 @@ function HintMarquee({ hints, onPick }) {
 }
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
-function LoadingScreen({ msg, progress, t }) {
+function LoadingScreen({ msg, progress, t, note }) {
+  // After 6 seconds of waiting, start rotating little fun facts to make the
+  // wait feel shorter (and teach something worth smiling about).
+  const [factIdx, setFactIdx] = useState(-1);
+  useEffect(() => {
+    let interval = null;
+    const kickoff = setTimeout(() => {
+      setFactIdx(Math.floor(Math.random() * t.facts.length));
+      interval = setInterval(() => {
+        setFactIdx(i => (i + 1) % t.facts.length);
+      }, 6000);
+    }, 6000);
+    return () => { clearTimeout(kickoff); if (interval) clearInterval(interval); };
+  }, [t]);
+
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-10" style={{ zIndex: 5 }}>
       <BlobLoader size={240} />
@@ -1238,6 +1323,17 @@ function LoadingScreen({ msg, progress, t }) {
               <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(10,10,12,0.35)',
                 animation: 'float-soft 1.2s ease-in-out infinite', animationDelay: i * 0.22 + 's' }} />
             ))}
+          </div>
+        )}
+        {note && (
+          <div className="mono text-center text-[11px] tracking-[0.08em]" style={{ color: 'var(--muted)' }}>
+            {note}
+          </div>
+        )}
+        {factIdx >= 0 && (
+          <div key={factIdx} className="rise text-center" aria-live="polite"
+            style={{ color: 'var(--muted)', fontSize: 15, lineHeight: 1.55, maxWidth: 360, minHeight: 48, marginTop: 8 }}>
+            {t.facts[factIdx]}
           </div>
         )}
       </div>
@@ -1533,6 +1629,7 @@ function App() {
   const [text,  setText]  = useState("");
   const [pages, setPages] = useState(null);
   const [loadingMsg,      setLoadingMsg]      = useState("");
+  const [loadingNote,     setLoadingNote]     = useState("");
   const [loadingProgress, setLoadingProgress] = useState(null);
   const t = COPY[lang];
 
@@ -1595,6 +1692,7 @@ function App() {
   const doSubmit = async (q) => {
     setPhase("loading");
     setLoadingMsg(t.weaving);
+    setLoadingNote("");
     setLoadingProgress(null);
     loaderRef.current = window.SFX && window.SFX.startLoader ? window.SFX.startLoader() : null;
 
@@ -1611,12 +1709,14 @@ function App() {
         // AI path: the model writes the story TEXT, then we build pages deterministically.
         let storyText = null;
         try {
-          storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel) => {
+          storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel, fromCache) => {
             if (pct < 1) {
-              setLoadingMsg(t.modelDownloading + (modelLabel ? " · " + modelLabel : ""));
+              setLoadingMsg((fromCache ? t.modelCached : t.modelDownloading) + (modelLabel ? " · " + modelLabel : ""));
+              setLoadingNote(fromCache ? "" : t.firstTimeNote);
               setLoadingProgress(pct);
             } else {
               setLoadingMsg(t.generating);
+              setLoadingNote("");
               setLoadingProgress(null);
             }
           });
@@ -1659,7 +1759,7 @@ function App() {
     if (srRef.current) { srRef.current.stop(); srRef.current = null; }
     window.SFX && window.SFX.play("tap");
     setPages(null); setText(""); setPhase("idle");
-    setLoadingMsg(""); setLoadingProgress(null);
+    setLoadingMsg(""); setLoadingNote(""); setLoadingProgress(null);
   };
 
   return (
@@ -1720,7 +1820,7 @@ function App() {
         </main>
       )}
 
-      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} />}
+      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} note={loadingNote} />}
       {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
     </div>
   );
