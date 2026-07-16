@@ -435,13 +435,28 @@ window.TACT = (function () {
   var CAP_SIGN = [6];        // single-letter capital indicator (dot 6)
   var NUM_SIGN = [3,4,5,6];  // number indicator
 
+  // Fold typographic punctuation onto the ASCII forms the table above knows.
+  // Language models (and macOS smart quotes) emit curly apostrophes, ellipses
+  // and long dashes constantly. Any character the table misses becomes a blank
+  // cell, and a blank cell is also where a line is allowed to break — so
+  // "C’era" would read as "C era" and could even split across two lines.
+  // Italian elides everywhere (l’orso, un’amica, dov’è), so this is not cosmetic.
+  function normalisePunctuation(text) {
+    return String(text)
+      .replace(/[‘’‚‛]/g, "'")  // ‘ ’ ‚ ‛
+      .replace(/[“”„‟]/g, '"')  // “ ” „ ‟
+      .replace(/…/g, '...')                     // … → three period cells
+      .replace(/[–—―]/g, '-')         // – — ―
+      .replace(/[   ]/g, ' ');        // non-breaking spaces
+  }
+
   // Returns Promise<Array> — one entry per Braille cell.
   // Cell forms: dots[] = a cell, [] = space (and word-wrap point), "BR" = line break.
   function translateBraille(text, lang) {
     return new Promise(function (resolve) {
       var cells = [];
       var inNumber = false;
-      var chars = Array.from(String(text));
+      var chars = Array.from(normalisePunctuation(text));
       for (var i = 0; i < chars.length; i++) {
         var raw = chars[i];
         if (raw === '\n') { cells.push('BR'); inNumber = false; continue; }
@@ -525,30 +540,6 @@ window.TACT = (function () {
     return Promise.resolve(false);
   }
 
-  // If any tier at or below the resolved one is ALREADY in the browser cache,
-  // prefer it: reusing a cached model is instant, re-downloading a "better" one
-  // costs the visitor gigabytes. Never auto-picks a tier LARGER than resolved
-  // (it was excluded for memory reasons, cached or not).
-  function _pickCachedTier(webllm, resolvedIdx) {
-    if (_preferredModelId || typeof webllm.hasModelInCache !== 'function') {
-      return Promise.resolve({ idx: resolvedIdx, cached: false });
-    }
-    var checks = [];
-    for (var k = resolvedIdx; k < MODEL_TIERS.length; k++) {
-      (function (i) {
-        checks.push(webllm.hasModelInCache(MODEL_TIERS[i].id)
-          .then(function (hit) { return hit ? i : -1; })
-          .catch(function () { return -1; }));
-      })(k);
-    }
-    return Promise.all(checks).then(function (hits) {
-      for (var j = 0; j < hits.length; j++) {
-        if (hits[j] !== -1) return { idx: hits[j], cached: true };
-      }
-      return { idx: resolvedIdx, cached: false };
-    });
-  }
-
   // Create an engine, walking DOWN the tier list on failure.
   // onProgress(pct, statusText, modelLabel, fromCache)
   function _createEngine(webllm, idx, onProgress) {
@@ -612,8 +603,7 @@ window.TACT = (function () {
         ? Promise.resolve(_engine)
         : _requestPersistentStorage()
             .then(function () { return _resolveTierIndex(_startTierIndex()); })
-            .then(function (idx) { return _pickCachedTier(webllm, idx); })
-            .then(function (pick) { return _createEngine(webllm, pick.idx, onProgress); });
+            .then(function (idx) { return _createEngine(webllm, idx, onProgress); });
 
       return enginePromise.then(function (engine) {
         if (onProgress) onProgress(1, 'ready', _activeModel ? _activeModel.label : '');
@@ -639,6 +629,7 @@ window.TACT = (function () {
   return {
     webgpuSupported: webgpuSupported,
     translateBraille: translateBraille,
+    normalisePunctuation: normalisePunctuation,
     generateStory: generateStory,
     // ── Model controls (used now internally; future manual-selection UI hooks)
     models: MODEL_TIERS,
@@ -958,15 +949,21 @@ function BlobLoader({ size = 220 }) {
   );
 }
 
-// ─── Braille JS fallback (used when Liblouis WASM is unavailable) ─────────────
+// ─── Braille (synchronous) ───────────────────────────────────────────────────
+// Same table and rules as window.TACT.translateBraille, in sync form: the
+// paginator needs to measure text before a Promise could resolve. The two must
+// stay in step — a character missing here (but present there) would make the
+// page fit calculation disagree with the page that actually prints.
 const BRAILLE_MAP = {
   a:[1],b:[1,2],c:[1,4],d:[1,4,5],e:[1,5],f:[1,2,4],g:[1,2,4,5],
   h:[1,2,5],i:[2,4],j:[2,4,5],k:[1,3],l:[1,2,3],m:[1,3,4],n:[1,3,4,5],
   o:[1,3,5],p:[1,2,3,4],q:[1,2,3,4,5],r:[1,2,3,5],s:[2,3,4],t:[2,3,4,5],
   u:[1,3,6],v:[1,2,3,6],w:[2,4,5,6],x:[1,3,4,6],y:[1,3,4,5,6],z:[1,3,5,6],
   "à":[1,2,3,5,6],"è":[2,3,4,6],"é":[1,2,3,4,5,6],"ì":[3,4],"ò":[3,4,6],"ù":[2,3,4,5,6],
+  "â":[1,6],"ê":[1,2,6],"î":[1,4,6],"ô":[1,4,5,6],"û":[1,5,6],
+  "ç":[1,2,3,4,6],"ñ":[1,2,4,5,6],"ü":[1,2,5,6],
   ".":[2,5,6],",":[2],";":[2,3],":":[2,5],"?":[2,6],"!":[2,3,5],
-  "'":[3],"-":[3,6],'"':[2,3,6],
+  "'":[3],"-":[3,6],'"':[2,3,6],"(":[1,2,6],")":[3,4,5],"/":[3,4],
   "1":[1],"2":[1,2],"3":[1,4],"4":[1,4,5],"5":[1,5],
   "6":[1,2,4],"7":[1,2,4,5],"8":[1,2,5],"9":[2,4],"0":[2,4,5],
 };
@@ -976,7 +973,8 @@ const NUM_INDICATOR = [3,4,5,6];
 function textToBrailleCells(text) {
   const cells = [];
   let inNumber = false;
-  for (const raw of text) {
+  const normalise = (window.TACT && window.TACT.normalisePunctuation) || String;
+  for (const raw of normalise(text)) {
     if (raw === " ") { cells.push([]); inNumber = false; continue; }
     if (raw === "\n") { cells.push("BR"); inNumber = false; continue; }
     if (/[0-9]/.test(raw)) {
@@ -1069,7 +1067,6 @@ const COPY = {
     generating: "Writing your story…",
     modelDownloading: "Downloading AI model…",
     modelCached: "Loading AI model (already on your device)…",
-    firstTimeNote: "First visit only — next time it loads straight from your device.",
     brailleTranslating: "Translating to Braille…",
     facts: [
       "Braille was invented by Louis Braille when he was 15. Homework existed back then too.",
@@ -1091,6 +1088,14 @@ const COPY = {
     demoNotice: "AI writing off · your own words become real Braille",
     hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
     footer: "Open source · No account · Works with any FDM 3D printer",
+    inputLabel: "Describe your story idea",
+    useIdea: "Use this idea:",
+    resultRegion: "Your finished story",
+    ready: "Your story is ready.",
+    pictureShows: "The picture shows:",
+    prevPage: "Previous page",
+    nextPage: "Next page",
+    goToPage: "Go to page",
   },
   it: {
     eyebrow:    "Storie da leggere con le dita",
@@ -1106,11 +1111,10 @@ const COPY = {
     generating: "Sto scrivendo la storia…",
     modelDownloading: "Scarico il modello AI…",
     modelCached: "Carico il modello AI (già sul tuo dispositivo)…",
-    firstTimeNote: "Solo la prima visita — la prossima volta si carica subito dal tuo dispositivo.",
     brailleTranslating: "Traduco in Braille…",
     facts: [
       "Il Braille l'ha inventato Louis Braille a 15 anni. Sì, i compiti esistevano anche allora.",
-      "Le dita allenate leggono il Braille fino a 125 parole al minuto. Altro che occhi!",
+      "Le dita allenate leggono il Braille fino a 125 parole al minuto. Una bella corsa!",
       "Questa storia nasce dentro il TUO dispositivo. Nessuna nuvola è stata disturbata.",
       "La stampante 3D costruisce la pagina strato dopo strato, come una lasagna sottilissima.",
       "I puntini della tua pagina saranno alti come due fogli di carta impilati.",
@@ -1128,6 +1132,14 @@ const COPY = {
     demoNotice: "Scrittura AI non attiva · le tue parole diventano Braille reale",
     hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
     footer: "Open source · Senza account · Funziona con ogni stampante FDM",
+    inputLabel: "Descrivi la tua idea di storia",
+    useIdea: "Usa questa idea:",
+    resultRegion: "La tua storia finita",
+    ready: "La tua storia è pronta.",
+    pictureShows: "L'illustrazione mostra:",
+    prevPage: "Pagina precedente",
+    nextPage: "Pagina successiva",
+    goToPage: "Vai alla pagina",
   },
 };
 
@@ -1267,25 +1279,34 @@ function MicButton({ state, onClick, t }) {
 }
 
 // ─── Hint marquee ─────────────────────────────────────────────────────────────
-function HintMarquee({ hints, onPick }) {
+function HintMarquee({ hints, onPick, useIdeaLabel }) {
+  // The list is doubled so the marquee can scroll seamlessly. Only the first
+  // copy is real to assistive tech; the second is a visual clone, hidden from
+  // screen readers and removed from the tab order so ideas aren't read twice.
   const doubled = [...hints, ...hints];
+  const n = hints.length;
   return (
     <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)", WebkitMaskImage: "linear-gradient(90deg, transparent, black 12%, black 88%, transparent)" }}>
       <div className="drift flex gap-3 whitespace-nowrap py-1">
-        {doubled.map((h, i) => (
-          <button key={i} onClick={() => onPick(h)}
-            className="focus-ring px-4 py-2 rounded-full text-[13px] transition-colors"
-            style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}>
-            <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }}>↗</span>{h}
-          </button>
-        ))}
+        {doubled.map((h, i) => {
+          const clone = i >= n;
+          return (
+            <button key={i} onClick={() => onPick(h)}
+              aria-hidden={clone ? "true" : undefined} tabIndex={clone ? -1 : undefined}
+              aria-label={clone ? undefined : `${useIdeaLabel} ${h}`}
+              className="focus-ring px-4 py-2 rounded-full text-[13px] transition-colors"
+              style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", color: "var(--ink)", backdropFilter: "blur(8px)" }}>
+              <span className="mono text-[10px] mr-2" style={{ color: "var(--muted-soft)" }} aria-hidden="true">↗</span>{h}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
-function LoadingScreen({ msg, progress, t, note }) {
+function LoadingScreen({ msg, progress, t }) {
   // After 6 seconds of waiting, start rotating little fun facts to make the
   // wait feel shorter (and teach something worth smiling about).
   const [factIdx, setFactIdx] = useState(-1);
@@ -1323,11 +1344,6 @@ function LoadingScreen({ msg, progress, t, note }) {
               <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(10,10,12,0.35)',
                 animation: 'float-soft 1.2s ease-in-out infinite', animationDelay: i * 0.22 + 's' }} />
             ))}
-          </div>
-        )}
-        {note && (
-          <div className="mono text-center text-[11px] tracking-[0.08em]" style={{ color: 'var(--muted)' }}>
-            {note}
           </div>
         )}
         {factIdx >= 0 && (
@@ -1380,12 +1396,34 @@ function StoryResult({ pages, lang, t, onAgain }) {
     height: (L.ILL_H / L.PAGE_H) * 100 + "%",
   };
 
+  // Screen-reader support. A blind reader is the whole point of this tool, so
+  // the finished story cannot be a silent, mouse-only screen. On arrival we move
+  // focus into the result and a polite live region speaks a summary — the story
+  // is ready, which page of how many, which picture was chosen — followed by the
+  // story text itself. The visual page (dots + illustration) is decorative here:
+  // it is aria-hidden, because its information already exists as spoken text.
+  const headingRef = useRef(null);
+  const didAnnounce = useRef(false);
+  const [liveText, setLiveText] = useState("");
+  const shape = p.illustration?.elements?.[0]?.shape || 'star';
+  const illName = shapeLabel(shape, lang);
+
+  useEffect(() => { if (headingRef.current) headingRef.current.focus(); }, []);
+  useEffect(() => {
+    const prefix = didAnnounce.current ? "" : (t.ready + " ");
+    didAnnounce.current = true;
+    setLiveText(`${prefix}${t.page} ${page + 1} ${t.of} ${pages.length}. ${t.pictureShows} ${illName}. ${p.text}`);
+  }, [page]);
+
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center px-6" style={{ zIndex: 5 }}>
+    <section role="region" aria-label={t.resultRegion}
+      className="absolute inset-0 flex flex-col items-center justify-center px-6" style={{ zIndex: 5 }}>
+      <div className="sr-only" role="status" aria-live="polite">{liveText}</div>
       <div className="w-full max-w-[1100px] grid grid-cols-12 gap-8 items-center">
 
-        {/* Left — physical page preview, true-to-scale (mm) mirror of the print */}
-        <div className="col-span-7 rise">
+        {/* Left — physical page preview, true-to-scale (mm) mirror of the print.
+            Decorative for assistive tech: everything it shows is spoken above. */}
+        <div className="col-span-7 rise" aria-hidden="true">
           <div className="relative mx-auto"
             style={{ width: "100%", maxWidth: 520, aspectRatio: `${L.PAGE_W} / ${L.PAGE_H}`, borderRadius: 8,
               background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
@@ -1427,17 +1465,17 @@ function StoryResult({ pages, lang, t, onAgain }) {
               {t.demoNotice}
             </div>
           )}
-          <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--muted)" }}>{t.yourStory}</div>
-          <div className="serif text-[32px] leading-[1.18]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</div>
+          <h2 ref={headingRef} tabIndex={-1} className="mono text-[11px] tracking-[0.22em] uppercase focus-ring" style={{ color: "var(--muted)", outlineOffset: 4 }}>{t.yourStory}</h2>
+          <p className="serif text-[32px] leading-[1.18]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</p>
 
           <div className="flex items-center gap-3 mt-2">
             <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.max(0, x-1)); }}
               disabled={page === 0} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
               style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === 0 ? 0.35 : 1, cursor: page === 0 ? "default" : "pointer" }}
-              aria-label="Previous page">‹</button>
+              aria-label={t.prevPage}>‹</button>
             <div className="flex gap-1.5">
               {pages.map((_, i) => (
-                <button key={i} onClick={() => setPage(i)} aria-label={`Page ${i+1}`}
+                <button key={i} onClick={() => setPage(i)} aria-label={`${t.goToPage} ${i+1}`}
                   style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6,
                     background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)",
                     transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }} />
@@ -1446,7 +1484,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
             <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.min(pages.length-1, x+1)); }}
               disabled={page === pages.length-1} className="focus-ring w-10 h-10 rounded-full flex items-center justify-center"
               style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset", opacity: page === pages.length-1 ? 0.35 : 1, cursor: page === pages.length-1 ? "default" : "pointer" }}
-              aria-label="Next page">›</button>
+              aria-label={t.nextPage}>›</button>
           </div>
 
           <div className="flex flex-wrap gap-3 mt-4">
@@ -1470,16 +1508,17 @@ function StoryResult({ pages, lang, t, onAgain }) {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
 // ─── Fallback helpers (no WebGPU path) ─────────────────────────────────────────
-function pickShapeFromText(text, lang) {
-  // Ordered most-specific → most-general; whole-word match (a keyword must equal
-  // a full word, so "mare"/sea never matches "re"/king). Plurals/diminutives are
-  // listed explicitly. First matching shape wins.
-  const keywords = lang === 'it' ? {
+// Shape keyword tables (module scope so shapeLabel can reuse them). Ordered
+// most-specific to most-general; whole-word match, so "mare"/sea never matches
+// "re"/king. The FIRST keyword of each list doubles as the shape's human name,
+// which is how a screen reader is told which picture was chosen.
+const SHAPE_KEYWORDS = {
+  it: {
     teddy_bear:['orsacchiotto','orsacchiotti','peluche'],
     unicorn:['unicorno','unicorni'], dragon:['drago','draghi','draghetto'],
     mermaid:['sirena','sirene'], fairy:['fata','fate','fatina'],
@@ -1525,7 +1564,8 @@ function pickShapeFromText(text, lang) {
     castle_tower:['castello','castelli','palazzo','torre'], lighthouse:['faro','fari'],
     person_child:['bambino','bambina','bimbo','bimba','bambini'],
     person_standing:['persona','uomo','donna','amico','amica']
-  } : {
+  },
+  en: {
     teddy_bear:['teddy'], unicorn:['unicorn','unicorns'], dragon:['dragon','dragons'],
     mermaid:['mermaid','mermaids'], fairy:['fairy','fairies','pixie'],
     witch:['witch','witches'], wizard:['wizard','wizards','sorcerer'],
@@ -1564,12 +1604,27 @@ function pickShapeFromText(text, lang) {
     leaf:['leaf','leaves'], house_simple:['house','home','cottage'],
     castle_tower:['castle','castles','palace','tower'], lighthouse:['lighthouse'],
     person_child:['child','girl','boy','kid'], person_standing:['person','man','woman','friend']
-  };
+  }
+};
+
+function pickShapeFromText(text, lang) {
+  const keywords = SHAPE_KEYWORDS[lang === 'it' ? 'it' : 'en'];
   const wset = new Set(text.toLowerCase().split(/[^a-zàèéìòù]+/).filter(Boolean));
   for (const [shape, keys] of Object.entries(keywords)) {
     if (keys.some(k => wset.has(k))) return shape;
   }
   return 'star';
+}
+
+// Human-readable name of a shape in the given language, for screen-reader
+// announcements. Uses the first keyword (the canonical word) and falls back to
+// the shape id with suffixes stripped if a shape has no keyword list.
+function shapeLabel(shape, lang) {
+  const table = SHAPE_KEYWORDS[lang === 'it' ? 'it' : 'en'];
+  if (table[shape] && table[shape][0]) return table[shape][0];
+  const star = lang === 'it' ? 'stella' : 'star';
+  if (!shape || shape === 'star') return star;
+  return shape.replace(/_(sitting|standing|simple|flying|perched|small|sailboat)$/,'').replace(/_/g,' ');
 }
 
 // Does the given list of words fit within `maxLines` Braille rows?
@@ -1629,7 +1684,6 @@ function App() {
   const [text,  setText]  = useState("");
   const [pages, setPages] = useState(null);
   const [loadingMsg,      setLoadingMsg]      = useState("");
-  const [loadingNote,     setLoadingNote]     = useState("");
   const [loadingProgress, setLoadingProgress] = useState(null);
   const t = COPY[lang];
 
@@ -1692,7 +1746,6 @@ function App() {
   const doSubmit = async (q) => {
     setPhase("loading");
     setLoadingMsg(t.weaving);
-    setLoadingNote("");
     setLoadingProgress(null);
     loaderRef.current = window.SFX && window.SFX.startLoader ? window.SFX.startLoader() : null;
 
@@ -1712,11 +1765,9 @@ function App() {
           storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel, fromCache) => {
             if (pct < 1) {
               setLoadingMsg((fromCache ? t.modelCached : t.modelDownloading) + (modelLabel ? " · " + modelLabel : ""));
-              setLoadingNote(fromCache ? "" : t.firstTimeNote);
               setLoadingProgress(pct);
             } else {
               setLoadingMsg(t.generating);
-              setLoadingNote("");
               setLoadingProgress(null);
             }
           });
@@ -1759,7 +1810,7 @@ function App() {
     if (srRef.current) { srRef.current.stop(); srRef.current = null; }
     window.SFX && window.SFX.play("tap");
     setPages(null); setText(""); setPhase("idle");
-    setLoadingMsg(""); setLoadingNote(""); setLoadingProgress(null);
+    setLoadingMsg(""); setLoadingProgress(null);
   };
 
   return (
@@ -1789,7 +1840,7 @@ function App() {
 
             <div className="flex flex-col items-center gap-4 rise-slow mt-2">
               <MicButton state={phase === "listening" ? "listening" : "idle"} onClick={toggleListen} t={t} />
-              <div className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: phase === "listening" ? "var(--ink)" : "var(--muted)" }}>
+              <div aria-hidden="true" className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: phase === "listening" ? "var(--ink)" : "var(--muted)" }}>
                 {phase === "listening" ? t.listening : t.tap}
               </div>
             </div>
@@ -1800,6 +1851,7 @@ function App() {
                 style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}
                 onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}>
                 <input ref={inputRef} type="text" value={text} onChange={(e) => setText(e.target.value)}
+                  aria-label={t.inputLabel}
                   placeholder={t.placeholder} className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
                   style={{ color: "var(--ink)" }} />
                 <button type="submit" disabled={!text.trim()} className="btn"
@@ -1810,7 +1862,7 @@ function App() {
             </div>
 
             <div className="w-full mt-2">
-              <HintMarquee hints={t.hints} onPick={(h) => { setText(h); inputRef.current && inputRef.current.focus(); }} />
+              <HintMarquee hints={t.hints} useIdeaLabel={t.useIdea} onPick={(h) => { setText(h); inputRef.current && inputRef.current.focus(); }} />
             </div>
           </div>
 
@@ -1820,7 +1872,7 @@ function App() {
         </main>
       )}
 
-      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} note={loadingNote} />}
+      {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} />}
       {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
     </div>
   );
