@@ -565,7 +565,7 @@ window.TACT = (function () {
   // We ask the model only for PLAIN STORY TEXT — not structured JSON. In-browser
   // models write decent prose but are unreliable at strict JSON schemas. Page
   // split and illustration-shape selection happen deterministically on the
-  // client (paginateByLines / pickShapeFromText).
+  // client (paginateStory / pickShapeFromText).
   //
   // The craft brief is tuned for the audience: young BLIND children. We favour
   // touch, sound, warmth and movement over colour and sight, give a clear
@@ -573,15 +573,16 @@ window.TACT = (function () {
   // story come alive under the fingers.
   var SYSTEM_PROMPT =
     'You are a beloved children\'s picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n' +
-    'Write a SHORT story from the user\'s idea. Craft it with care:\n' +
-    '- Give it a clear arc: a calm beginning, one small wish or problem, and a warm, satisfying ending.\n' +
+    'Write a complete little story from the user\'s idea. Craft it with care:\n' +
+    '- Give it a clear arc: a calm beginning, a small wish or problem, a turn, and a warm, satisfying ending.\n' +
     '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
-    '- Use concrete, simple words a 6-year-old knows. Keep sentences short.\n' +
+    '- Use concrete, simple words a 6-year-old knows.\n' +
+    '- Let the sentences flow and vary in length. Join ideas with words like and, but, so, until, while, because. Some sentences are short; several run longer and carry the reader along. Never write a long chain of tiny three or four word sentences.\n' +
     '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n' +
-    '- About 65 to 75 words, in 7 to 9 short sentences — enough to fill the page well.\n\n' +
+    '- Write about 75 to 85 words, in flowing sentences that together fill two full pages.\n\n' +
     'Output ONLY the story prose — no title, no quotation marks, no notes, no markdown. Write in the SAME language as the request.\n\n' +
-    'Example of the warmth and style to aim for (English):\n' +
-    'The little snail felt the cool dew on her shell. Today I will climb the tall leaf, she whispered. Slowly, slowly, she went up, her belly feeling every bump of the stem. Birds sang somewhere warm and near. At the top, the sun hugged her tight. Slowly, slowly, she smiled.';
+    'Example of the warmth, flow, and length to aim for (English):\n' +
+    'The little snail woke to the cool dew resting along her shell, and she decided that today she would climb the tall leaf that swayed above her. Slowly, slowly she began to climb, her soft belly feeling every bump of the green stem, while somewhere warm and near the birds sang a song she almost knew. The wind pushed against her and she held on tighter, until the sun wrapped around her like a warm blanket and she smiled and rested at the very top.';
 
   // Strip anything that isn't story prose (a stray title line, quotes, fences).
   function _cleanStoryText(raw) {
@@ -616,7 +617,7 @@ window.TACT = (function () {
           temperature: 0.85,
           top_p: 0.9,
           frequency_penalty: 0.3,
-          max_tokens: 320
+          max_tokens: 600
         });
       }).then(function (reply) {
         var text = _cleanStoryText(reply.choices[0].message.content);
@@ -652,17 +653,23 @@ window.TACT = (function () {
   // left BESIDE a bottom-right corner illustration. Lines lay top-down from
   // LINE_Y0, left-aligned at TZ_X.
   var TZ_X=10, CELL_W=6.0, LINE_H=10.0, LINE_Y0=135;
-  var LINE_WIDTHS=[21,21,21,21,21,21,21,12,12,12,12,12,12]; // 7 full + 6 narrow
+  // Two page profiles. ILLUSTRATED pages (odd) keep the L-shape: full rows on top,
+  // narrow rows down the left beside a bottom-right picture. TEXT pages (even) drop
+  // the picture and use the whole width on every line, so they hold more of the
+  // story and read as full. Both share the same 13 line positions.
+  var LINE_WIDTHS=[21,21,21,21,21,21,21,12,12,12,12,12,12]; // 7 full + 6 narrow (illustrated)
+  var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,21]; // 13 full (text-only)
   // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
   var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
   // Illustration zone: bottom-right corner, with the 6 narrow rows (12-cell text
   // ends at x≤82) running down its left side at the same height.
   var ILL_X=86, ILL_Y=12, ILL_W=54, ILL_H=54, ILL_ABOVE=0.9, ILL_PIX=2;
 
-  // Wrap cells into lines whose max width varies per line (LINE_WIDTHS).
-  function layoutLines(cells) {
+  // Wrap cells into lines whose max width varies per line (widths profile).
+  function layoutLines(cells, widths) {
+    widths = widths || LINE_WIDTHS;
     var lines=[],line=[],ls=-1;
-    var cap=function(){ var i=lines.length; return LINE_WIDTHS[i<LINE_WIDTHS.length?i:LINE_WIDTHS.length-1]; };
+    var cap=function(){ var i=lines.length; return widths[i<widths.length?i:widths.length-1]; };
     for(var i=0;i<cells.length;i++){
       var c=cells[i];
       if(c==='BR'){lines.push(line);line=[];ls=-1;continue;}
@@ -758,11 +765,14 @@ window.TACT = (function () {
     img.src=blobUrl;
   }
 
-  function generateSTL(brailleCells,pageNum,slug,illPillars){
+  // full: text-only page (even) uses the full-width profile and draws no picture.
+  // Otherwise the L-shaped illustrated profile is used and illPillars are raised.
+  function generateSTL(brailleCells,pageNum,slug,illPillars,full){
+    var widths = full ? LINE_WIDTHS_FULL : LINE_WIDTHS;
     var tris=[];
     box(tris,0,0,0,PAGE_W,PAGE_H,BASE_H);
-    var lines=layoutLines(brailleCells);
-    lines.slice(0,LINE_WIDTHS.length).forEach(function(line,li){
+    var lines=layoutLines(brailleCells,widths);
+    lines.slice(0,widths.length).forEach(function(line,li){
       var cy=LINE_Y0-li*LINE_H;
       line.forEach(function(cell,ci){
         if(!cell||!cell.length)return;
@@ -794,9 +804,12 @@ window.TACT = (function () {
 
   window.TACT.generateSTL=generateSTL;
 
+  // Even pages (pageNum 2,4,...) are text-only: full-width profile, no picture.
+  // Odd pages carry the illustration from svgUrl in the L-shaped profile.
   window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl){
+    var full = (pageNum % 2 === 0);
     function finish(pil){
-      var buf=generateSTL(brailleCells,pageNum,slug,pil);
+      var buf=generateSTL(brailleCells,pageNum,slug,pil,full);
       var blob=new Blob([buf],{type:'application/octet-stream'});
       var url=URL.createObjectURL(blob);
       var a=document.createElement('a');
@@ -805,7 +818,7 @@ window.TACT = (function () {
       document.body.appendChild(a);a.click();
       setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
     }
-    if(svgUrl){
+    if(svgUrl && !full){
       fetch(svgUrl)
         .then(function(r){return r.ok?r.text():Promise.reject();})
         .then(function(txt){rasterizeIll(txt,finish);})
@@ -820,7 +833,7 @@ window.TACT = (function () {
   window.TACT_LAYOUT = {
     PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H,
     TZ_X: TZ_X, CELL_W: CELL_W, LINE_H: LINE_H, LINE_Y0: LINE_Y0,
-    LINE_WIDTHS: LINE_WIDTHS, DOFF: DOFF, DOT_R: DOT_R,
+    LINE_WIDTHS: LINE_WIDTHS, LINE_WIDTHS_FULL: LINE_WIDTHS_FULL, DOFF: DOFF, DOT_R: DOT_R,
     ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H
   };
 })();
@@ -1016,8 +1029,13 @@ function layoutBrailleLines(cells, cellsPerLine = 22) {
 // printed page. Full-width rows on top, then narrow rows down the left side
 // beside (and below) the bottom-right corner illustration.
 const LAYOUT = window.TACT_LAYOUT;
-const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;
+const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;              // illustrated pages (odd): L-shape
+const LINE_WIDTHS_FULL = LAYOUT.LINE_WIDTHS_FULL;   // text-only pages (even): full width
 const FULL_LINE_CELLS = LINE_WIDTHS[0];
+// Page profile by 1-based page number: odd pages carry the illustration, even
+// pages are text-only. Kept in one place so pagination, preview and STL agree.
+const isTextOnlyPage = (pageNumber) => pageNumber % 2 === 0;
+const widthsForPage = (pageNumber) => isTextOnlyPage(pageNumber) ? LINE_WIDTHS_FULL : LINE_WIDTHS;
 
 // Like layoutBrailleLines but each line's max width comes from LINE_WIDTHS.
 function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS) {
@@ -1366,14 +1384,19 @@ function StoryResult({ pages, lang, t, onAgain }) {
   // Use Liblouis cells when available, JS fallback otherwise
   const cells = useMemo(() => p.brailleCells || textToBrailleCells(p.text), [p]);
 
+  // Odd pages carry the illustration (L-shape); even pages are text-only (full
+  // width). Derive from the page number so preview, STL and pagination agree.
+  const textOnly = isTextOnlyPage(page + 1);
+  const pageWidths = widthsForPage(page + 1);
+
   // True-to-scale dot layout in page millimetres — computed from the SAME
   // geometry the STL uses (window.TACT_LAYOUT), so the preview is an exact mirror
   // of the printed page. Every cell shows all 6 dot positions; raised dots are
   // dark, unraised are faint. Coordinates are converted to SVG space (y-down).
   const dots = useMemo(() => {
     const L = LAYOUT, out = [];
-    const lines = layoutBrailleLinesVar(cells);
-    lines.slice(0, L.LINE_WIDTHS.length).forEach((line, li) => {
+    const lines = layoutBrailleLinesVar(cells, pageWidths);
+    lines.slice(0, pageWidths.length).forEach((line, li) => {
       const baseY = L.LINE_Y0 - li * L.LINE_H;
       line.forEach((cell, ci) => {
         const cellX = L.TZ_X + ci * L.CELL_W;
@@ -1385,7 +1408,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
       });
     });
     return out;
-  }, [cells]);
+  }, [cells, pageWidths]);
 
   // Illustration zone as a percentage of the page (mm → %), matching the STL.
   const L = LAYOUT;
@@ -1405,14 +1428,15 @@ function StoryResult({ pages, lang, t, onAgain }) {
   const headingRef = useRef(null);
   const didAnnounce = useRef(false);
   const [liveText, setLiveText] = useState("");
-  const shape = p.illustration?.elements?.[0]?.shape || 'star';
-  const illName = shapeLabel(shape, lang);
+  const shape = p.illustration?.elements?.[0]?.shape || null;
+  const illName = shape ? shapeLabel(shape, lang) : null;
 
   useEffect(() => { if (headingRef.current) headingRef.current.focus(); }, []);
   useEffect(() => {
     const prefix = didAnnounce.current ? "" : (t.ready + " ");
     didAnnounce.current = true;
-    setLiveText(`${prefix}${t.page} ${page + 1} ${t.of} ${pages.length}. ${t.pictureShows} ${illName}. ${p.text}`);
+    const picture = illName ? ` ${t.pictureShows} ${illName}.` : "";
+    setLiveText(`${prefix}${t.page} ${page + 1} ${t.of} ${pages.length}.${picture} ${p.text}`);
   }, [page]);
 
   return (
@@ -1446,14 +1470,17 @@ function StoryResult({ pages, lang, t, onAgain }) {
             </svg>
 
             {/* Illustration in its true mm zone (bottom-right), with the L-shaped
-                dotted divider (top + left edges) at the exact zone boundary. */}
-            <div style={{ position: "absolute", ...illBox,
-                borderTop: "1px dashed rgba(10,10,12,0.22)",
-                borderLeft: "1px dashed rgba(10,10,12,0.22)",
-                padding: "3%",
-                display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ShapeRenderer illustration={p.illustration} />
-            </div>
+                dotted divider (top + left edges) at the exact zone boundary.
+                Only on illustrated (odd) pages; text-only pages use full width. */}
+            {!textOnly && p.illustration && (
+              <div style={{ position: "absolute", ...illBox,
+                  borderTop: "1px dashed rgba(10,10,12,0.22)",
+                  borderLeft: "1px dashed rgba(10,10,12,0.22)",
+                  padding: "3%",
+                  display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ShapeRenderer illustration={p.illustration} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -1490,9 +1517,14 @@ function StoryResult({ pages, lang, t, onAgain }) {
           <div className="flex flex-wrap gap-3 mt-4">
             <button className="btn" onClick={() => {
               window.SFX && window.SFX.play("download");
-              const shape = p.illustration?.elements?.[0]?.shape || 'star';
-              const relPath = SHAPE_PATHS[shape] || 'objects/star';
-              window.TACT.downloadSTL(cells, page + 1, 'tact', 'shapes/' + relPath + '.svg');
+              // Text-only (even) pages carry no illustration; pass no SVG so the
+              // STL uses the full-width profile.
+              let svgUrl = null;
+              if (!textOnly && shape) {
+                const relPath = SHAPE_PATHS[shape] || 'objects/star';
+                svgUrl = 'shapes/' + relPath + '.svg';
+              }
+              window.TACT.downloadSTL(cells, page + 1, 'tact', svgUrl);
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               {t.download}
@@ -1627,53 +1659,80 @@ function shapeLabel(shape, lang) {
   return shape.replace(/_(sitting|standing|simple|flying|perched|small|sailboat)$/,'').replace(/_/g,' ');
 }
 
-// Does the given list of words fit within `maxLines` Braille rows?
-function wordsFit(words, maxLines) {
-  return layoutBrailleLinesVar(textToBrailleCells(words.join(' '))).length <= maxLines;
+// How many Braille rows a run of words needs under a given width profile.
+function lineCount(words, widths) {
+  return layoutBrailleLinesVar(textToBrailleCells(words.join(' ')), widths).length;
+}
+// Does this run of words fit within the profile's row count?
+function wordsFit(words, widths) {
+  return lineCount(words, widths) <= widths.length;
 }
 
-// Paginate by Braille line capacity AND balance words across pages, so a story
-// never leaves a near-empty last page (e.g. 50 words → [25,25], not [37,13]).
-// We find the fewest pages P whose EVEN split fits every page, then split evenly.
-// Even, well-filled pages read as intentional instead of an orphaned tail.
-function paginateByLines(text) {
+// Paginate a story respecting the per-page profile: odd pages hold less (the
+// illustration eats the bottom-right corner), even pages hold the full width.
+// Fill each page to capacity so no page is left with empty rows, then, if the
+// last page came out sparse, rebalance just the final two so the story does not
+// end on a near-empty card.
+function paginateStory(text) {
   const words = text.split(/\s+/).filter(w => w.length > 0);
   if (!words.length) return [text];
-  const maxLines = LINE_WIDTHS.length;
 
-  // Lower bound: greedy fill tells us the minimum number of pages needed.
-  let minPages = 0, cur = [];
-  for (const w of words) {
-    if (cur.length && !wordsFit(cur.concat(w), maxLines)) { minPages++; cur = [w]; }
-    else cur.push(w);
+  // Greedy fill: take as many words as each page's profile allows, in order.
+  const pages = [];
+  let i = 0, pageNum = 1;
+  while (i < words.length) {
+    const widths = widthsForPage(pageNum);
+    let cur = [];
+    while (i < words.length) {
+      if (cur.length && !wordsFit(cur.concat(words[i]), widths)) break;
+      cur.push(words[i]); i++;
+    }
+    if (!cur.length) { cur.push(words[i]); i++; } // safety: never stall on one long word
+    pages.push(cur);
+    pageNum++;
   }
-  if (cur.length) minPages++;
-  minPages = Math.max(minPages, 1);
 
-  // Grow P until an even split fits every page, then return that balanced split.
-  for (let P = minPages; P <= words.length; P++) {
-    const per = Math.ceil(words.length / P);
-    const groups = [];
-    for (let i = 0; i < words.length; i += per) groups.push(words.slice(i, i + per));
-    if (groups.length <= P && groups.every(g => wordsFit(g, maxLines))) {
-      return groups.map(g => g.join(' '));
+  // If the last page is under half full, slide the boundary with the page before
+  // it to even the two out (keeps every earlier page full).
+  if (pages.length >= 2) {
+    const lastNum = pages.length;
+    const wLast = widthsForPage(lastNum), wPrev = widthsForPage(lastNum - 1);
+    if (lineCount(pages[lastNum - 1], wLast) < wLast.length / 2) {
+      const merged = pages[lastNum - 2].concat(pages[lastNum - 1]);
+      let best = null;
+      for (let k = 1; k < merged.length; k++) {
+        const a = merged.slice(0, k), b = merged.slice(k);
+        if (wordsFit(a, wPrev) && wordsFit(b, wLast)) {
+          const score = Math.min(lineCount(a, wPrev) / wPrev.length, lineCount(b, wLast) / wLast.length);
+          if (!best || score > best.score) best = { a, b, score };
+        }
+      }
+      if (best) { pages[lastNum - 2] = best.a; pages[lastNum - 1] = best.b; }
     }
   }
-  return [words.join(' ')];
+
+  return pages.map(g => g.join(' '));
 }
 
-// Turn a block of story text into page objects (text + keyword-picked illustration).
-// Used for both the AI path (LLM-written story) and the no-AI path (user's own words).
+// Turn a story into page objects. Odd pages (1,3,5…) carry an illustration; even
+// pages are text-only (see isTextOnlyPage). Each illustrated page picks a shape
+// from its OWN text so a multi-page story can vary its pictures, falling back to
+// the story's main subject when a page names nothing in the shape library.
 function buildPages(storyText, lang) {
-  return paginateByLines(storyText).map((text, idx) => ({
-    page_number: idx + 1,
-    text: text,
-    illustration: {
-      scene: text,
-      layout_hint: "center",
-      elements: [{ shape: pickShapeFromText(text, lang), scale: 1.0, position: "center", mirror: false }]
+  const mainShape = pickShapeFromText(storyText, lang);
+  return paginateStory(storyText).map((text, idx) => {
+    const pageNumber = idx + 1;
+    let illustration = null;
+    if (!isTextOnlyPage(pageNumber)) {
+      let shape = pickShapeFromText(text, lang);
+      if (shape === 'star') shape = mainShape; // no subject on this page → anchor
+      illustration = {
+        scene: text, layout_hint: "center",
+        elements: [{ shape, scale: 1.0, position: "center", mirror: false }]
+      };
     }
-  }));
+    return { page_number: pageNumber, text, full: isTextOnlyPage(pageNumber), illustration };
+  });
 }
 
 // ─── Main app ─────────────────────────────────────────────────────────────────
@@ -1785,7 +1844,7 @@ function App() {
         let brailleCells = null;
         try { brailleCells = await window.TACT.translateBraille(p.text, lang); }
         catch (e) { /* JS fallback used in StoryResult */ }
-        return { text: p.text, illustration: p.illustration, brailleCells, demo: isDemo };
+        return { text: p.text, illustration: p.illustration, full: p.full, brailleCells, demo: isDemo };
       }));
 
       stopLoader();
