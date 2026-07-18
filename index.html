@@ -647,6 +647,7 @@ window.TACT = (function () {
   // Square page (fits the 220×220 bed with margins). Matches the square page the
   // design sketches assume; the preview mirrors this exactly.
   var PAGE_W=150, PAGE_H=150, BASE_H=0.5;
+  var CORNER_R=10; // rounded page corners (mm) — soft to hold, matches the preview
   var DOT_R=0.8, DOT_TOTAL_H=0.85, CYL_H=0.35;
   // L-shaped text layout — MIRRORS the React LINE_WIDTHS profile so the print
   // matches the preview: full-width rows on top, narrower rows running down the
@@ -700,6 +701,40 @@ window.TACT = (function () {
     T([x0,y1,z0],[x1,y1,z1],[x1,y1,z0]);T([x0,y1,z0],[x0,y1,z1],[x1,y1,z1]); // back
     T([x0,y0,z0],[x0,y0,z1],[x0,y1,z1]);T([x0,y0,z0],[x0,y1,z1],[x0,y1,z0]); // left
     T([x1,y0,z0],[x1,y1,z0],[x1,y1,z1]);T([x1,y0,z0],[x1,y1,z1],[x1,y0,z1]); // right
+  }
+
+  // Counter-clockwise outline of a rounded rectangle (viewed from +z).
+  function roundedRectPts(x0,y0,x1,y1,r,seg){
+    r=Math.min(r,(x1-x0)/2,(y1-y0)/2);
+    var pts=[], corners=[
+      [x1-r,y0+r,-90,0],  // bottom-right
+      [x1-r,y1-r,0,90],   // top-right
+      [x0+r,y1-r,90,180], // top-left
+      [x0+r,y0+r,180,270] // bottom-left
+    ];
+    corners.forEach(function(c){
+      var a0=c[2]*Math.PI/180, a1=c[3]*Math.PI/180;
+      for(var i=0;i<=seg;i++){
+        var a=a0+(a1-a0)*i/seg;
+        pts.push([c[0]+r*Math.cos(a), c[1]+r*Math.sin(a)]);
+      }
+    });
+    return pts;
+  }
+
+  // Base plate as a rounded-rectangle slab: fan-triangulated top and bottom
+  // faces plus a wall around the rounded perimeter. Replaces the sharp-cornered
+  // box so the printed page has the soft corners shown in the preview.
+  function roundedSlab(tris,x0,y0,x1,y1,z0,z1,r,seg){
+    var pts=roundedRectPts(x0,y0,x1,y1,r,seg);
+    var cx=(x0+x1)/2, cy=(y0+y1)/2, n=pts.length, T=tri.bind(null,tris);
+    for(var i=0;i<n;i++){
+      var p=pts[i], q=pts[(i+1)%n];
+      T([cx,cy,z1],[p[0],p[1],z1],[q[0],q[1],z1]);        // top face (up)
+      T([cx,cy,z0],[q[0],q[1],z0],[p[0],p[1],z0]);        // bottom face (down)
+      T([p[0],p[1],z0],[q[0],q[1],z0],[q[0],q[1],z1]);    // wall
+      T([p[0],p[1],z0],[q[0],q[1],z1],[p[0],p[1],z1]);
+    }
   }
 
   function dot(tris,cx,cy){
@@ -770,7 +805,7 @@ window.TACT = (function () {
   function generateSTL(brailleCells,pageNum,slug,illPillars,full){
     var widths = full ? LINE_WIDTHS_FULL : LINE_WIDTHS;
     var tris=[];
-    box(tris,0,0,0,PAGE_W,PAGE_H,BASE_H);
+    roundedSlab(tris,0,0,PAGE_W,PAGE_H,0,BASE_H,CORNER_R,8);
     var lines=layoutLines(brailleCells,widths);
     lines.slice(0,widths.length).forEach(function(line,li){
       var cy=LINE_Y0-li*LINE_H;
@@ -831,7 +866,7 @@ window.TACT = (function () {
   // Single source of truth for page geometry (mm), shared with the on-screen
   // preview so the preview is a true-to-scale mirror of the printed page.
   window.TACT_LAYOUT = {
-    PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H,
+    PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H, CORNER_R: CORNER_R,
     TZ_X: TZ_X, CELL_W: CELL_W, LINE_H: LINE_H, LINE_Y0: LINE_Y0,
     LINE_WIDTHS: LINE_WIDTHS, LINE_WIDTHS_FULL: LINE_WIDTHS_FULL, DOFF: DOFF, DOT_R: DOT_R,
     ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H
@@ -1449,11 +1484,11 @@ function StoryResult({ pages, lang, t, onAgain }) {
             Decorative for assistive tech: everything it shows is spoken above. */}
         <div className="col-span-7 rise" aria-hidden="true">
           <div className="relative mx-auto"
-            style={{ width: "100%", maxWidth: 520, aspectRatio: `${L.PAGE_W} / ${L.PAGE_H}`, borderRadius: 8,
+            style={{ width: "100%", maxWidth: 520, aspectRatio: `${L.PAGE_W} / ${L.PAGE_H}`, borderRadius: `${(L.CORNER_R / L.PAGE_W) * 100}%`,
               background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
               boxShadow: "0 0 0 1px rgba(10,10,12,0.08) inset, 0 50px 90px -40px rgba(10,10,12,0.35), 0 18px 40px -20px rgba(10,10,12,0.15)",
               transform: "rotate(-0.6deg)", overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, borderRadius: 8, pointerEvents: "none", opacity: 0.5,
+            <div style={{ position: "absolute", inset: 0, borderRadius: `${(L.CORNER_R / L.PAGE_W) * 100}%`, pointerEvents: "none", opacity: 0.5,
               backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
               mixBlendMode: "multiply" }} />
             <div className="mono absolute top-3 right-4 text-[9px] tracking-[0.2em] uppercase" style={{ color: "rgba(10,10,12,0.35)", zIndex: 2 }}>
