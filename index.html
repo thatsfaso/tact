@@ -594,11 +594,38 @@ window.TACT = (function () {
     return t;
   }
 
-  // Resolves to the story TEXT (a plain string).
-  // onProgress(progress 0-1, statusText, modelLabel).
-  function generateStory(prompt, lang, onProgress) {
-    if (!webgpuSupported) return Promise.reject(new Error('no-webgpu'));
+  // ── Cloud path ────────────────────────────────────────────────────────────
+  // A small Cloudflare Worker holds the API key, because a static page cannot
+  // keep a secret (see worker/). This path needs no model download, so a story
+  // arrives in seconds on any device, phones included.
+  //
+  // Leave CLOUD_ENDPOINT empty to disable it: the page then generates stories
+  // in the browser exactly as before. Nothing here is required for Tact to work.
+  var CLOUD_ENDPOINT = '';   // e.g. 'https://tact-story-proxy.<subdomain>.workers.dev'
 
+  function _generateStoryCloud(prompt, lang) {
+    if (!CLOUD_ENDPOINT) return Promise.reject(new Error('cloud-disabled'));
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 22000);
+    return fetch(CLOUD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, lang: lang }),
+      signal: ctrl.signal
+    }).then(function (r) {
+      if (!r.ok) throw new Error('cloud-http-' + r.status);
+      return r.json();
+    }).then(function (data) {
+      var text = _cleanStoryText(data && data.story);
+      if (!text || text.length < 8) throw new Error('empty-story');
+      return text;
+    }).finally(function () { clearTimeout(timer); });
+  }
+
+  // In-browser model: private and offline-capable, but needs WebGPU and a
+  // one-time model download.
+  // onProgress(progress 0-1, statusText, modelLabel, fromCache).
+  function _generateStoryWebLLM(prompt, lang, onProgress) {
     return import('https://esm.run/@mlc-ai/web-llm').then(function (webllm) {
       var enginePromise = _engine
         ? Promise.resolve(_engine)
@@ -627,8 +654,23 @@ window.TACT = (function () {
     });
   }
 
+  // Resolves to the story TEXT. Tries the fast cloud path first, then the
+  // in-browser model. If both are unavailable this rejects, and the caller
+  // turns the visitor's own words into a real Braille page instead — so there
+  // is never a dead end, only a shorter story.
+  function generateStory(prompt, lang, onProgress) {
+    return _generateStoryCloud(prompt, lang).catch(function (cloudErr) {
+      if (CLOUD_ENDPOINT) {
+        console.warn('[TACT] cloud story unavailable (' + cloudErr.message + '); trying the in-browser model');
+      }
+      if (!webgpuSupported) throw new Error('no-webgpu');
+      return _generateStoryWebLLM(prompt, lang, onProgress);
+    });
+  }
+
   return {
     webgpuSupported: webgpuSupported,
+    cloudEnabled: !!CLOUD_ENDPOINT,
     translateBraille: translateBraille,
     normalisePunctuation: normalisePunctuation,
     generateStory: generateStory,
@@ -1847,30 +1889,27 @@ function App() {
       let rawPages;
       let isDemo = false;
 
-      if (!window.TACT.webgpuSupported) {
-        // No WebGPU: the user's own words become the story (real Braille, not a demo).
-        setLoadingMsg(t.brailleTranslating);
-        await new Promise(r => setTimeout(r, 800));
-        rawPages = buildPages(q, lang);
-      } else {
-        // AI path: the model writes the story TEXT, then we build pages deterministically.
-        let storyText = null;
-        try {
-          storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel, fromCache) => {
-            if (pct < 1) {
-              setLoadingMsg((fromCache ? t.modelCached : t.modelDownloading) + (modelLabel ? " · " + modelLabel : ""));
-              setLoadingProgress(pct);
-            } else {
-              setLoadingMsg(t.generating);
-              setLoadingProgress(null);
-            }
-          });
-        } catch (llmErr) {
-          console.warn('[TACT] LLM unavailable, using the prompt text directly:', llmErr.message);
-          isDemo = true; // mark that the AI writing step didn't run
-        }
-        rawPages = buildPages(storyText || q, lang);
+      // Try the AI paths in order: the cloud proxy (instant, any device), then
+      // the in-browser model (private, needs WebGPU and a download). If neither
+      // is available the visitor's own words still become a real Braille page,
+      // so there is never a dead end.
+      let storyText = null;
+      setLoadingMsg(t.generating);
+      try {
+        storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel, fromCache) => {
+          if (pct < 1) {
+            setLoadingMsg((fromCache ? t.modelCached : t.modelDownloading) + (modelLabel ? " · " + modelLabel : ""));
+            setLoadingProgress(pct);
+          } else {
+            setLoadingMsg(t.generating);
+            setLoadingProgress(null);
+          }
+        });
+      } catch (llmErr) {
+        console.warn('[TACT] no AI path available, using the prompt text directly:', llmErr.message);
+        isDemo = true; // mark that the AI writing step didn't run
       }
+      rawPages = buildPages(storyText || q, lang);
 
       setLoadingMsg(t.brailleTranslating);
       setLoadingProgress(null);
@@ -1915,7 +1954,7 @@ function App() {
         <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
           <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center">
 
-            {!window.TACT.webgpuSupported && (
+            {!window.TACT.cloudEnabled && !window.TACT.webgpuSupported && (
               <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full"
                 style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)' }}>
                 {t.demoNotice}

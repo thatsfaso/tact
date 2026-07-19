@@ -161,6 +161,16 @@ MIT — free to use, fork, and adapt, including for schools, libraries, and nonp
 
 ---
 
+## Related work
+
+**[tatto.dev](https://github.com/francescogiuliani87/tatto.dev)** — by **Francesco Giuliani**
+
+An independent fork that rebuilt Tact as a production web application. It replaces the in-browser language model with a fast server-side one, so a story arrives in seconds on any device with no model download; cuts the JavaScript payload by roughly 94%; moves the codebase to TypeScript with a modular architecture and unit tests on the Braille tables; adds SEO infrastructure, a reader mode and a responsive navigation; and fixes a bug where the Italian toggle still produced English stories.
+
+The idea of reaching a language model over the network, rather than downloading one into the browser, comes from that work and is the reason Tact now offers the same option. The two projects share no code and evolve independently.
+
+---
+
 <div align="center">
 <sub>Built on one conviction: a blind child's imagination shouldn't be limited by what a publisher already decided was worth printing.</sub>
 </div>
