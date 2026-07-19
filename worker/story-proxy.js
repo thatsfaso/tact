@@ -67,6 +67,14 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(origin, allowed) });
     }
+
+    // Health check: confirms the Worker is deployed and whether the key is set,
+    // without revealing it and without spending a request on the model.
+    // curl https://<worker-url>/health
+    if (request.method === 'GET' && new URL(request.url).pathname === '/health') {
+      return reply({ ok: true, configured: !!env.AGNES_API_KEY, model: AGNES_MODEL }, 200, origin, allowed);
+    }
+
     if (!allowed) return reply({ error: 'origin' }, 403, origin, false);
     if (request.method !== 'POST') return reply({ error: 'method' }, 405, origin, allowed);
     if (!env.AGNES_API_KEY) return reply({ error: 'unconfigured' }, 503, origin, allowed);

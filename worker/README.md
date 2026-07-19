@@ -32,6 +32,17 @@ npx wrangler deploy
 `wrangler deploy` prints the Worker URL, something like
 `https://tact-story-proxy.<your-subdomain>.workers.dev`.
 
+Check it is alive and that the key was stored, without spending a request on
+the model:
+
+```bash
+curl https://tact-story-proxy.<your-subdomain>.workers.dev/health
+# {"ok":true,"configured":true,"model":"agnes-2.0-flash"}
+```
+
+`configured: false` means the secret is missing: run `wrangler secret put
+AGNES_API_KEY` again and redeploy.
+
 Put that URL in `index.html`, in the `CLOUD_ENDPOINT` constant near the top of
 the story-generation script. Leaving it empty disables the cloud path entirely
 and the page uses in-browser generation, which is a safe default.
