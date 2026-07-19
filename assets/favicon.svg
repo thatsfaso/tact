@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Tact mark: one Braille cell. Dots 1, 2, 5 and 6 raised, 3 and 4 flat,
+       the same pattern the site header shows. -->
+  <rect width="64" height="64" rx="14" fill="#0a0a0c"/>
+  <g fill="#fafaf7">
+    <circle cx="23" cy="19" r="6.2"/>
+    <circle cx="23" cy="32" r="6.2"/>
+    <circle cx="41" cy="32" r="6.2"/>
+    <circle cx="41" cy="45" r="6.2"/>
+  </g>
+  <g fill="#fafaf7" opacity="0.2">
+    <circle cx="23" cy="45" r="6.2"/>
+    <circle cx="41" cy="19" r="6.2"/>
+  </g>
+</svg>
