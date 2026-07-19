@@ -1,0 +1,6 @@
+name = "tact-story-proxy"
+main = "story-proxy.js"
+compatibility_date = "2026-01-01"
+
+# The Agnes API key is NOT stored here. Set it as an encrypted secret:
+#   npx wrangler secret put AGNES_API_KEY
