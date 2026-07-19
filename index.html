@@ -6,7 +6,52 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>Tact — tell me a story</title>
+<title>Tact by Iliano Fasolino — Braille storybooks you can print at home</title>
+<meta name="description" content="Tact, created by Iliano Fasolino, turns a spoken or typed idea into a Braille page with a raised tactile picture, ready to print on a home 3D printer. Free, open source, Italian and English." />
+<meta name="author" content="Iliano Fasolino" />
+<link rel="canonical" href="https://tactbraille.com/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Tact" />
+<meta property="og:title" content="Tact by Iliano Fasolino — Braille storybooks you can print at home" />
+<meta property="og:description" content="A story a blind child asks for, turned into a page they can read with their own hands, printed at home for the cost of the filament." />
+<meta property="og:url" content="https://tactbraille.com/" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Tact by Iliano Fasolino" />
+<meta name="twitter:description" content="Braille storybooks with raised tactile pictures, generated in the browser and printed at home." />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://tactbraille.com/#iliano-fasolino",
+      "name": "Iliano Fasolino",
+      "givenName": "Iliano",
+      "familyName": "Fasolino",
+      "jobTitle": "Independent researcher and designer",
+      "description": "Creator of Tact, an open source tool that turns spoken story ideas into printable Braille pages with tactile illustrations for blind children.",
+      "sameAs": ["https://github.com/thatsfaso/tact"]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Tact",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any modern web browser",
+      "url": "https://tactbraille.com/",
+      "description": "Turns a spoken or typed story idea into a Grade 1 Braille page with a raised tactile illustration, exported as a print-ready STL file for consumer FDM 3D printers.",
+      "author": { "@id": "https://tactbraille.com/#iliano-fasolino" },
+      "creator": { "@id": "https://tactbraille.com/#iliano-fasolino" },
+      "license": "https://opensource.org/licenses/MIT",
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+      "codeRepository": "https://github.com/thatsfaso/tact",
+      "inLanguage": ["it", "en"]
+    }
+  ]
+}
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -1206,6 +1251,33 @@ const COPY = {
     demoNotice: "AI writing off · your own words become real Braille",
     hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
     footer: "Open source · No account · Works with any FDM 3D printer",
+    help: {
+      button: "Help and printing guide",
+      title: "How to print, and how it works",
+      close: "Close",
+      groups: [
+        { name: "Printing", items: [
+          { q: "How do I print the page?",
+            a: "Download the .stl file and open it in your printer's slicing program (Cura, PrusaSlicer, OrcaSlicer, or whatever came with the machine). Lay the page flat on the bed and do not rotate it. You do not need supports, because the dots are low domes that print on their own. Set the layer height between 0.12 and 0.16 mm: at the standard 0.2 mm the dots come out squarer and are harder to feel. Infill at 15 percent is plenty, with a 0.4 mm nozzle. If the page struggles to stick to the bed, turn on a brim." },
+          { q: "Which material should I use?",
+            a: "Start with PLA. It is cheap, it prints well on any machine, and it tells you whether your settings are right. Once that works, move to PETG, which stands up much better to small hands and does not soften on a warm day. TPU is the nicest to touch, because the page stays soft and bends instead of snapping, but it is also the hardest to print, so leave it for last." },
+          { q: "What printer do I need?",
+            a: "Any FDM printer with a bed of at least 150 by 150 mm. Cheap machines are fine: an Ender 3, a Kingroon KP3S, an Elegoo Neptune all work. Nothing special is required, no unusual nozzle and no particular bed." },
+          { q: "I do not have a 3D printer",
+            a: "Many public libraries and fablabs have one and let people use it, often for free or close to it. Searching for \"fablab\" together with your town name usually finds them. There are also online printing services you can send the .stl file to, though the cost per page climbs a lot compared with printing it yourself." },
+        ]},
+        { name: "Reading the page", items: [
+          { q: "How is the page read?",
+            a: "The Braille sits at the top and takes the wider part of the page. When there is an illustration it sits in the bottom right corner, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
+          { q: "What is Grade 1 Braille?",
+            a: "It is Braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
+        ]},
+        { name: "About", items: [
+          { q: "Who made this?",
+            a: "Tact was created and built by Iliano Fasolino, an independent researcher and designer based in Milan, Italy. It started from a simple observation: a sighted child can ask for a story about anything and hold it that same evening, and a blind child cannot. All of the code is public and reusable under the MIT licence, at github.com/thatsfaso/tact." },
+        ]},
+      ],
+    },
     inputLabel: "Describe your story idea",
     useIdea: "Use this idea:",
     resultRegion: "Your finished story",
@@ -1250,6 +1322,33 @@ const COPY = {
     demoNotice: "Scrittura AI non attiva · le tue parole diventano Braille reale",
     hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
     footer: "Open source · Senza account · Funziona con ogni stampante FDM",
+    help: {
+      button: "Aiuto e guida alla stampa",
+      title: "Come si stampa, e come funziona",
+      close: "Chiudi",
+      groups: [
+        { name: "Stampa", items: [
+          { q: "Come stampo la pagina?",
+            a: "Scarica il file .stl e aprilo nel programma di slicing della tua stampante (Cura, PrusaSlicer, OrcaSlicer o quello fornito con la macchina). Appoggia la pagina piatta sul piano, senza ruotarla. Non servono supporti, perché i puntini sono cupole basse che si stampano da sole. Imposta l'altezza layer tra 0,12 e 0,16 mm: con lo strato standard da 0,2 mm i puntini vengono più squadrati e si sentono peggio. Il riempimento al 15 per cento basta, con ugello da 0,4 mm. Se la pagina fatica ad attaccarsi al piano, attiva il brim." },
+          { q: "Che materiale conviene usare?",
+            a: "Parti dal PLA. Costa poco, viene bene su qualsiasi macchina e ti dice se le impostazioni sono giuste. Quando funziona passa al PETG, che regge molto meglio le mani dei bambini e non si ammorbidisce in una giornata calda. Il TPU è il più bello da toccare, perché la pagina resta morbida e si piega invece di spezzarsi, ma è anche il più difficile da stampare, quindi lascialo per ultimo." },
+          { q: "Che stampante serve?",
+            a: "Una qualsiasi stampante FDM con un piano di almeno 150 per 150 mm. Vanno benissimo le macchine economiche: una Ender 3, una Kingroon KP3S o una Elegoo Neptune fanno il loro lavoro. Non serve niente di speciale, né un ugello particolare né un piano fuori dal comune." },
+          { q: "Non ho una stampante 3D",
+            a: "Molte biblioteche comunali e i fablab ne hanno una e la mettono a disposizione, spesso gratis o quasi. Di solito basta cercare \"fablab\" insieme al nome della tua città. Esistono anche service di stampa online a cui mandare il file .stl, anche se il costo per pagina sale parecchio rispetto a stamparla da sé." },
+        ]},
+        { name: "Leggere la pagina", items: [
+          { q: "Come si legge la pagina?",
+            a: "Il Braille sta in alto e occupa la parte più larga della pagina. Quando c'è un'illustrazione si trova nell'angolo in basso a destra, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
+          { q: "Cos'è il Braille di Grado 1?",
+            a: "È il Braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
+        ]},
+        { name: "Il progetto", items: [
+          { q: "Chi l'ha realizzato?",
+            a: "Tact è ideato e sviluppato da Iliano Fasolino, ricercatore e designer indipendente di Milano. Nasce da una constatazione semplice: un bambino che vede può chiedere una storia su qualunque cosa e tenerla in mano la sera stessa, un bambino cieco no. Tutto il codice è pubblico e riutilizzabile con licenza MIT, su github.com/thatsfaso/tact." },
+        ]},
+      ],
+    },
     inputLabel: "Descrivi la tua idea di storia",
     useIdea: "Usa questa idea:",
     resultRegion: "La tua storia finita",
@@ -1329,7 +1428,7 @@ function ShapeRenderer({ illustration }) {
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
-function Header({ lang, setLang, sound, setSound }) {
+function Header({ lang, setLang, sound, setSound, t, onHelp }) {
   return (
     <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6" style={{ zIndex: 5 }}>
       <div className="flex items-center gap-3">
@@ -1354,6 +1453,12 @@ function Header({ lang, setLang, sound, setSound }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
           )}
         </button>
+        <button onClick={onHelp}
+          className="focus-ring w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+          style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)" }}
+          aria-label={t.help.button}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+        </button>
         <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}>
           {["en", "it"].map((l) => (
             <button key={l} onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
@@ -1366,6 +1471,77 @@ function Header({ lang, setLang, sound, setSound }) {
         </div>
       </div>
     </header>
+  );
+}
+
+// ─── Help panel ───────────────────────────────────────────────────────────────
+// Built on native <details> elements: they are already operable by keyboard and
+// announced properly by screen readers, which matters more here than in most
+// places. Escape closes, focus moves into the panel on open and returns to the
+// button on close.
+function HelpPanel({ t, onClose }) {
+  const boxRef = useRef(null);
+
+  useEffect(() => {
+    if (boxRef.current) boxRef.current.focus();
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div onClick={onClose}
+      style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(10,10,12,0.35)",
+        backdropFilter: "blur(6px)", display: "flex", alignItems: "flex-start",
+        justifyContent: "center", padding: "6vh 24px", overflowY: "auto" }}>
+      <div role="dialog" aria-modal="true" aria-label={t.help.title}
+        ref={boxRef} tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className="rise"
+        style={{ width: "100%", maxWidth: 640, background: "var(--paper)", borderRadius: 22,
+          boxShadow: "0 40px 90px -30px rgba(10,10,12,0.5)", padding: "32px 34px 26px",
+          outline: "none" }}>
+
+        <div className="flex items-start justify-between gap-6 mb-6">
+          <h2 className="serif" style={{ fontSize: 30, lineHeight: 1.15, letterSpacing: "-0.01em" }}>
+            {t.help.title}
+          </h2>
+          <button onClick={onClose} aria-label={t.help.close}
+            className="focus-ring w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: "rgba(10,10,12,0.05)", color: "var(--ink)" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+
+        {t.help.groups.map((g) => (
+          <section key={g.name} className="mb-6">
+            <h3 className="mono text-[10px] uppercase tracking-[0.22em] mb-3"
+              style={{ color: "var(--muted-soft)" }}>{g.name}</h3>
+            {g.items.map((it) => (
+              <details key={it.q}
+                style={{ borderTop: "1px solid var(--hairline)", padding: "12px 0" }}>
+                <summary className="focus-ring"
+                  style={{ cursor: "pointer", fontSize: 16, lineHeight: 1.4, listStyle: "none",
+                    display: "flex", justifyContent: "space-between", gap: 16, alignItems: "baseline" }}>
+                  <span>{it.q}</span>
+                  <span aria-hidden="true" className="mono text-[13px] shrink-0"
+                    style={{ color: "var(--muted-soft)" }}>+</span>
+                </summary>
+                <p style={{ marginTop: 10, fontSize: 15, lineHeight: 1.6, color: "var(--muted)" }}>
+                  {it.a}
+                </p>
+              </details>
+            ))}
+          </section>
+        ))}
+
+        <p className="mono text-[10px] uppercase tracking-[0.18em] pt-2"
+          style={{ color: "var(--muted-soft)", borderTop: "1px solid var(--hairline)" }}>
+          Tact · Iliano Fasolino · MIT
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -1860,6 +2036,7 @@ function App() {
   const [phase, setPhase] = useState("idle");
   const [text,  setText]  = useState("");
   const [pages, setPages] = useState(null);
+  const [helpOpen,        setHelpOpen]        = useState(false);
   const [loadingMsg,      setLoadingMsg]      = useState("");
   const [loadingProgress, setLoadingProgress] = useState(null);
   const t = COPY[lang];
@@ -2010,7 +2187,8 @@ function App() {
 
   return (
     <div className="relative w-full h-full">
-      <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} />
+      <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} t={t} onHelp={() => { window.SFX && window.SFX.play("tap"); setHelpOpen(true); }} />
+      {helpOpen && <HelpPanel t={t} onClose={() => setHelpOpen(false)} />}
 
       {(phase === "idle" || phase === "listening") && (
         <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
