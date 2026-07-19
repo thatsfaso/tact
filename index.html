@@ -571,18 +571,22 @@ window.TACT = (function () {
   // touch, sound, warmth and movement over colour and sight, give a clear
   // little arc, and ask for gentle rhythm — the qualities that make a tactile
   // story come alive under the fingers.
-  var SYSTEM_PROMPT =
+  function buildSystemPrompt(lang) {
+    return (
     'You are a beloved children\'s picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n' +
     'Write a complete little story from the user\'s idea. Craft it with care:\n' +
     '- Give it a clear arc: a calm beginning, a small wish or problem, a turn, and a warm, satisfying ending.\n' +
     '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
     '- Use concrete, simple words a 6-year-old knows.\n' +
-    '- Let the sentences flow and vary in length. Join ideas with words like and, but, so, until, while, because. Some sentences are short; several run longer and carry the reader along. Never write a long chain of tiny three or four word sentences.\n' +
-    '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n' +
-    '- Write about 75 to 85 words, in flowing sentences that together fill two full pages.\n\n' +
+    '- Write about ' + (lang === 'it' ? '55' : '62') + ' words as ' + (lang === 'it' ? 'SIX or SEVEN' : 'SEVEN or EIGHT') + ' sentences in total. Never more than ' + (lang === 'it' ? 'seven' : 'eight') + '.\n' +
+    '- HARD LIMIT: the whole story must stay under ' + (lang === 'it' ? '64' : '72') + ' words. Going over ruins the printed page, so count as you write and stop before the limit.\n' +
+    '- Most sentences should run eight to fourteen words, joining ideas with words like and, but, so, until, while, because. Let one or two be short for rhythm. Never write a chain of tiny three or four word sentences.\n' +
+    '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n\n' +
     'Output ONLY the story prose — no title, no quotation marks, no notes, no markdown. Write in the SAME language as the request.\n\n' +
-    'Example of the warmth, flow, and length to aim for (English):\n' +
-    'The little snail woke to the cool dew resting along her shell, and she decided that today she would climb the tall leaf that swayed above her. Slowly, slowly she began to climb, her soft belly feeling every bump of the green stem, while somewhere warm and near the birds sang a song she almost knew. The wind pushed against her and she held on tighter, until the sun wrapped around her like a warm blanket and she smiled and rested at the very top.';
+    'Match the length, rhythm and sentence count of this example (English):\n' +
+    'The little snail woke to cool dew along her shell. Today, she decided, she would climb the tall leaf that swayed above her. Slowly, slowly she began, her soft belly feeling every bump of the green stem. Birds sang somewhere warm and near. The wind pushed against her, and she held on tighter until it passed. At the top, the sun wrapped around her like a blanket. She rested there, and she smiled.'
+    );
+  }
 
   // Strip anything that isn't story prose (a stray title line, quotes, fences).
   function _cleanStoryText(raw) {
@@ -601,16 +605,18 @@ window.TACT = (function () {
   //
   // Leave CLOUD_ENDPOINT empty to disable it: the page then generates stories
   // in the browser exactly as before. Nothing here is required for Tact to work.
-  var CLOUD_ENDPOINT = '';   // e.g. 'https://tact-story-proxy.<subdomain>.workers.dev'
+  var CLOUD_ENDPOINT = 'https://tact-story-proxy.tactbraille.workers.dev';
 
-  function _generateStoryCloud(prompt, lang) {
+  function _generateStoryCloud(prompt, lang, targetWords) {
     if (!CLOUD_ENDPOINT) return Promise.reject(new Error('cloud-disabled'));
     var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 22000);
+    // Slightly longer than the Worker's own timeout, so its error surfaces
+    // instead of the client aborting first and hiding the reason.
+    var timer = setTimeout(function () { ctrl.abort(); }, 45000);
     return fetch(CLOUD_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt, lang: lang }),
+      body: JSON.stringify({ prompt: prompt, lang: lang, targetWords: targetWords || 0 }),
       signal: ctrl.signal
     }).then(function (r) {
       if (!r.ok) throw new Error('cloud-http-' + r.status);
@@ -638,7 +644,7 @@ window.TACT = (function () {
         var userLang = lang === 'it' ? 'Italian' : 'English';
         return engine.chat.completions.create({
           messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: buildSystemPrompt(lang) },
             { role: 'user',   content: 'Write the story in ' + userLang + ' about: ' + prompt }
           ],
           temperature: 0.85,
@@ -658,8 +664,8 @@ window.TACT = (function () {
   // in-browser model. If both are unavailable this rejects, and the caller
   // turns the visitor's own words into a real Braille page instead — so there
   // is never a dead end, only a shorter story.
-  function generateStory(prompt, lang, onProgress) {
-    return _generateStoryCloud(prompt, lang).catch(function (cloudErr) {
+  function generateStory(prompt, lang, onProgress, targetWords) {
+    return _generateStoryCloud(prompt, lang, targetWords).catch(function (cloudErr) {
       if (CLOUD_ENDPOINT) {
         console.warn('[TACT] cloud story unavailable (' + cloudErr.message + '); trying the in-browser model');
       }
@@ -883,8 +889,11 @@ window.TACT = (function () {
 
   // Even pages (pageNum 2,4,...) are text-only: full-width profile, no picture.
   // Odd pages carry the illustration from svgUrl in the L-shaped profile.
-  window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl){
-    var full = (pageNum % 2 === 0);
+  window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl,fullPage){
+    // The page decides the profile (the last card may carry a picture even when
+    // its number is even), so trust the flag and fall back to parity only if the
+    // caller did not say.
+    var full = (fullPage === undefined) ? (pageNum % 2 === 0) : !!fullPage;
     function finish(pil){
       var buf=generateSTL(brailleCells,pageNum,slug,pil,full);
       var blob=new Blob([buf],{type:'application/octet-stream'});
@@ -1113,6 +1122,20 @@ const FULL_LINE_CELLS = LINE_WIDTHS[0];
 // pages are text-only. Kept in one place so pagination, preview and STL agree.
 const isTextOnlyPage = (pageNumber) => pageNumber % 2 === 0;
 const widthsForPage = (pageNumber) => isTextOnlyPage(pageNumber) ? LINE_WIDTHS_FULL : LINE_WIDTHS;
+
+// A story rarely ends exactly at the foot of a page, so the last card tends to
+// carry only part of a page of Braille. Rather than print a card that is mostly
+// blank plastic, give that card the illustration: the picture sits in the corner
+// the text does not reach, and the page reads as composed instead of unfinished.
+// Only when the remaining text still fits the narrower illustrated layout — if it
+// fills the full width, the page is already full and needs no picture.
+function pageIsIllustrated(pageNumber, totalPages, text) {
+  if (!isTextOnlyPage(pageNumber)) return true;          // odd pages always
+  if (pageNumber !== totalPages) return false;           // middle pages: text only
+  return layoutBrailleLinesVar(textToBrailleCells(text), LINE_WIDTHS).length <= LINE_WIDTHS.length;
+}
+const widthsForRendering = (pageNumber, totalPages, text) =>
+  pageIsIllustrated(pageNumber, totalPages, text) ? LINE_WIDTHS : LINE_WIDTHS_FULL;
 
 // Like layoutBrailleLines but each line's max width comes from LINE_WIDTHS.
 function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS) {
@@ -1463,8 +1486,8 @@ function StoryResult({ pages, lang, t, onAgain }) {
 
   // Odd pages carry the illustration (L-shape); even pages are text-only (full
   // width). Derive from the page number so preview, STL and pagination agree.
-  const textOnly = isTextOnlyPage(page + 1);
-  const pageWidths = widthsForPage(page + 1);
+  const textOnly = !pageIsIllustrated(page + 1, pages.length, p.text);
+  const pageWidths = widthsForRendering(page + 1, pages.length, p.text);
 
   // True-to-scale dot layout in page millimetres — computed from the SAME
   // geometry the STL uses (window.TACT_LAYOUT), so the preview is an exact mirror
@@ -1601,7 +1624,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
                 const relPath = SHAPE_PATHS[shape] || 'objects/star';
                 svgUrl = 'shapes/' + relPath + '.svg';
               }
-              window.TACT.downloadSTL(cells, page + 1, 'tact', svgUrl);
+              window.TACT.downloadSTL(cells, page + 1, 'tact', svgUrl, textOnly);
             }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               {t.download}
@@ -1769,26 +1792,42 @@ function paginateStory(text) {
     pageNum++;
   }
 
-  // If the last page is under half full, slide the boundary with the page before
-  // it to even the two out (keeps every earlier page full).
-  if (pages.length >= 2) {
-    const lastNum = pages.length;
-    const wLast = widthsForPage(lastNum), wPrev = widthsForPage(lastNum - 1);
-    if (lineCount(pages[lastNum - 1], wLast) < wLast.length / 2) {
-      const merged = pages[lastNum - 2].concat(pages[lastNum - 1]);
-      let best = null;
-      for (let k = 1; k < merged.length; k++) {
-        const a = merged.slice(0, k), b = merged.slice(k);
-        if (wordsFit(a, wPrev) && wordsFit(b, wLast)) {
-          const score = Math.min(lineCount(a, wPrev) / wPrev.length, lineCount(b, wLast) / wLast.length);
-          if (!best || score > best.score) best = { a, b, score };
-        }
-      }
-      if (best) { pages[lastNum - 2] = best.a; pages[lastNum - 1] = best.b; }
-    }
-  }
+  // No rebalancing: every page before the last stays completely full, and the
+  // leftover collects on the final card, which carries the illustration (see
+  // pageIsIllustrated). Spreading the slack backwards instead would leave a
+  // middle page with empty rows and no picture to fill them, which is exactly
+  // the thing that looked unfinished.
 
   return pages.map(g => g.join(' '));
+}
+
+// How well a story lands on the printed pages: how many cards it needs and how
+// full the emptiest one is. A story that spills a couple of lines onto a third
+// card leaves a child holding a nearly blank sheet of plastic, so the page
+// measures the result and can ask for a better-sized story rather than hope.
+function measureFit(text) {
+  const pages = paginateStory(text);
+  const fills = pages.map((t, i) => {
+    const w = widthsForPage(i + 1);
+    return layoutBrailleLinesVar(textToBrailleCells(t), w).length / w.length;
+  });
+  return { pages: pages.length, minFill: Math.min.apply(null, fills) };
+}
+
+// Good enough to print: two cards, both essentially full.
+function fitIsGood(fit) {
+  return fit.pages === 2 && fit.minFill >= 0.85;
+}
+
+// Words that would fill exactly two cards, calibrated on THIS story's own
+// density (Italian words are longer than English ones, and every capital costs
+// an extra Braille cell, so a global constant is never right for long).
+function idealWordCount(text) {
+  const cells = textToBrailleCells(text).length;
+  const words = text.split(/\s+/).filter(Boolean).length || 1;
+  const budget = (LINE_WIDTHS.reduce((a, b) => a + b, 0) +
+                  LINE_WIDTHS_FULL.reduce((a, b) => a + b, 0)) * 0.92;
+  return Math.round(budget / (cells / words));
 }
 
 // Turn a story into page objects. Odd pages (1,3,5…) carry an illustration; even
@@ -1797,10 +1836,12 @@ function paginateStory(text) {
 // the story's main subject when a page names nothing in the shape library.
 function buildPages(storyText, lang) {
   const mainShape = pickShapeFromText(storyText, lang);
-  return paginateStory(storyText).map((text, idx) => {
+  const texts = paginateStory(storyText);
+  return texts.map((text, idx) => {
     const pageNumber = idx + 1;
+    const illustrated = pageIsIllustrated(pageNumber, texts.length, text);
     let illustration = null;
-    if (!isTextOnlyPage(pageNumber)) {
+    if (illustrated) {
       let shape = pickShapeFromText(text, lang);
       if (shape === 'star') shape = mainShape; // no subject on this page → anchor
       illustration = {
@@ -1808,7 +1849,7 @@ function buildPages(storyText, lang) {
         elements: [{ shape, scale: 1.0, position: "center", mirror: false }]
       };
     }
-    return { page_number: pageNumber, text, full: isTextOnlyPage(pageNumber), illustration };
+    return { page_number: pageNumber, text, full: !illustrated, illustration };
   });
 }
 
@@ -1909,6 +1950,27 @@ function App() {
         console.warn('[TACT] no AI path available, using the prompt text directly:', llmErr.message);
         isDemo = true; // mark that the AI writing step didn't run
       }
+
+      // The model cannot count words accurately enough to land inside the narrow
+      // window that fills exactly two cards. So measure what came back, and if it
+      // does not sit well on the pages, ask once more for the length this very
+      // story's density says is right. Keep whichever of the two prints better.
+      if (storyText) {
+        const firstFit = measureFit(storyText);
+        if (!fitIsGood(firstFit)) {
+          try {
+            const retry = await window.TACT.generateStory(q, lang, null, idealWordCount(storyText));
+            const retryFit = measureFit(retry);
+            const better = (retryFit.pages === 2 && firstFit.pages !== 2) ||
+                           (retryFit.pages === firstFit.pages && retryFit.minFill > firstFit.minFill) ||
+                           (retryFit.pages === 2 && firstFit.pages === 2 && retryFit.minFill > firstFit.minFill);
+            if (better) storyText = retry;
+          } catch (e) {
+            /* keep the first story: a slightly loose page beats no story */
+          }
+        }
+      }
+
       rawPages = buildPages(storyText || q, lang);
 
       setLoadingMsg(t.brailleTranslating);
