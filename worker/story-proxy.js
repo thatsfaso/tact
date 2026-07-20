@@ -105,6 +105,15 @@ export default {
       return reply({ ok: true, configured: !!env.AGNES_API_KEY, model: AGNES_MODEL }, 200, origin, allowed);
     }
 
+    // The story brief lives here, and the in-browser model needs the same one.
+    // Serving it means there is one copy rather than two that quietly drift
+    // apart. The page falls back to its built-in copy if this is unreachable,
+    // which is the only case where the two can differ.
+    if (request.method === 'GET' && new URL(request.url).pathname === '/brief') {
+      const lang = new URL(request.url).searchParams.get('lang') === 'it' ? 'Italian' : 'English';
+      return reply({ prompt: buildSystemPrompt(lang, 0) }, 200, origin, allowed);
+    }
+
     if (!allowed) return reply({ error: 'origin' }, 403, origin, false);
     if (request.method !== 'POST') return reply({ error: 'method' }, 405, origin, allowed);
     if (!env.AGNES_API_KEY) return reply({ error: 'unconfigured' }, 503, origin, allowed);
