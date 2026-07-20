@@ -39,6 +39,51 @@ const ALLOWED_ORIGINS = [
 // swinging from eight seconds to timeouts, which is what motivated the chain.
 // Timeouts are per provider: a short leash for the fast one, a long leash for
 // the slow one, because waiting on Agnes still beats a 1.8 GB model download.
+// Measured: the Llama models write much shorter sentences than Agnes for the
+// same brief, landing around 35 words where 65 were asked. The fix is NOT to
+// ask for more sentences: 66 words across ten sentences is seven words each,
+// which contradicts the ten-to-eighteen rule below and makes the model write a
+// chain of telegraphic fragments. Sentence count and word target have to agree
+// arithmetically. Length comes from the worked example instead, which anchors
+// these models far more than any numeric rule does — so the example runs
+// deliberately longer than the story actually wants.
+// Measured, the hard way: these models track the EXAMPLE's length almost one
+// for one, and largely ignore the numeric target. A 115-word example produced
+// 110-word stories no matter what number the brief asked for, and 90% of those
+// spilled onto a third, mostly empty page. So the example is now written to the
+// length the page can actually hold, and the per-sentence band is narrow enough
+// that six or seven sentences cannot add up to an overflow.
+const LLAMA_TUNE = {
+  // English needs one sentence fewer. These models write English roughly a
+  // quarter longer than Italian for an identical brief, and they overrun the
+  // per-sentence ceiling freely (asked for 12 words, they write 15). Sentence
+  // COUNT is the one length control they actually obey, so that is the lever
+  // used to separate the two languages.
+  sentences: { Italian: 'FIVE or SIX', English: 'FOUR or FIVE' },
+  sentMax: { Italian: 'six', English: 'five' },
+  minWords: 8, maxWords: 12,
+  // Italian words are longer in Braille cells, so two pages hold about 65 of
+  // them against 75 English ones — yet these models land FURTHER short in
+  // Italian than in English for the same ask. Both effects push the same way,
+  // hence the noticeably higher Italian number. Measured, not guessed.
+  target: { Italian: '58', English: '50' },
+  // One worked example per language. An English-only example left Italian
+  // unanchored, and Italian then ignored the word target completely: raising it
+  // from 66 to 76 moved the output by minus two words. The example is the lever;
+  // the number is nearly decorative.
+  example: {
+    // Shorter than the Italian one on purpose: for an identical brief these
+    // models write English about a quarter longer than Italian, so an example
+    // of the same length would push English onto a third page.
+    // Deliberately shorter than the Italian one, and deliberately erring short.
+    // An overlong story spills onto a third, half-empty page and the second pass
+    // cannot take words away; a short one is simply asked to grow. So the bias
+    // is downward on purpose.
+    English: 'The little snail crept into the wet garden, and the air smelled of rain. That day she decided to climb the tall leaf above her. The wind pushed her back, so she held on until it passed. At the top the sun warmed her, and she smiled.',
+    Italian: 'La piccola lumaca uscì nel giardino bagnato, e l\'aria sapeva di pioggia. Quel giorno decise di salire sulla foglia alta sopra di lei. La sua pancia sentiva ogni nodo del gambo mentre saliva. Il vento la spingeva indietro, così si tenne stretta finché non passò. In cima il sole la avvolse come una coperta tiepida. Poi, piano piano, sorrise.',
+  },
+};
+
 function providers(env) {
   return [
     {
@@ -47,18 +92,20 @@ function providers(env) {
       model: 'llama-3.3-70b-versatile',
       key: env.GROQ_API_KEY,
       timeoutMs: 12000,
-      // Measured: this model writes much shorter sentences than Agnes for the
-      // same brief, landing around 35 words where 65 were asked. It needs more
-      // sentences and a firmer floor on their length to fill the same page.
-      // The example anchors this model far more than the rules do, so it gets
-      // a longer one. It still lands short of the example, which is why the
-      // example runs longer than the story actually wanted.
-      tune: {
-        sentences: 'EIGHT to TEN', sentMax: 'ten', minWords: 10, maxWords: 18,
-        // Italian lands short of the same ask, so it gets a higher one.
-        target: { Italian: '66', English: '62' },
-        example: 'The little snail woke to cool dew along her shell, and the whole garden smelled of wet earth. Today, she decided, she would climb the tall leaf that swayed far above her. Slowly, slowly she began. Her soft belly felt every bump and ridge of the green stem as she went. Birds sang somewhere warm and near, and the sound seemed to pull her upward. The wind pushed against her, so she held on tighter until it passed. Her small heart beat fast in the quiet. At the top, the sun wrapped around her like a wide warm blanket. She rested there for a long while and listened to the garden humming below. Then, slowly, slowly, she smiled.',
-      },
+      tune: LLAMA_TUNE,
+    },
+    {
+      // Same account, different model, therefore a different rate-limit bucket.
+      // The 70B model's free-tier allowance is the thing most likely to run out
+      // on a busy day, and when it does the next stop should be another model
+      // that answers in a second — not a slow one, and certainly not a 1.8 GB
+      // download. Slightly weaker prose is a far better trade than either.
+      name: 'groq-fast',
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      model: 'llama-3.1-8b-instant',
+      key: env.GROQ_API_KEY,
+      timeoutMs: 10000,
+      tune: LLAMA_TUNE,
     },
     {
       name: 'agnes',
@@ -77,7 +124,9 @@ function providers(env) {
 // words, fill the two pages without spilling onto a third.
 const WORD_TARGET = { Italian: '55', English: '62' };
 // Hard ceiling: past this the story spills onto a third, mostly empty page.
-const CAP = { Italian: '64', English: '72' };
+// It sits a little above the per-language target, so the ceiling stays a
+// ceiling rather than contradicting the length actually being asked for.
+const CAP = { Italian: '72', English: '82' };
 // Italian needs about 67 words to fill two cards, English about 76, and both
 // read best near ten words a sentence — so each language gets its own count.
 const SENTENCES = { Italian: 'SIX or SEVEN', English: 'SEVEN or EIGHT' };
@@ -89,10 +138,16 @@ const DEFAULT_EXAMPLE = 'The little snail woke to cool dew along her shell. Toda
 // and ask for a second one of the exact length that fills the pages.
 function buildSystemPrompt(language, targetWords, tune) {
   const t = tune || {};
-  const sentences = t.sentences || SENTENCES[language] || 'SIX or SEVEN';
-  const sentMax = t.sentMax || SENT_MAX[language] || 'seven';
+  // Any tune value may be a single string or one entry per language.
+  const perLang = (v, fallback) => (v == null) ? fallback
+    : (typeof v === 'string') ? v : (v[language] || fallback);
+  const sentences = perLang(t.sentences, SENTENCES[language] || 'SIX or SEVEN');
+  const sentMax = perLang(t.sentMax, SENT_MAX[language] || 'seven');
   const minW = t.minWords || 8;
-  const example = t.example || DEFAULT_EXAMPLE;
+  // A tune may carry one example per language, or a single shared one.
+  const ex = t.example || DEFAULT_EXAMPLE;
+  const example = (typeof ex === 'string') ? ex : (ex[language] || ex.English);
+  const exampleLang = (typeof ex === 'string') ? 'English' : (ex[language] ? language : 'English');
   const maxW = t.maxWords || 14;
   const wanted = Number(targetWords) || Number((t.target || WORD_TARGET)[language]) || 80;
   const target = String(Math.max(45, wanted));
@@ -107,7 +162,12 @@ function buildSystemPrompt(language, targetWords, tune) {
     '- Most sentences should run ' + minW + ' to ' + maxW + ' words, joining ideas with words like and, but, so, until, while, because. Let one or two be short for rhythm. Never write a chain of tiny three or four word sentences.\n' +
     '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n\n' +
     'Output ONLY the story prose: no title, no quotation marks, no notes, no markdown. Write in the SAME language as the request.\n\n' +
-    'Match the length, rhythm and sentence count of this example (English):\n' + example
+    // The example anchors length far better than any numeric rule, but it
+    // anchors PHRASING too: without this line the stories start reusing its
+    // opening and its cadence, and every story begins to sound like the same
+    // story. Copy the shape, not the words.
+    'Match only the length, rhythm and sentence count of this example (' + exampleLang + '). ' +
+    'Do NOT reuse its words, its characters, its opening or its closing — your story must be entirely your own:\n' + example
   );
 }
 
@@ -210,7 +270,11 @@ export default {
     // which is the only case where the two can differ.
     if (request.method === 'GET' && new URL(request.url).pathname === '/brief') {
       const lang = new URL(request.url).searchParams.get('lang') === 'it' ? 'Italian' : 'English';
-      return reply({ prompt: buildSystemPrompt(lang, 0) }, 200, origin, allowed);
+      // Serve the Llama tune, not the default. The in-browser fallback is a
+      // small instruct model of the same family, and it fails the same way the
+      // hosted Llama models do: given the untuned brief it writes chains of
+      // three and four word sentences. It needs the corrected one too.
+      return reply({ prompt: buildSystemPrompt(lang, 0, LLAMA_TUNE) }, 200, origin, allowed);
     }
 
     if (!allowed) return reply({ error: 'origin' }, 403, origin, false);

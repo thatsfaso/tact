@@ -733,12 +733,25 @@ window.TACT = (function () {
     });
   }
 
+  // One transient hiccup should not cost a 1.8 GB download. A single failed
+  // request is far more often a blip — a dropped connection, a provider
+  // momentarily rate limiting — than a real outage, and the whole chain
+  // answers in under a second, so one more try costs the reader nothing they
+  // will notice and saves them from the model downloader entirely.
+  function _cloudWithOneRetry(prompt, lang, targetWords) {
+    return _generateStoryCloud(prompt, lang, targetWords).catch(function (err) {
+      console.warn('[TACT] cloud attempt failed (' + err.message + '); retrying once');
+      return new Promise(function (r) { setTimeout(r, 900); })
+        .then(function () { return _generateStoryCloud(prompt, lang, targetWords); });
+    });
+  }
+
   // Resolves to the story TEXT. Tries the fast cloud path first, then the
   // in-browser model. If both are unavailable this rejects, and the caller
   // turns the visitor's own words into a real Braille page instead — so there
   // is never a dead end, only a shorter story.
   function generateStory(prompt, lang, onProgress, targetWords) {
-    return _generateStoryCloud(prompt, lang, targetWords).catch(function (cloudErr) {
+    return _cloudWithOneRetry(prompt, lang, targetWords).catch(function (cloudErr) {
       if (CLOUD_ENDPOINT) {
         console.warn('[TACT] cloud story unavailable (' + cloudErr.message + '); trying the in-browser model');
       }
@@ -747,12 +760,22 @@ window.TACT = (function () {
     });
   }
 
+  // Cloud only, no fallback of any kind. The page uses this for the optional
+  // second pass that tunes a story's length: that pass is a refinement of a
+  // story it ALREADY has, so it must never be able to start a model download.
+  // Letting it fall through to WebLLM was exactly that bug — a reader with a
+  // finished story in hand would suddenly be shown a model downloading.
+  function refineStoryCloudOnly(prompt, lang, targetWords) {
+    return _generateStoryCloud(prompt, lang, targetWords);
+  }
+
   return {
     webgpuSupported: webgpuSupported,
     cloudEnabled: !!CLOUD_ENDPOINT,
     translateBraille: translateBraille,
     normalisePunctuation: normalisePunctuation,
     generateStory: generateStory,
+    refineStoryCloudOnly: refineStoryCloudOnly,
     // ── Model controls (used now internally; future manual-selection UI hooks)
     models: MODEL_TIERS,
     getActiveModel: function () { return _activeModel; },
@@ -2185,7 +2208,7 @@ function App() {
         const firstFit = measureFit(storyText);
         if (!fitIsGood(firstFit)) {
           try {
-            const retry = await window.TACT.generateStory(q, lang, null, idealWordCount(storyText));
+            const retry = await window.TACT.refineStoryCloudOnly(q, lang, idealWordCount(storyText));
             const retryFit = measureFit(retry);
             const better = (retryFit.pages === 2 && firstFit.pages !== 2) ||
                            (retryFit.pages === firstFit.pages && retryFit.minFill > firstFit.minFill) ||
