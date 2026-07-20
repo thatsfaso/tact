@@ -30,9 +30,25 @@ npx wrangler secret put AGNES_API_KEY   # from agnes-ai.com, the fallback
 npx wrangler deploy
 ```
 
-Either key alone is enough: a provider whose key is missing is skipped. Groq
-answers in about a second; Agnes is slower but keeps the chain alive if Groq
-ever refuses.
+Either key alone is enough: a provider whose key is missing is skipped.
+
+The providers are raced, not queued. The preferred one starts immediately; if
+it has not answered within 1.6 seconds, or the moment it refuses, the next one
+starts alongside it and the first story to arrive wins. A provider that fails
+is then skipped for a minute, so a sick service costs one slow request instead
+of every request.
+
+That matters more than it sounds. With a strict queue, a first provider that
+hangs imposes its whole timeout on every single story before anything else is
+tried — twelve dead seconds each, with a perfectly healthy provider waiting
+behind it. Preference ordering is only safe when providers fail fast.
+
+**Free tiers are the real capacity limit.** Groq's free allowance is measured
+in tokens per minute and per day, and a busy day exhausts it: every request
+then comes back `busy` in about 20 milliseconds and the race moves on. Two
+models on one key are two separate buckets, not twice the quota. If this
+endpoint needs to survive real traffic, add a key from a third, independent
+provider rather than relying on one account.
 
 `wrangler deploy` prints the Worker URL, something like
 `https://tact-story-proxy.<your-subdomain>.workers.dev`.
