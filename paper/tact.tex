@@ -3,6 +3,12 @@
 
 \usepackage{cite,amsmath,amssymb,graphicx,booktabs,url}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Tact: A Zero-Cost, Browser-Based Pipeline for On-Demand Tactile Braille Storybooks},
+  pdfauthor={Iliano Fasolino},
+  pdfsubject={Accessible on-demand tactile Braille storybooks via a zero-cost browser pipeline with graceful degradation},
+  pdfkeywords={Braille, tactile graphics, accessibility, assistive technology, blind children, Braille literacy, 3D printing, fused deposition modeling, in-browser LLM, WebGPU, human-computer interaction}
+}
 
 \graphicspath{{figures/}}
 
@@ -17,7 +23,7 @@ Milan, Italy}}
 \maketitle
 
 \begin{abstract}
-Braille literacy among blind school-age children fell from roughly 50 percent in 1960 to under 10 percent today, and the decline is a content problem, not a technology problem: producing one illustrated Braille page still requires specialized software and trained labor, so almost nothing in the existing catalog is personalized to an individual child. We present Tact, a system that converts a spoken or typed story idea into a printable Braille page with a matching raised tactile illustration, computed entirely inside a web browser with no server, no account, and no mandatory cost. This paper documents the full engineering history behind that system, rather than a narrow slice of it. It covers the target population and the ethical framing behind an explicit sighted-operator model, the hardware rationale for desktop fused deposition modeling over purpose-built embossing, and the physical Braille geometry and its printer-specific calibration. It documents the architecture that lets a language model run on the reader's own device instead of a remote server, the investigation that replaced a general-purpose Braille translation library with a small deterministic implementation after it failed in production, and the evolution of the page layout from an inherited portrait specification to a verified square design. It further documents the construction of an 89-shape hand-drawn tactile illustration library derived from a frequency study of fairy-tale subjects, and the synthesized sound design used to make a voice-first interface legible without a screen. We report the verification performed to date, the ethical commitments the project has made, and the work required before the system can be considered ready for real blind and low-vision readers.
+Braille literacy among blind school-age children fell from roughly 50 percent in 1960 to under 10 percent today, and the decline is a content problem, not a technology problem: producing one illustrated Braille page still requires specialized software and trained labor, so almost nothing in the existing catalog is personalized to an individual child. We present Tact, a system that converts a spoken or typed story idea into a printable Braille page with a matching raised tactile illustration, computed inside a web browser with no account and no mandatory cost, and able to run with no server at all. This paper documents the full engineering history behind that system, rather than a narrow slice of it. It covers the target population and the ethical framing behind an explicit sighted-operator model, the hardware rationale for desktop fused deposition modeling over purpose-built embossing, and the physical Braille geometry and its printer-specific calibration. It documents the architecture that lets a language model run on the reader's own device, the later addition of a faster hosted path in front of it after an independent reimplementation exposed the cost of a 1.8 gigabyte first-use download, and the fallback chain that keeps the system working when that path is absent, the investigation that replaced a general-purpose Braille translation library with a small deterministic implementation after it failed in production, and the evolution of the page layout from an inherited portrait specification to a verified square design. It further documents the construction of an 89-shape hand-drawn tactile illustration library derived from a frequency study of fairy-tale subjects, and the synthesized sound design used to make a voice-first interface legible without a screen. We report the verification performed to date, the ethical commitments the project has made, and the work required before the system can be considered ready for real blind and low-vision readers.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -142,7 +148,7 @@ Tact runs as a single self-contained web application with no backend server. A p
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.72\textwidth]{tact_pipeline_architecture.pdf}
-\caption{The complete Tact pipeline, running entirely client-side inside a single \texttt{index.html} file with no backend server. Voice or typed input is transcribed by the browser's native speech recognition, passed to an adaptively sized in-browser language model (Section~\ref{sec:llm}), and then split into a Braille translation path (Section~\ref{sec:braille}) and a tactile graphics path (Section~\ref{sec:illustration}) that execute in parallel before being merged by the page layout engine (Section~\ref{sec:layout}) and exported by the binary STL generator (Section~\ref{sec:fabrication}).}
+\caption{The complete Tact pipeline, running inside a single \texttt{index.html} file, with story writing supplied by a hosted model, an in-browser model, or the reader's own words, in that order of preference. Voice or typed input is transcribed by the browser's native speech recognition, passed to an adaptively sized in-browser language model (Section~\ref{sec:llm}), and then split into a Braille translation path (Section~\ref{sec:braille}) and a tactile graphics path (Section~\ref{sec:illustration}) that execute in parallel before being merged by the page layout engine (Section~\ref{sec:layout}) and exported by the binary STL generator (Section~\ref{sec:fabrication}).}
 \label{fig:pipeline}
 \end{figure*}
 
@@ -152,11 +158,52 @@ The single-file, no-backend architecture was chosen over a more conventional cli
 
 \section{Case Study: In-Browser Language Model Inference}\label{sec:llm}
 
-\subsection{Why Not a Remote Server}
+\subsection{Why the First Version Refused a Remote Server}
 
 A cloud-hosted language model is the most obvious way to obtain consistently well-written stories. It was rejected as the default path for three compounding reasons rather than one. It reintroduces a recurring cost that violates the zero-cost requirement the moment usage exceeds whatever a developer is willing to subsidize indefinitely. It requires an application programming interface (API) key, which reintroduces an account and setup barrier. It also means every story a family generates passes through a third-party server, an unnecessary privacy cost for content that is frequently about a specific, identifiable child.
 
 The alternative adopted instead loads a small language model directly into the browser tab, over the WebGPU application programming interface \cite{w3cwebgpu}, and runs inference entirely on the visitor's own hardware, following the architecture described for the WebLLM in-browser inference engine \cite{webllm}. Nothing leaves the device during story generation, and there is no server-side compute to bill for.
+
+That reasoning was sound on privacy and cost, and it remains the reasoning behind the path the system still ships. It was, however, incomplete on one axis the authors weighted too lightly, and Section~\ref{sec:hosted} documents what a second implementation of this system revealed about it.
+
+\subsection{What an Independent Reimplementation Exposed}\label{sec:hosted}
+
+Shortly after the first public version of this work was released, Francesco Giuliani independently rebuilt it as a production web application, published as \emph{tatto.dev} \cite{tattodev}. That reimplementation replaced the in-browser model with a hosted one reached through a server route, reduced the JavaScript payload by roughly 94 percent, moved the codebase to TypeScript with unit tests on the Braille tables, and corrected a defect in which selecting Italian still produced English stories. The two projects share no code and evolve independently.
+
+The substantive contribution of that work to this one is not an implementation detail but a correction to the argument above. The in-browser design was defended as the choice that imposed no barrier on anyone. In practice it imposes a very specific and very large one: a first-use model download of roughly 1.8 gigabytes. For the households and schools this project explicitly targets, which are disproportionately those on slow, metered, or shared connections, that download is a heavier barrier than the account it was meant to avoid. It also excludes mobile devices almost entirely. The original analysis had correctly identified the costs of a server while systematically underweighting the cost of the alternative.
+
+The system was therefore restructured, not by removing the in-browser path but by placing a faster one in front of it. Story generation now attempts three paths in order. A hosted model is tried first, reached through a minimal proxy described below. If that path is unavailable, rate limited, or removed entirely, the in-browser model of Section~\ref{sec:llm} runs exactly as before. If the device cannot run that either, the reader's own words become the printed page. Every claim of graceful degradation made in the first version survives intact, because the paths beneath the new one were not modified.
+
+\subsection{Holding a Key Without Holding a Server}
+
+A hosted model requires authentication, and a static page cannot hold a secret. Placing an API key in client-side JavaScript would publish it to anyone who opened the developer tools. The system therefore introduces exactly one server-side component, a proxy of roughly 150 lines deployed on a serverless platform, whose only responsibilities are to hold the key, to accept a one-line story idea, and to return prose.
+
+Two properties of that proxy are deliberate. The story brief lives inside the proxy rather than travelling in the request, so a caller who discovers the endpoint can obtain a children's story and nothing else; the endpoint cannot be repurposed as a general-purpose language model. Requests are additionally restricted to the project's own origins. The proxy stores nothing, and no account exists at any layer.
+
+This is a genuine change to the system's privacy posture and is stated plainly rather than minimized. On the hosted path, the one-line idea a child or adult supplies leaves the device and reaches a third party. Nothing else is transmitted, but that sentence is. The in-browser path continues to transmit nothing at all, and remains available by removing the proxy endpoint from the configuration, which disables the hosted path entirely and returns the system to its original behavior. The honest formulation of the resulting claim is not that the system runs without a server, but that it \emph{works} without one, and that the hosted path is an accelerator rather than a dependency.
+
+\subsection{Measured Effect of the Hosted Path}
+
+The hosted path uses \texttt{agnes-2.0-flash}, an OpenAI-compatible model offered without charge at the time of writing \cite{agnes}. Its free tier carries no stated expiry, which is a commercial position rather than a guarantee, and the fallback chain exists partly because that position may change.
+
+Table~\ref{tab:hosted} reports the effect measured over approximately 150 generated stories. The comparison of interest is not raw inference speed but time-to-first-story on a device that has never visited the site before, which is the only figure a family or a classroom actually experiences.
+
+\begin{table}[t]
+\caption{Time to a printable page on a first visit, by generation path}
+\label{tab:hosted}
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Path} & \textbf{First visit} & \textbf{Transfer} \\
+\midrule
+In-browser model (3B tier) & several minutes & $\approx$1.8\,GB \\
+Hosted model via proxy & 6.3--9.2\,s & $<$2\,kB \\
+Reader's own words & $<$1\,s & none \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Request success was measured separately, since a free tier implies a rate ceiling. At up to eight concurrent requests, 31 of 32 succeeded, the single failure being a client-side timeout rather than a rejection. Under a deliberately abusive burst of 40 requests issued as fast as the network allowed, 15 were rejected as rate limited. Sequential use at approximately five requests per minute produced no rejections at all. The practical reading is that ordinary use does not reach the ceiling, that a sudden surge of attention will, and that the fallback chain is what makes the second case a slower story rather than no story.
 
 \subsection{Adaptive Model Selection and a False Positive Worth Documenting}
 
@@ -201,7 +248,7 @@ The second passage is not merely longer. It is built almost entirely from touch,
 
 \subsection{Graceful Degradation Without a Demonstration Trap}
 
-If the visitor's device has no WebGPU support at all, or if model initialization fails for any reason, the system does not substitute a fixed demonstration story and call the interaction complete. The words the person actually typed or spoke are paginated using the same balancing logic described in Section~\ref{sec:layout}, translated to real Braille, matched to a real illustration by keyword, and exported to a real, printable STL file. A fixed demonstration is used only as a last resort, reached solely if every other step in the chain fails outright. Every visitor, regardless of hardware, leaves with a working product; the language model is a genuine enhancement, never a load-bearing dependency.
+If the hosted path of Section~\ref{sec:hosted} is unavailable and the visitor's device has no WebGPU support either, or if model initialization fails for any reason, the system does not substitute a fixed demonstration story and call the interaction complete. The words the person actually typed or spoke are paginated using the same balancing logic described in Section~\ref{sec:layout}, translated to real Braille, matched to a real illustration by keyword, and exported to a real, printable STL file. A fixed demonstration is used only as a last resort, reached solely if every other step in the chain fails outright. Every visitor, regardless of hardware, leaves with a working product; the language model is a genuine enhancement, never a load-bearing dependency.
 
 \section{Case Study: Braille Translation Engineering}\label{sec:braille}
 
@@ -244,7 +291,15 @@ The final layout is an L-shaped Braille region wrapping a bottom-right corner il
 \label{fig:geometry}
 \end{figure*}
 
-A second, independent bug surfaced once real multi-page stories were tested end to end. Pagination originally filled each page greedily, placing as many words as would physically fit before starting the next page, which meant a fifty-word story became a full 37-word first page followed by a nearly empty 13-word second page. A blind reader's fingers register a mostly blank page as unambiguously as sighted eyes do; it reads as broken, not as a stylistic choice. The fix computes, for a given story, the fewest number of pages whose even split still fits every page, and distributes words accordingly. The same fifty-word story now becomes two pages of roughly twenty-five words each. The target length in the story-writing prompt (Section~\ref{sec:llm}) was raised in tandem, from roughly 45 to 60 words up to roughly 65 to 75 words, specifically so that a story crossing onto a second page fills that second page rather than merely trickling onto it.
+A second, independent bug surfaced once real multi-page stories were tested end to end. Pagination originally filled each page greedily, placing as many words as would physically fit before starting the next page, which meant a fifty-word story became a full 37-word first page followed by a nearly empty 13-word second page. A blind reader's fingers register a mostly blank page as unambiguously as sighted eyes do; it reads as broken, not as a stylistic choice. The first fix computed, for a given story, the fewest number of pages whose even split still fits every page, and distributed words accordingly.
+
+That fix was later withdrawn, and the reasoning is worth recording because the intuition behind it is wrong in a way that is not obvious. Balancing does remove the near-empty final page, but it does so by moving the deficit backwards into pages that were previously full. Measured over identical stories, balancing eliminated all sparse final pages at the cost of leaving five of twelve intermediate pages incomplete. Since each page here is a separate physical card rather than a leaf in a bound book, the substitution is a poor one: it converts one visibly unfinished card into two, and an intermediate card has no illustration to occupy the space the text does not reach.
+
+\subsection{Sizing Text to a Page That Cannot Be Resized}
+
+An attempt was made to solve the problem upstream instead, by asking the language model for the number of words that exactly fills the available cards. This failed, and the measurements explain why. The window that fills two cards without spilling onto a third is narrow, approximately 63 to 70 words in Italian and 74 to 80 in English; the asymmetry is itself a Braille effect, since Italian words are longer and every capital letter consumes an additional cell for the capital indicator. Against a window of roughly $\pm5$ words, the model's output varied by approximately $\pm20$ words, and it saturated: constrained to seven sentences it would not exceed roughly 70 words regardless of the number requested. Successive prompt revisions moved conformity between 17 and 43 percent without converging, because no phrasing can make a model hit a target narrower than its own variance.
+
+The problem was therefore moved out of the prompt and into the layout. Pages are filled greedily, so every page before the last is completely full, and the leftover collects on the final card, which is then given the illustration whenever the remaining text still fits the narrower L-shaped profile. The picture occupies the corner the words do not reach, and the card reads as composed rather than unfinished. A final card that is already full receives no illustration, because it does not need one. Under this scheme, measured across the same corpus, no card was left sparse without a picture, every page before the last was completely full, and 76 percent of stories fit two cards.
 
 \subsection{Why Preview-Print Fidelity Is Not a Cosmetic Concern Here}
 
@@ -405,7 +460,7 @@ A household switching between Italian and English mid-session exercises every in
 
 \subsection{A Rural or Low-Connectivity Setting}
 
-Once opened, the application continues to function entirely offline. Braille translation, illustration matching, layout, and STL export all run locally regardless of network state; only the optional in-browser model download requires connectivity, and only once.
+Once opened, the application continues to function offline. Braille translation, illustration matching, layout, and STL export all run locally regardless of network state. Only story writing needs the network, and only for the hosted path; the in-browser model requires connectivity once, for its download, and none afterwards.
 
 \subsection{An Older, More Independent Reader}
 
@@ -442,7 +497,7 @@ This is engineering-level verification, not user research, and that distinction 
 
 \subsection{Comparison With Prior Systems}
 
-Tact differs from the related systems in Section~\ref{sec:related} primarily in deployment cost and hardware assumption. TaleVision and TactileNet demonstrate that AI-assisted tactile content generation improves outcomes for blind children, but neither is an open, deployable end-user tool \cite{talevision,tactilenet}. AltCanvas and Chart4Blind both assume a human author, sighted or blind, actively composing a scene through a manual interface, whereas Tact composes the page automatically from a one-sentence prompt \cite{altcanvas,chart4blind}. BrailleRAP is the most directly comparable open hardware project \cite{braillerap}. Relative to it, FDM three-dimensional printing trades faster per-page embossing time for a page that survives repeated handling and for reliance on general-purpose hardware a household may already own. Relative to a cloud-hosted language model, in-browser inference following the WebLLM architecture removes the recurring cost and the data-transmission step \cite{webllm}. The price is a one-time model download and a quality ceiling set by what the reader's own device can run, a trade-off documented in full in Section~\ref{sec:llm}.
+Tact differs from the related systems in Section~\ref{sec:related} primarily in deployment cost and hardware assumption. TaleVision and TactileNet demonstrate that AI-assisted tactile content generation improves outcomes for blind children, but neither is an open, deployable end-user tool \cite{talevision,tactilenet}. AltCanvas and Chart4Blind both assume a human author, sighted or blind, actively composing a scene through a manual interface, whereas Tact composes the page automatically from a one-sentence prompt \cite{altcanvas,chart4blind}. BrailleRAP is the most directly comparable open hardware project \cite{braillerap}. Relative to it, FDM three-dimensional printing trades faster per-page embossing time for a page that survives repeated handling and for reliance on general-purpose hardware a household may already own. Relative to a purely cloud-hosted system, Tact keeps in-browser inference following the WebLLM architecture as a path that removes both the recurring cost and the data-transmission step \cite{webllm}, while placing a hosted path in front of it for speed. The price of the in-browser path is a one-time model download and a quality ceiling set by the reader's own hardware; the price of the hosted path is that one sentence leaves the device. Both are documented in Sections~\ref{sec:llm} and~\ref{sec:hosted}.
 
 \section{The Zero-Cost Architecture in Full}\label{sec:zerocost}
 
@@ -491,7 +546,7 @@ A manual model-selection interface does not yet exist. The adaptive tiering desc
 
 \section{Conclusion}\label{sec:conclusion}
 
-Braille literacy did not decline because Braille became a worse technology. It declined because the economics of producing Braille content never adjusted to match the economics of producing print content. A blind child's ability to ask for a story about the thing they are currently obsessed with, a dragon, a specific kind of boat, their own name, was quietly priced out of existence somewhere along the way. This paper's claim is narrow and falsifiable: the specific combination of in-browser language inference, a small deterministic Braille translator, a hand-built tactile illustration library, and consumer FDM three-dimensional printing is now mature and cheap enough to put that ability back within reach of an ordinary family. The only requirements are a 70 euro printer and no internet connection after setup. Four pieces of engineering, documented across Sections~\ref{sec:llm} through~\ref{sec:illustration}, support this claim. A WebAssembly failure was diagnosed and replaced. An adaptive model tiering rule was built around a real false positive in the browser's own capability signals. A page geometry error was corrected after a preview silently diverged from the print, and a pagination scheme was rebalanced after a genuinely empty-looking page was caught. Together, they are offered as evidence that the claim has been tested rigorously at the systems level. The representative use cases in Section~\ref{sec:usecases} and the verification results in Section~\ref{sec:evaluation} confirm the pipeline is ready for that final step. What remains, and what this project treats as the actual finish line rather than this paper, is putting a printed page into a blind child's hands and finding out, from them, whether it was worth building at all.
+Braille literacy did not decline because Braille became a worse technology. It declined because the economics of producing Braille content never adjusted to match the economics of producing print content. A blind child's ability to ask for a story about the thing they are currently obsessed with, a dragon, a specific kind of boat, their own name, was quietly priced out of existence somewhere along the way. This paper's claim is narrow and falsifiable: the specific combination of browser-based language inference, a small deterministic Braille translator, a hand-built tactile illustration library, and consumer FDM three-dimensional printing is now mature and cheap enough to put that ability back within reach of an ordinary family. The only requirement is a 70 euro printer. Four pieces of engineering, documented across Sections~\ref{sec:llm} through~\ref{sec:illustration}, support this claim. A WebAssembly failure was diagnosed and replaced. An adaptive model tiering rule was built around a real false positive in the browser's own capability signals. A page geometry error was corrected after a preview silently diverged from the print, and a pagination scheme was rebalanced after a genuinely empty-looking page was caught. Together, they are offered as evidence that the claim has been tested rigorously at the systems level. The representative use cases in Section~\ref{sec:usecases} and the verification results in Section~\ref{sec:evaluation} confirm the pipeline is ready for that final step. What remains, and what this project treats as the actual finish line rather than this paper, is putting a printed page into a blind child's hands and finding out, from them, whether it was worth building at all.
 
 \appendix
 
@@ -502,6 +557,10 @@ A standard Braille cell is a two-by-three grid of potential dot positions, numbe
 \section{Glossary}
 
 Grade 1 Braille denotes uncontracted Braille, one cell per character, with no shorthand contractions, and is the standard for beginning readers and the only form Italian Braille has. Grade 2 Braille denotes contracted Braille, English only, using roughly 180 shorthand contractions, typically introduced after Grade 1 fluency. FDM denotes fused deposition modeling, the most common consumer three-dimensional printing process, in which molten plastic filament is extruded layer by layer. TPU and PETG denote flexible and rigid three-dimensional-printing filament materials, respectively. STL denotes a standard three-dimensional model file format understood by essentially every three-dimensional printer slicer application. WebGPU denotes a browser application programming interface providing direct, general-purpose access to a device's graphics hardware \cite{w3cwebgpu}.
+
+\section*{Acknowledgment}
+
+The author thanks Francesco Giuliani, whose independent reimplementation of this system \cite{tattodev} demonstrated that reaching a language model over the network, rather than downloading one into the browser, removes a barrier this project had underestimated. The hosted path described in Section~\ref{sec:hosted} exists because of that work. The two projects share no code and are developed independently.
 
 \begin{thebibliography}{00}
 
@@ -528,6 +587,10 @@ Grade 1 Braille denotes uncontracted Braille, one cell per character, with no sh
 \bibitem{w3cwebgpu} World Wide Web Consortium, ``WebGPU,'' W3C Candidate Recommendation Draft. [Online]. Available: https://www.w3.org/TR/webgpu/
 
 \bibitem{w3cwebaudio} World Wide Web Consortium, ``Web Audio API,'' W3C Recommendation, 2021. [Online]. Available: https://www.w3.org/TR/webaudio-1.1/
+
+\bibitem{tattodev} F. Giuliani, ``tatto.dev: a production reimplementation of Tact,'' 2026. [Online]. Available: https://github.com/francescogiuliani87/tatto.dev
+
+\bibitem{agnes} Agnes AI, ``Agnes 2.0 Flash,'' model documentation. [Online]. Available: https://agnes-ai.com/en/docs/agnes-20-flash
 
 \end{thebibliography}
 
