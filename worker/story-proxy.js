@@ -5,10 +5,21 @@
  * hold a secret; this Worker is the only piece that can. It accepts a one-line
  * story idea and returns story prose, nothing else.
  *
- * Story generation is a chain of providers, tried in order. Groq answers in
- * about a second; Agnes is the fallback when Groq is missing or refuses; and if
- * the whole Worker fails, the page itself falls back to its in-browser model
- * and then to the reader's own words. No single service can take the site down.
+ * Story generation runs several providers as a HEDGED race, not a queue. The
+ * preferred one starts immediately; if it has not answered within a short
+ * grace period the next one starts alongside it, and the first story to arrive
+ * wins. A provider that fails is then skipped for a cooldown period, so one
+ * sick service costs one slow request rather than every request.
+ *
+ * This replaced a strictly sequential chain, which had a flaw worth recording:
+ * a first provider that hangs imposes its entire timeout on EVERY request
+ * before anything else is even attempted. When Groq's 70B model degraded, that
+ * meant twelve dead seconds per story, and readers were pushed onto the
+ * in-browser model even though a healthy provider was sitting right behind it.
+ * Ordering by preference is only correct when providers fail fast.
+ *
+ * If every provider fails, the page falls back to its in-browser model and then
+ * to the reader's own words. No single service can take the site down.
  *
  * Deliberate design choices:
  *  - The system prompt lives HERE, not in the request. A caller can only ever
@@ -91,7 +102,10 @@ function providers(env) {
       url: 'https://api.groq.com/openai/v1/chat/completions',
       model: 'llama-3.3-70b-versatile',
       key: env.GROQ_API_KEY,
-      timeoutMs: 12000,
+      // This model answers healthy requests in well under a second, so a long
+      // leash buys nothing and costs everything: it is the interval a reader
+      // stares at a spinner before the hedge rescues them.
+      timeoutMs: 5000,
       tune: LLAMA_TUNE,
     },
     {
@@ -112,7 +126,13 @@ function providers(env) {
       url: 'https://apihub.agnes-ai.com/v1/chat/completions',
       model: 'agnes-2.0-flash',
       key: env.AGNES_API_KEY,
-      timeoutMs: 40000,
+      // Was 40s, on the reasoning that waiting beats a 1.8 GB model download.
+      // That reasoning was wrong once measured: when Agnes is degraded it does
+      // not answer late, it does not answer at all, so the long leash bought
+      // nothing and spent forty seconds of a reader's patience before failing
+      // anyway. Healthy Agnes replies in about eight seconds; past twelve it is
+      // not coming, and the in-browser model is the better use of the time.
+      timeoutMs: 12000,
       tune: null,   // the defaults below were calibrated against this model
     },
   ].filter(function (p) { return !!p.key; });
@@ -169,6 +189,76 @@ function buildSystemPrompt(language, targetWords, tune) {
     'Match only the length, rhythm and sentence count of this example (' + exampleLang + '). ' +
     'Do NOT reuse its words, its characters, its opening or its closing — your story must be entirely your own:\n' + example
   );
+}
+
+// How long the preferred provider gets on its own before the next one is
+// started alongside it. Healthy providers answer in about 700ms, so this is
+// long enough that a well-behaved service is never doubled up on, and short
+// enough that a sick one is not something the reader has to sit through.
+const HEDGE_MS = 1600;
+
+// A provider that just failed is very likely to fail again in the next seconds,
+// and trying it first would tax every request with its timeout. So a failure is
+// remembered and that provider is demoted for a while. This lives at module
+// scope: a Worker isolate is reused across requests, so it survives long enough
+// to matter, and losing it on eviction is harmless — the worst case is one
+// slow request that repopulates it.
+const cooldownUntil = Object.create(null);
+const COOLDOWN_MS = 60000;
+
+// Run the providers as a hedged race. Resolves with the first story to arrive;
+// rejects only once every provider has failed.
+function raceProviders(chain, language, idea, targetWords, log) {
+  const now = Date.now();
+  // Anything in cooldown goes to the back, but is still tried: if every
+  // provider is cooling down, the least recently failed one still gets a turn.
+  const ordered = chain.slice().sort(function (a, b) {
+    return ((cooldownUntil[a.name] || 0) > now ? 1 : 0) - ((cooldownUntil[b.name] || 0) > now ? 1 : 0);
+  });
+
+  return new Promise(function (resolve, reject) {
+    let settled = false;
+    let started = 0;
+    let failed = 0;
+    let sawBusy = false;
+
+    // The next provider starts either when the current one has been slow for
+    // HEDGE_MS, or the instant it fails — whichever comes first. Waiting out
+    // the full hedge after a refusal that arrived in 20ms would be pure dead
+    // time, and a rate-limited provider refuses almost instantly.
+    function startNext() {
+      if (settled || started >= ordered.length) return;
+      const p = ordered[started++];
+      const t0 = Date.now();
+      const hedge = setTimeout(startNext, HEDGE_MS);
+
+      askProvider(p, language, idea, targetWords).then(function (story) {
+        clearTimeout(hedge);
+        log.push(p.name + ':ok:' + (Date.now() - t0) + 'ms');
+        delete cooldownUntil[p.name];
+        if (settled) return;
+        settled = true;
+        resolve({ story: story, provider: p.name });
+      }).catch(function (e) {
+        clearTimeout(hedge);
+        if (e.kind === 'busy') sawBusy = true;
+        cooldownUntil[p.name] = Date.now() + COOLDOWN_MS;
+        log.push(p.name + ':' + (e.kind || 'err') + ':' + (Date.now() - t0) + 'ms');
+        failed += 1;
+        if (failed === ordered.length) {
+          if (settled) return;
+          settled = true;
+          const err = new Error(log.join(' | '));
+          err.busy = sawBusy;
+          reject(err);
+          return;
+        }
+        startNext();
+      });
+    }
+
+    startNext();
+  });
 }
 
 function corsHeaders(origin, allowed) {
@@ -297,33 +387,18 @@ export default {
     let targetWords = Number(body.targetWords) || 0;
     if (targetWords) targetWords = Math.max(40, Math.min(110, Math.round(targetWords)));
 
-    // Walk the chain. A provider that is rate limited gets one quick retry,
-    // because a second of waiting beats moving down the chain; any other
-    // failure moves on immediately. Only if every provider fails does the
-    // page's own fallback (in-browser model, then the reader's words) engage.
-    let sawBusy = false;
-    let lastError = '';
-    for (const p of chain) {
-      try {
-        return reply({ story: await askProvider(p, language, idea, targetWords), provider: p.name }, 200, origin, allowed);
-      } catch (e) {
-        if (e.kind === 'busy') {
-          sawBusy = true;
-          try {
-            await new Promise(function (r) { setTimeout(r, 1200); });
-            return reply({ story: await askProvider(p, language, idea, targetWords), provider: p.name }, 200, origin, allowed);
-          } catch (e2) {
-            if (e2.kind === 'busy') { lastError = e2.message; continue; }
-            lastError = e2.message;
-            continue;
-          }
-        }
-        lastError = e.message;
-        continue;
-      }
+    // Race the providers. Only if every one of them fails does the page's own
+    // fallback (in-browser model, then the reader's words) engage.
+    // `chain` is echoed back on both paths: it names who answered and who did
+    // not, which is the difference between "the cloud is broken" and "the
+    // preferred model is sick and something else covered for it".
+    const log = [];
+    try {
+      const won = await raceProviders(chain, language, idea, targetWords, log);
+      return reply({ story: won.story, provider: won.provider, chain: log }, 200, origin, allowed);
+    } catch (e) {
+      if (e.busy) return reply({ error: 'busy', chain: log }, 429, origin, allowed);
+      return reply({ error: 'upstream', chain: log, detail: String(e.message).slice(0, 200) }, 502, origin, allowed);
     }
-
-    if (sawBusy) return reply({ error: 'busy' }, 429, origin, allowed);
-    return reply({ error: 'upstream', detail: String(lastError).slice(0, 200) }, 502, origin, allowed);
   },
 };
