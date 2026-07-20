@@ -42,8 +42,12 @@ the model:
 
 ```bash
 curl https://tact-story-proxy.<your-subdomain>.workers.dev/health
-# {"ok":true,"configured":true,"providers":["groq:llama-3.3-70b-versatile","agnes:agnes-2.0-flash"]}
+# {"ok":true,"configured":true,"providers":["groq:llama-3.3-70b-versatile","groq-fast:llama-3.1-8b-instant","agnes:agnes-2.0-flash"]}
 ```
+
+The Groq key buys two links in the chain, not one: the 70B model and the 8B
+one are separate rate-limit buckets, so the busiest allowance running out drops
+to another sub-second model rather than all the way down the chain.
 
 `configured: false` means the secret is missing: run `wrangler secret put
 AGNES_API_KEY` again and redeploy.
