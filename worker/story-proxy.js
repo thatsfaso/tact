@@ -78,25 +78,64 @@ const LLAMA_TUNE = {
   // Italian than in English for the same ask. Both effects push the same way,
   // hence the noticeably higher Italian number. Measured, not guessed.
   target: { Italian: '58', English: '50' },
-  // One worked example per language. An English-only example left Italian
-  // unanchored, and Italian then ignored the word target completely: raising it
-  // from 66 to 76 moved the output by minus two words. The example is the lever;
-  // the number is nearly decorative.
+  // Several worked examples per language, one picked at random per request.
+  //
+  // An English-only example left Italian unanchored, and Italian then ignored
+  // the word target completely: raising it from 66 to 76 moved the output by
+  // minus two words. The example is the lever; the number is nearly decorative.
+  //
+  // But a SINGLE example anchors phrasing as hard as it anchors length. With
+  // one, two stories in three opened on "Quel giorno decise di" and closed on
+  // "Poi, piano piano, sorrise" — the example's own words, lifted whole, even
+  // with a line in the brief forbidding exactly that. Telling a model not to
+  // copy the only pattern it has been shown does not work; showing it several
+  // does. They deliberately differ in opening, in shape and in ending, so what
+  // survives the averaging is the length and the gentleness, not a formula.
   example: {
     // Shorter than the Italian one on purpose: for an identical brief these
     // models write English about a quarter longer than Italian, so an example
     // of the same length would push English onto a third page.
-    // Deliberately shorter than the Italian one, and deliberately erring short.
-    // An overlong story spills onto a third, half-empty page and the second pass
-    // cannot take words away; a short one is simply asked to grow. So the bias
-    // is downward on purpose.
-    English: 'The little snail crept into the wet garden, and the air smelled of rain. That day she decided to climb the tall leaf above her. The wind pushed her back, so she held on until it passed. At the top the sun warmed her, and she smiled.',
-    Italian: 'La piccola lumaca uscì nel giardino bagnato, e l\'aria sapeva di pioggia. Quel giorno decise di salire sulla foglia alta sopra di lei. La sua pancia sentiva ogni nodo del gambo mentre saliva. Il vento la spingeva indietro, così si tenne stretta finché non passò. In cima il sole la avvolse come una coperta tiepida. Poi, piano piano, sorrise.',
+    // Deliberately shorter than the Italian ones, and deliberately erring
+    // short. An overlong story spills onto a third, half-empty page and the
+    // second pass cannot take words away; a short one is simply asked to grow.
+    // So the bias is downward on purpose.
+    English: [
+      'The little snail crept into the wet garden, and the air smelled of rain. That day she decided to climb the tall leaf above her. The wind pushed her back, so she held on until it passed. At the top the sun warmed her, and she smiled.',
+      'The old drum slept in the attic under a blanket of dust. No one had played it for many winters, and its skin was cold. A small hand found it and wiped it clean. The first beat was shy, but the second filled the whole house.',
+      'The silver fish lived where the water was dark and still. Above him passed wide shadows that made the weeds tremble. One day he followed a warmer thread of current upward. He touched the air with his nose, and it was salty and light.',
+    ],
+    Italian: [
+      // This one's original opening ("Quel giorno decise di") and closing
+      // ("Poi, piano piano, sorrise") were catchy enough that stories lifted
+      // them verbatim even from inside a rotation. Rewritten without any line
+      // quotable enough to survive being copied.
+      'La piccola lumaca uscì nel giardino bagnato, e l\'aria sapeva di pioggia. Voleva arrivare in cima alla foglia più alta, così cominciò a salire. La sua pancia sentiva ogni nodo del gambo mentre andava su. Il vento la spingeva indietro, ma lei si tenne stretta finché non passò. In cima il sole la avvolse come una coperta tiepida, e lì restò a lungo.',
+      'Il vecchio tamburo dormiva in soffitta, coperto di polvere e di silenzio. Nessuno lo suonava da tanti inverni, e la sua pelle era fredda. Una mano piccola lo trovò e lo pulì con la manica. Il primo colpo fu timido, ma il secondo riempì tutta la casa. La polvere danzava nell\'aria come neve leggera. Da quel giorno il tamburo non ebbe più freddo.',
+      'Il pesciolino argentato viveva dove l\'acqua era scura e tranquilla. Sopra di lui passavano ombre grandi che facevano tremare le alghe. Un giorno seguì un filo di corrente più caldo e salì piano. L\'acqua diventava chiara, e sentiva le onde rumoreggiare sopra la testa. Uscì con il muso e toccò l\'aria per la prima volta. Era salata e leggera, e lui non ebbe paura.',
+    ],
   },
 };
 
 function providers(env) {
   return [
+    {
+      // First by preference: the most generous free allowance of the three
+      // accounts, which is the thing that actually runs out. Google exposes an
+      // OpenAI-compatible endpoint, so it needs no special client code.
+      name: 'gemini',
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      model: 'gemini-2.0-flash',
+      key: env.GEMINI_API_KEY,
+      timeoutMs: 6000,
+      // Not every OpenAI-compatible layer accepts `seed`, and one rejected
+      // field would fail the whole request. Variety here comes from
+      // temperature instead.
+      omitSeed: true,
+      // Calibrated separately once measured: a different model family reads the
+      // same brief differently, which is the whole reason tunes are per
+      // provider. Starting from the Llama tune is a guess, not a measurement.
+      tune: LLAMA_TUNE,
+    },
     {
       name: 'groq',
       url: 'https://api.groq.com/openai/v1/chat/completions',
@@ -166,7 +205,10 @@ function buildSystemPrompt(language, targetWords, tune) {
   const minW = t.minWords || 8;
   // A tune may carry one example per language, or a single shared one.
   const ex = t.example || DEFAULT_EXAMPLE;
-  const example = (typeof ex === 'string') ? ex : (ex[language] || ex.English);
+  const forLang = (typeof ex === 'string') ? ex : (ex[language] || ex.English);
+  const example = Array.isArray(forLang)
+    ? forLang[Math.floor(Math.random() * forLang.length)]
+    : forLang;
   const exampleLang = (typeof ex === 'string') ? 'English' : (ex[language] ? language : 'English');
   const maxW = t.maxWords || 14;
   const wanted = Number(targetWords) || Number((t.target || WORD_TARGET)[language]) || 80;
@@ -175,6 +217,7 @@ function buildSystemPrompt(language, targetWords, tune) {
     "You are a beloved children's picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n" +
     "Write a complete little story from the user's idea. Craft it with care:\n" +
     '- Give it a clear arc: a calm beginning, a small wish or problem, a turn, and a warm, satisfying ending.\n' +
+    '- Something must HAPPEN. The character has to want something and reach it, or fear something and face it. A character who only rests, listens and falls asleep is a mood, not a story, and the child is left with nothing to remember.\n' +
     '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
     '- Use concrete, simple words a 6-year-old knows.\n' +
     '- Write about ' + target + ' words as ' + sentences + ' sentences in total. Never more than ' + sentMax + '.\n' +
@@ -303,7 +346,7 @@ async function askProvider(p, language, idea, targetWords) {
       // Identical requests come back byte-for-byte identical from some
       // providers, so the same idea would always produce the same story.
       // A fresh seed per request makes each telling different.
-      seed: Math.floor(Math.random() * 1e9),
+      ...(p.omitSeed ? {} : { seed: Math.floor(Math.random() * 1e9) }),
     }),
     signal: AbortSignal.timeout(p.timeoutMs),
   });
