@@ -47,6 +47,18 @@ function providers(env) {
       model: 'llama-3.3-70b-versatile',
       key: env.GROQ_API_KEY,
       timeoutMs: 12000,
+      // Measured: this model writes much shorter sentences than Agnes for the
+      // same brief, landing around 35 words where 65 were asked. It needs more
+      // sentences and a firmer floor on their length to fill the same page.
+      // The example anchors this model far more than the rules do, so it gets
+      // a longer one. It still lands short of the example, which is why the
+      // example runs longer than the story actually wanted.
+      tune: {
+        sentences: 'EIGHT to TEN', sentMax: 'ten', minWords: 10, maxWords: 18,
+        // Italian lands short of the same ask, so it gets a higher one.
+        target: { Italian: '66', English: '62' },
+        example: 'The little snail woke to cool dew along her shell, and the whole garden smelled of wet earth. Today, she decided, she would climb the tall leaf that swayed far above her. Slowly, slowly she began. Her soft belly felt every bump and ridge of the green stem as she went. Birds sang somewhere warm and near, and the sound seemed to pull her upward. The wind pushed against her, so she held on tighter until it passed. Her small heart beat fast in the quiet. At the top, the sun wrapped around her like a wide warm blanket. She rested there for a long while and listened to the garden humming below. Then, slowly, slowly, she smiled.',
+      },
     },
     {
       name: 'agnes',
@@ -54,6 +66,7 @@ function providers(env) {
       model: 'agnes-2.0-flash',
       key: env.AGNES_API_KEY,
       timeoutMs: 40000,
+      tune: null,   // the defaults below were calibrated against this model
     },
   ].filter(function (p) { return !!p.key; });
 }
@@ -69,12 +82,19 @@ const CAP = { Italian: '64', English: '72' };
 // read best near ten words a sentence — so each language gets its own count.
 const SENTENCES = { Italian: 'SIX or SEVEN', English: 'SEVEN or EIGHT' };
 const SENT_MAX = { Italian: 'seven', English: 'eight' };
+const DEFAULT_EXAMPLE = 'The little snail woke to cool dew along her shell. Today, she decided, she would climb the tall leaf that swayed above her. Slowly, slowly she began, her soft belly feeling every bump of the green stem. Birds sang somewhere warm and near. The wind pushed against her, and she held on tighter until it passed. At the top, the sun wrapped around her like a blanket. She rested there, and she smiled.';
 
 // targetWords, when supplied, overrides the language default. The page owns the
 // only accurate measure of how much text fits, so it can measure a first story
 // and ask for a second one of the exact length that fills the pages.
-function buildSystemPrompt(language, targetWords) {
-  const wanted = Number(targetWords) || Number(WORD_TARGET[language]) || 80;
+function buildSystemPrompt(language, targetWords, tune) {
+  const t = tune || {};
+  const sentences = t.sentences || SENTENCES[language] || 'SIX or SEVEN';
+  const sentMax = t.sentMax || SENT_MAX[language] || 'seven';
+  const minW = t.minWords || 8;
+  const example = t.example || DEFAULT_EXAMPLE;
+  const maxW = t.maxWords || 14;
+  const wanted = Number(targetWords) || Number((t.target || WORD_TARGET)[language]) || 80;
   const target = String(Math.max(45, wanted));
   return (
     "You are a beloved children's picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n" +
@@ -82,13 +102,12 @@ function buildSystemPrompt(language, targetWords) {
     '- Give it a clear arc: a calm beginning, a small wish or problem, a turn, and a warm, satisfying ending.\n' +
     '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
     '- Use concrete, simple words a 6-year-old knows.\n' +
-    '- Write about ' + target + ' words as ' + (SENTENCES[language] || 'SIX or SEVEN') + ' sentences in total. Never more than ' + (SENT_MAX[language] || 'seven') + '.\n' +
+    '- Write about ' + target + ' words as ' + sentences + ' sentences in total. Never more than ' + sentMax + '.\n' +
     '- HARD LIMIT: the whole story must stay under ' + (targetWords ? (Number(targetWords) + 6) : CAP[language]) + ' words. Going over ruins the printed page, so count as you write and stop before the limit.\n' +
-    '- Most sentences should run eight to fourteen words, joining ideas with words like and, but, so, until, while, because. Let one or two be short for rhythm. Never write a chain of tiny three or four word sentences.\n' +
+    '- Most sentences should run ' + minW + ' to ' + maxW + ' words, joining ideas with words like and, but, so, until, while, because. Let one or two be short for rhythm. Never write a chain of tiny three or four word sentences.\n' +
     '- Give it a gentle rhythm; you may softly repeat a kind phrase.\n\n' +
     'Output ONLY the story prose: no title, no quotation marks, no notes, no markdown. Write in the SAME language as the request.\n\n' +
-    'Match the length, rhythm and sentence count of this example (English):\n' +
-    'The little snail woke to cool dew along her shell. Today, she decided, she would climb the tall leaf that swayed above her. Slowly, slowly she began, her soft belly feeling every bump of the green stem. Birds sang somewhere warm and near. The wind pushed against her, and she held on tighter until it passed. At the top, the sun wrapped around her like a blanket. She rested there, and she smiled.'
+    'Match the length, rhythm and sentence count of this example (English):\n' + example
   );
 }
 
@@ -125,7 +144,7 @@ async function askProvider(p, language, idea, targetWords) {
     body: JSON.stringify({
       model: p.model,
       messages: [
-        { role: 'system', content: buildSystemPrompt(language, targetWords) },
+        { role: 'system', content: buildSystemPrompt(language, targetWords, p.tune) },
         { role: 'user', content: 'Write the story in ' + language + ' about: ' + idea },
       ],
       temperature: 0.85,
