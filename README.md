@@ -57,7 +57,7 @@ The result: a flexible page, roughly postcard-sized, with domed Braille dots on 
 
 A few decisions this project made on purpose, because the obvious version of this tool would have failed the people it's for:
 
-**The story-writing model runs inside the visitor's browser tab — no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list — from a 3-billion-parameter model on capable hardware to progressively lighter ones — so nobody is locked out by their laptop, and nobody's data leaves their machine. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real Braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
+**The story-writing model runs inside the visitor's browser tab — no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list — from a 3-billion-parameter model on capable hardware to progressively lighter ones — so nobody is locked out by their laptop, and on that path nothing leaves their machine. A faster hosted path now runs ahead of it, described below, and sends only the one-line idea; removing it from the configuration returns the app to browser-only generation. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real Braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
 
 **Braille translation is a from-scratch deterministic mapping, not a bundled library.** Grade 1 Braille — the uncontracted form this project standardizes on for beginning readers — is a fixed character-to-cell table with no linguistic ambiguity. Tact implements it directly for Italian and English rather than shipping a general-purpose translation engine, which means it is instant, works fully offline, and has no failure mode where a translation silently comes back wrong.
 
@@ -80,7 +80,7 @@ Open `index.html` in any modern desktop browser. Nothing to install, nothing to 
 3. Preview the square page — Braille dots and illustration, true to the size it will print at.
 4. Download the `.stl` file and slice it for TPU or PETG on any FDM printer with a 220 × 220 mm bed.
 
-No sign-up. No cloud round-trip required. No dependency that can be discontinued out from under a family using it.
+No sign-up, and no single point of failure: the hosted model is an accelerator, not a dependency. Switch it off and the app writes stories in the browser; switch that off too and the reader's own words still become a real Braille page. A family that has the file keeps a working tool.
 
 ---
 
