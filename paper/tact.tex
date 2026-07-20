@@ -184,7 +184,9 @@ This is a genuine change to the system's privacy posture and is stated plainly r
 
 \subsection{Measured Effect of the Hosted Path}
 
-The hosted path uses \texttt{agnes-2.0-flash}, an OpenAI-compatible model offered without charge at the time of writing \cite{agnes}. Its free tier carries no stated expiry, which is a commercial position rather than a guarantee, and the fallback chain exists partly because that position may change.
+The hosted path is itself a chain of two providers rather than one, and the reason is empirical. The first implementation used \texttt{agnes-2.0-flash}, an OpenAI-compatible model offered without charge \cite{agnes}, which answered in six to nine seconds for a day and then spent the following day alternating between thirty-second replies and outright timeouts. Both of the text models exposed on that account degraded identically while the provider's API layer continued to answer errors in under a fifth of a second, which located the fault in inference capacity rather than in anything a client could correct. A free tier with no stated expiry is a commercial position rather than a guarantee, and a single such tier is a single point of failure.
+
+The proxy therefore tries \texttt{llama-3.3-70b-versatile} on Groq first, on a twelve-second timeout, and falls back to Agnes on a forty-second one. The asymmetry is deliberate: the fast provider is abandoned quickly, while the slow one is given room, because even a thirty-second story is better than sending a visitor to a 1.8 gigabyte model download. A provider whose key is absent is skipped entirely, so the deployment degrades to whatever is configured.
 
 Table~\ref{tab:hosted} reports the effect measured over approximately 150 generated stories. The comparison of interest is not raw inference speed but time-to-first-story on a device that has never visited the site before, which is the only figure a family or a classroom actually experiences.
 
@@ -197,11 +199,14 @@ Table~\ref{tab:hosted} reports the effect measured over approximately 150 genera
 \textbf{Path} & \textbf{First visit} & \textbf{Transfer} \\
 \midrule
 In-browser model (3B tier) & several minutes & $\approx$1.8\,GB \\
-Hosted model via proxy & 6.3--9.2\,s & $<$2\,kB \\
+Hosted, Groq & 0.6--0.9\,s & $<$2\,kB \\
+Hosted, Agnes (fallback) & 6.3--9.2\,s & $<$2\,kB \\
 Reader's own words & $<$1\,s & none \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+A second finding concerns the brief rather than the transport. The two providers read identical instructions very differently: asked for 65 words, Agnes produced approximately 65 while \texttt{llama-3.3-70b-versatile} produced approximately 35, in noticeably clipped sentences, and raising the requested count barely moved it, with a request for 100 words yielding 61. What did move it was the worked example included in the brief, which anchors the larger model considerably more strongly than the numeric rules do. Replacing the example with a longer one, and giving each provider its own sentence count and per-language word target, brought Groq output to a median of 0.8 seconds with 81 percent of stories fitting two cards and 92 percent leaving every page acceptably filled. The general lesson is that a story brief is not portable between models, and a system that treats providers as interchangeable will silently produce differently shaped pages depending on which one answered.
 
 Request success was measured separately, since a free tier implies a rate ceiling. At up to eight concurrent requests, 31 of 32 succeeded, the single failure being a client-side timeout rather than a rejection. Under a deliberately abusive burst of 40 requests issued as fast as the network allowed, 15 were rejected as rate limited. Sequential use at approximately five requests per minute produced no rejections at all. The practical reading is that ordinary use does not reach the ceiling, that a sudden surge of attention will, and that the fallback chain is what makes the second case a slower story rather than no story.
 
