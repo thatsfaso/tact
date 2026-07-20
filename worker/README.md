@@ -19,15 +19,20 @@ not a dependency.
 
 ## Deploy
 
-You need a free Cloudflare account and an Agnes API key from
-<https://agnes-ai.com>.
+You need a free Cloudflare account, plus at least one model key: Groq from
+<https://console.groq.com> (recommended, fast) or Agnes from <https://agnes-ai.com>.
 
 ```bash
 cd worker
 npx wrangler login          # opens the browser, authorises your account
-npx wrangler secret put AGNES_API_KEY   # paste the key when prompted
+npx wrangler secret put GROQ_API_KEY    # from console.groq.com, tried first
+npx wrangler secret put AGNES_API_KEY   # from agnes-ai.com, the fallback
 npx wrangler deploy
 ```
+
+Either key alone is enough: a provider whose key is missing is skipped. Groq
+answers in about a second; Agnes is slower but keeps the chain alive if Groq
+ever refuses.
 
 `wrangler deploy` prints the Worker URL, something like
 `https://tact-story-proxy.<your-subdomain>.workers.dev`.
@@ -37,7 +42,7 @@ the model:
 
 ```bash
 curl https://tact-story-proxy.<your-subdomain>.workers.dev/health
-# {"ok":true,"configured":true,"model":"agnes-2.0-flash"}
+# {"ok":true,"configured":true,"providers":["groq:llama-3.3-70b-versatile","agnes:agnes-2.0-flash"]}
 ```
 
 `configured: false` means the secret is missing: run `wrangler secret put
