@@ -1275,7 +1275,6 @@ const COPY = {
     facts: [
       "Braille was invented by Louis Braille when he was 15. Homework existed back then too.",
       "Trained fingertips read Braille at up to 125 words a minute. Speedy little readers!",
-      "This story is being written inside YOUR device. No clouds were disturbed.",
       "A 3D printer builds your page layer by layer, like a very thin lasagna.",
       "The dots on your page will be about as tall as two sheets of paper stacked up.",
       "Cats can't read Braille. They prefer to sit on it.",
@@ -1348,7 +1347,6 @@ const COPY = {
     facts: [
       "Il Braille l'ha inventato Louis Braille a 15 anni. Sì, i compiti esistevano anche allora.",
       "Le dita allenate leggono il Braille fino a 125 parole al minuto. Una bella corsa!",
-      "Questa storia nasce dentro il TUO dispositivo. Nessuna nuvola è stata disturbata.",
       "La stampante 3D costruisce la pagina strato dopo strato, come una lasagna sottilissima.",
       "I puntini della tua pagina saranno alti come due fogli di carta impilati.",
       "I gatti non leggono il Braille: preferiscono sedercisi sopra.",
@@ -1777,7 +1775,13 @@ function StoryResult({ pages, lang, t, onAgain }) {
             <div style={{ position: "absolute", inset: 0, borderRadius: `${(L.CORNER_R / L.PAGE_W) * 100}%`, pointerEvents: "none", opacity: 0.5,
               backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
               mixBlendMode: "multiply" }} />
-            <div className="mono absolute top-3 right-4 text-[9px] tracking-[0.2em] uppercase" style={{ color: "rgba(10,10,12,0.35)", zIndex: 2 }}>
+            <div className="mono absolute text-[9px] tracking-[0.2em] uppercase"
+              style={{ color: "rgba(10,10,12,0.35)", zIndex: 2,
+                // Proportional to the page, not a fixed pixel offset, so the
+                // label keeps the same 10 mm margin the Braille text uses no
+                // matter what size the preview is drawn at.
+                top: `${(L.TZ_X / L.PAGE_H) * 100 * 0.55}%`,
+                right: `${(L.TZ_X / L.PAGE_W) * 100}%` }}>
               {t.page} {page + 1} {t.of} {pages.length}
             </div>
 
