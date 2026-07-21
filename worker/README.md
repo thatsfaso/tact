@@ -93,18 +93,26 @@ To get sub-second generation on your own deployment:
 4. Point `CLOUD_ENDPOINT` in `index.html` at your Worker URL
 
 The origin check is not a security boundary — any non-browser client can send
-whatever header it likes — and it is not meant to be one. The real protection
-is that the system prompt is fixed server-side, so the endpoint can only ever
-write a children's story and cannot be repurposed as a general-purpose model.
+whatever header it likes — and it is not meant to be one. Two real protections
+sit behind it. The system prompt is fixed server-side, so the endpoint can only
+ever write a children's story and cannot be repurposed as a general-purpose
+model. And every request passes an exact rate limit (20 a minute per IP, 240 a
+minute overall, counted by a Durable Object) before it is allowed to reach any
+model, so even a caller who fakes the origin header cannot spend more than
+pocket change of the deployment's allowance. A refused request gets the same
+`busy` answer a rate-limited provider produces, and the page falls back to its
+in-browser model as usual.
 
 ## Notes
 
 - The key is stored encrypted by Cloudflare and is never sent to the browser.
 - `ALLOWED_ORIGINS` in `story-proxy.js` lists the origins allowed to call the
   Worker. Add any new domain there.
-- The origin check stops casual reuse from other websites; it is not a hard
-  security boundary, since a non-browser client can send any header. The real
-  protection is that the system prompt is fixed server-side, so the endpoint
-  cannot be repurposed as a general-purpose model.
-- If you later need stricter limits, Cloudflare KV or Durable Objects can add
-  per-IP rate limiting.
+- The origin check stops casual reuse from other websites; the enforced
+  boundary is the Durable Object rate limiter above, plus the fixed
+  server-side system prompt.
+- The limits (20/min per IP, 240/min overall) live in `story-proxy.js`, next
+  to the check that applies them. Cloudflare's own `[[ratelimits]]` binding
+  was tried first and is deliberately not used: its counters are cached per
+  isolate and synced lazily, and a burst of thirty separate requests on one
+  key sailed straight through a limit of twenty.

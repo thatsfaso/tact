@@ -82,6 +82,8 @@ Open `index.html` in any modern desktop browser. Nothing to install, nothing to 
 
 No sign-up, and no single point of failure: the hosted model is an accelerator, not a dependency. Switch it off and the app writes stories in the browser; switch that off too and the reader's own words still become a real Braille page. A family that has the file keeps a working tool.
 
+**If you cloned this repository, it works — with one difference worth knowing.** The hosted fast path belongs to this project's own deployment and answers only its own domain, so a clone is declined and the page falls back to generating the story in your browser. That takes a one-time model download, and every other part of Tact behaves identically. It is a deliberate boundary, not a missing feature: one project's free allowance cannot fund everybody's stories. To get sub-second generation on a fork, deploy the small proxy in [`worker/`](worker/) with your own free API key — the README there walks through it in four steps.
+
 ---
 
 ## Braille standards

@@ -2,5 +2,23 @@ name = "tact-story-proxy"
 main = "story-proxy.js"
 compatibility_date = "2026-01-01"
 
-# The Agnes API key is NOT stored here. Set it as an encrypted secret:
+# The API keys are NOT stored here. Set each as an encrypted secret:
+#   npx wrangler secret put GROQ_API_KEY
 #   npx wrangler secret put AGNES_API_KEY
+
+# Rate limiting, enforced before a request reaches any model. The Origin
+# allowlist in story-proxy.js only stops browsers — any non-browser client can
+# type the header — so the real gate is this counter, keyed by the connection's
+# own IP, which a caller cannot choose. It is a Durable Object rather than
+# Cloudflare's [[ratelimits]] binding for a measured reason: that binding's
+# counters are cached per isolate and synced lazily, and thirty separate
+# requests on one key sailed through a limit of twenty. The Durable Object
+# count is exact. Limits themselves (20/min per IP, 240/min overall) live next
+# to the check in story-proxy.js.
+[[durable_objects.bindings]]
+name = "RATE"
+class_name = "RateCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateCounter"]

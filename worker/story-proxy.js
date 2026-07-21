@@ -37,6 +37,31 @@
  * Deploy: see worker/README.md
  */
 
+import { DurableObject } from 'cloudflare:workers';
+
+// Exact request counting, one object per key (an IP, or 'all' for the global
+// ceiling). Cloudflare's own rate-limiting binding was tried first and failed
+// the only test that matters: its counters are cached per isolate and synced
+// lazily, so thirty separate requests on one key — precisely the shape of a
+// curl loop hammering the endpoint — sailed through a limit of twenty. A
+// Durable Object is single-threaded over its own storage, so its count is
+// exact by construction, not by luck of routing.
+export class RateCounter extends DurableObject {
+  // Consume one slot under `limit` per sliding minute. True = allowed.
+  async take(limit) {
+    const now = Date.now();
+    let stamps = (await this.ctx.storage.get('stamps')) || [];
+    stamps = stamps.filter(function (t) { return now - t < 60000; });
+    if (stamps.length >= limit) {
+      await this.ctx.storage.put('stamps', stamps);
+      return false;
+    }
+    stamps.push(now);
+    await this.ctx.storage.put('stamps', stamps);
+    return true;
+  }
+}
+
 const ALLOWED_ORIGINS = [
   'https://tactbraille.com',
   'https://www.tactbraille.com',
@@ -407,13 +432,47 @@ export default {
     }
 
     if (!allowed) return reply({ error: 'origin' }, 403, origin, false);
-    if (request.method !== 'POST') return reply({ error: 'method' }, 405, origin, allowed);
+
+    // Everything past this point spends a model call, and model calls are about
+    // to be billed. The origin check above is a courtesy, not a defence: any
+    // non-browser client can type the header. This is the defence — enforced by
+    // Cloudflare before the request costs anything, and impossible to spoof
+    // because the keys come from the connection, not from the caller. Two
+    // limits: per-IP, sized so a family or a small classroom behind one router
+    // never notices it, and a global ceiling that bounds the worst hour an
+    // abuser can bill even from many addresses. A refused request returns the
+    // same `busy` the providers use, so the page falls back exactly as it
+    // would for any other shortage. The `env.X &&` guards mean a deploy
+    // without the bindings still works, just unshielded.
+    // Per address: 20 requests a minute. A story costs at most three (first
+    // ask, one retry, one length refinement), so a family or a small
+    // classroom behind one router never meets this, while one abusive machine
+    // is capped at pocket change per day. All addresses together: 240 a
+    // minute, bounding the worst hour a distributed abuser can bill while
+    // leaving launch-day headroom. Both checks run in parallel so the second
+    // costs no extra latency; the guard means a deploy without the binding
+    // still works, just unshielded.
+    if (env.RATE) {
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      try {
+        const verdicts = await Promise.all([
+          env.RATE.get(env.RATE.idFromName('ip:' + ip)).take(20),
+          env.RATE.get(env.RATE.idFromName('all')).take(240),
+        ]);
+        if (!verdicts[0] || !verdicts[1]) return reply({ error: 'busy' }, 429, origin, allowed);
+      } catch (e) {
+        // The counter failing must not take the service down with it: a
+        // reader's story matters more than a bounded billing risk.
+      }
+    }
 
     // Diagnostic: run ONE provider in isolation and report what it did. In a
     // race a slow provider simply loses and leaves no trace, which hides the
     // difference between "refused instantly" and "took fifteen seconds to say
-    // no" — and those two need opposite fixes. Behind the origin check, since
-    // it spends a real model call.
+    // no" — and those two need opposite fixes. Behind the origin check and the
+    // rate limits, since it spends a real model call. (This must sit BEFORE
+    // the POST-only check below, which would otherwise 405 it — that exact
+    // ordering mistake once left this endpoint unreachable.)
     if (request.method === 'GET' && new URL(request.url).pathname === '/probe') {
       const want = new URL(request.url).searchParams.get('p') || '';
       const lang = new URL(request.url).searchParams.get('lang') === 'it' ? 'Italian' : 'English';
@@ -428,6 +487,7 @@ export default {
       }
     }
 
+    if (request.method !== 'POST') return reply({ error: 'method' }, 405, origin, allowed);
     if (chain.length === 0) return reply({ error: 'unconfigured' }, 503, origin, allowed);
 
     let body;
