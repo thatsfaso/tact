@@ -1075,6 +1075,9 @@ const SHAPE_PATHS = {
   bell:'objects/bell', lantern:'objects/lantern', candle:'objects/candle', mirror:'objects/mirror',
   gift:'objects/gift', balloon:'objects/balloon', ball:'objects/ball', kite:'objects/kite',
   snowflake:'nature/snowflake', bridge:'buildings/bridge',
+  // ── batch 3: high-frequency story subjects that had no shape ──
+  whale:'animals/whale', penguin:'animals/penguin',
+  dinosaur:'animals/dinosaur', robot:'objects/robot',
 };
 
 // ─── Demo pages (shown when WebGPU/LLM unavailable) ──────────────────────────
@@ -1919,7 +1922,10 @@ const SHAPE_KEYWORDS = {
     dog_sitting:['cane','cani','cagnolino','cucciolo'], owl:['gufo','gufi','civetta'],
     horse:['cavallo','cavalli','cavallino','pony','puledro'],
     duck:['anatra','anatre','anatroccolo','papera'], frog:['rana','rane','ranocchio','rospo'],
-    turtle:['tartaruga','tartarughe'], elephant:['elefante','elefanti'],
+    turtle:['tartaruga','tartarughe'], elephant:['elefante','elefanti','elefantino'],
+    whale:['balena','balene','balenottera'], penguin:['pinguino','pinguini'],
+    dinosaur:['dinosauro','dinosauri','dino','tirannosauro','brontosauro'],
+    robot:['robot','robottino','automa'],
     lion:['leone','leoni','leoncino'], bear:['orso','orsi','orsetto'],
     bird_flying:['uccello','uccelli','uccellino','passero','colomba'],
     butterfly:['farfalla','farfalle','farfallina'], fish:['pesce','pesci','pesciolino'],
@@ -1963,6 +1969,8 @@ const SHAPE_KEYWORDS = {
     owl:['owl','owls'], horse:['horse','horses','pony','foal'], duck:['duck','ducks','duckling'],
     frog:['frog','frogs','toad'], turtle:['turtle','turtles','tortoise'],
     elephant:['elephant','elephants'], lion:['lion','lions'], bear:['bear','bears'],
+    whale:['whale','whales'], penguin:['penguin','penguins'],
+    dinosaur:['dinosaur','dinosaurs','dino','trex'], robot:['robot','robots'],
     bird_flying:['bird','birds','sparrow','robin','pigeon'],
     butterfly:['butterfly','butterflies','moth'], fish:['fish','fishes'],
     magic_wand:['wand','wands'], sword:['sword','swords'],

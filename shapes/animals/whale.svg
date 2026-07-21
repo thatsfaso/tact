@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: whale | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 30,100 Q 34,74 74,68 Q 116,62 140,80 Q 150,88 152,100 L 152,104 Q 158,94 166,88 Q 170,100 164,110 Q 174,112 180,120 Q 170,128 158,124 Q 150,140 116,144 Q 58,148 38,124 Q 28,112 30,100 Z"/>
+  <path d="M 30,106 L 16,106 Q 22,114 32,116" stroke-width="4"/>
+  <circle cx="54" cy="94" r="4" fill="#000000"/>
+  <path d="M 42,114 Q 54,124 68,118" stroke-width="4"/>
+  <path d="M 80,64 L 80,48 M 80,48 Q 72,44 70,34 M 80,48 Q 88,44 90,34 M 80,48 L 80,32" stroke-width="5"/>
+</g>
+</svg>

@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: bird_flying | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 24,100 L 44,90 Q 58,80 78,82 Q 122,82 150,98 L 176,86 L 170,104 L 178,118 L 148,110 Q 122,120 92,116 Q 60,112 44,104 Z"/>
-  <path d="M 84,84 Q 94,44 132,32 Q 122,62 102,84"/>
-  <path d="M 90,116 Q 102,148 138,158 Q 126,128 108,114"/>
-  <circle cx="48" cy="94" r="4" fill="#000000"/>
+  <path d="M 64,104 Q 60,88 76,82 Q 90,78 104,80 L 130,84 Q 148,88 150,102 Q 151,112 140,116 L 96,118 Q 72,118 64,104 Z"/>
+  <circle cx="58" cy="82" r="15"/>
+  <path d="M 44,80 L 26,84 L 44,90" />
+  <circle cx="54" cy="78" r="3" fill="#000000"/>
+  <path d="M 98,82 Q 92,52 116,40 Q 134,32 148,38 Q 130,46 124,60 Q 118,72 120,84" />
+  <path d="M 106,118 Q 112,138 130,144 Q 120,130 122,118" />
+  <path d="M 140,110 L 172,102 M 142,114 L 174,116" stroke-width="5"/>
 </g>
 </svg>

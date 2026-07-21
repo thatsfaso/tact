@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: unicorn | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 18,58 Q 14,48 26,44 L 34,28 L 44,40 Q 56,38 60,50 L 96,84 Q 128,78 152,88 Q 172,96 170,116 Q 169,130 158,136 L 160,170 L 146,170 L 143,142 Q 118,150 96,144 L 92,170 L 78,170 L 76,136 Q 62,126 60,108 L 42,70 Q 26,66 18,58 Z"/>
-  <path d="M 32,26 L 18,2"/>
-  <path d="M 58,52 Q 70,62 80,72 Q 88,80 94,84" stroke-width="4"/>
-  <circle cx="34" cy="46" r="4" fill="#000000"/>
-  <path d="M 168,112 Q 190,120 186,150 Q 184,162 174,164"/>
+  <path d="M 22,66 Q 18,56 30,52 L 40,40 L 50,50 Q 60,48 64,58 L 96,88 Q 126,82 148,92 Q 168,100 166,118 Q 165,130 154,136 L 156,170 L 142,170 L 139,142 Q 116,150 96,144 L 92,170 L 78,170 L 76,136 Q 62,128 60,110 L 44,78 Q 30,76 22,66 Z"/>
+  <path d="M 40,42 L 32,8 L 52,38 Z" fill="#000000" stroke-width="3"/>
+  <path d="M 56,50 Q 66,56 70,66 Q 78,70 82,80 Q 90,84 94,92" stroke-width="5"/>
+  <circle cx="34" cy="56" r="4" fill="#000000"/>
+  <path d="M 164,108 Q 184,114 182,138 Q 180,154 170,160 Q 174,146 169,134" stroke-width="5"/>
+  <path d="M 70,20 L 74,28 L 82,30 L 74,34 L 70,42 L 66,34 L 58,32 L 66,28 Z" stroke-width="3"/>
 </g>
 </svg>

@@ -1,13 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: cow | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 20,74 Q 16,60 30,56 L 42,52 Q 48,36 64,35 Q 80,34 87,47 L 93,55 Q 128,49 154,59 Q 174,67 172,90 Q 171,104 160,112 L 162,170 L 148,170 L 144,120 Q 120,128 98,122 L 94,170 L 80,170 L 78,116 Q 62,108 58,90 L 38,84 Q 24,82 20,74 Z"/>
-  <path d="M 52,36 Q 44,24 54,18"/>
-  <path d="M 76,38 Q 84,24 74,18"/>
-  <circle cx="43" cy="50" r="4" fill="#000000"/>
-  <circle cx="24" cy="64" r="4" fill="#000000"/>
-  <circle cx="34" cy="70" r="4" fill="#000000"/>
-  <path d="M 168,94 L 178,140 Q 180,152 170,154"/>
-  <path d="M 100,120 Q 100,136 116,136 Q 130,136 130,121" stroke-width="4"/>
+  <path d="M 88,74 L 144,74 Q 164,76 164,96 L 164,118 Q 164,126 156,128 L 156,152 L 140,152 L 140,130 L 106,130 L 106,152 L 90,152 L 90,128 Q 76,126 74,110 L 74,88 Q 76,76 88,74 Z"/>
+  <path d="M 74,92 L 50,92 Q 38,92 38,104 L 38,116 Q 38,128 50,128 L 66,128 Q 76,128 76,118" />
+  <circle cx="50" cy="102" r="3.5" fill="#000000"/>
+  <circle cx="64" cy="102" r="3.5" fill="#000000"/>
+  <circle cx="48" cy="120" r="2.5" fill="#000000"/>
+  <circle cx="58" cy="120" r="2.5" fill="#000000"/>
+  <path d="M 46,90 Q 38,80 40,68 Q 50,74 54,86" stroke-width="5"/>
+  <path d="M 68,90 Q 72,78 82,72 Q 80,84 72,90" stroke-width="5"/>
+  <path d="M 38,98 L 26,96 Q 30,106 40,106" stroke-width="4"/>
+  <path d="M 110,130 Q 108,142 118,144 Q 128,146 130,134 M 116,133 L 116,142 M 123,134 L 123,143" stroke-width="3.5"/>
+  <path d="M 164,86 Q 178,94 176,116 Q 172,124 178,130" stroke-width="4"/>
 </g>
 </svg>
