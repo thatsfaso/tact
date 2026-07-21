@@ -25,10 +25,16 @@ You need a free Cloudflare account, plus at least one model key: Groq from
 ```bash
 cd worker
 npx wrangler login          # opens the browser, authorises your account
-npx wrangler secret put GROQ_API_KEY    # from console.groq.com, tried first
-npx wrangler secret put AGNES_API_KEY   # from agnes-ai.com, the fallback
+npx wrangler secret put GROQ_API_KEY      # from console.groq.com, tried first
+npx wrangler secret put CEREBRAS_API_KEY  # from cloud.cerebras.ai, same 70B model
+npx wrangler secret put AGNES_API_KEY     # from agnes-ai.com, the fallback
 npx wrangler deploy
 ```
+
+The Cerebras key is worth the extra two minutes: it serves the same
+llama-3.3-70b as Groq's best model on an independent free allowance, so the
+day's budget of best-quality stories roughly doubles, and exhausting one
+account's quota no longer means dropping to a smaller model.
 
 Either key alone is enough: a provider whose key is missing is skipped.
 
