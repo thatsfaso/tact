@@ -30,8 +30,9 @@
  *    so the page can fall back to in-browser generation instead of failing.
  *
  * Secrets: set each with `npx wrangler secret put <NAME>`.
- *   GROQ_API_KEY   — from console.groq.com (free)
- *   AGNES_API_KEY  — from agnes-ai.com (free)
+ *   GROQ_API_KEY      — from console.groq.com (free)
+ *   CEREBRAS_API_KEY  — from cloud.cerebras.ai (free)
+ *   AGNES_API_KEY     — from agnes-ai.com (free)
  * A provider whose key is missing is simply skipped.
  *
  * Deploy: see worker/README.md
@@ -161,11 +162,27 @@ function providers(env) {
       tune: LLAMA_TUNE,
     },
     {
-      // Same account, different model, therefore a different rate-limit bucket.
-      // The 70B model's free-tier allowance is the thing most likely to run out
-      // on a busy day, and when it does the next stop should be another model
-      // that answers in a second — not a slow one, and certainly not a 1.8 GB
-      // download. Slightly weaker prose is a far better trade than either.
+      // The SAME model on a different company's free tier, which makes it the
+      // best fallback in the list: when Groq's daily 70B allowance runs out,
+      // this continues with identical weights — same prose quality, and the
+      // tune calibrated against this model carries over exactly. Added when
+      // Groq froze Developer-tier upgrades, but it earns its place regardless:
+      // two independent allowances for the good model roughly double the
+      // stories per day that get it. Inert until CEREBRAS_API_KEY is set
+      // (free, no card, from cloud.cerebras.ai).
+      name: 'cerebras',
+      url: 'https://api.cerebras.ai/v1/chat/completions',
+      model: 'llama-3.3-70b',
+      key: env.CEREBRAS_API_KEY,
+      timeoutMs: 5000,
+      tune: LLAMA_TUNE,
+    },
+    {
+      // Same account as `groq`, different model, therefore a different
+      // rate-limit bucket. When both 70B allowances above run out, the next
+      // stop should be another model that answers in a second — not a slow
+      // one, and certainly not a 1.8 GB download. Slightly weaker prose is a
+      // far better trade than either.
       name: 'groq-fast',
       url: 'https://api.groq.com/openai/v1/chat/completions',
       model: 'llama-3.1-8b-instant',
