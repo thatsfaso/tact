@@ -119,24 +119,6 @@ const LLAMA_TUNE = {
 function providers(env) {
   return [
     {
-      // First by preference: the most generous free allowance of the three
-      // accounts, which is the thing that actually runs out. Google exposes an
-      // OpenAI-compatible endpoint, so it needs no special client code.
-      name: 'gemini',
-      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-      model: 'gemini-2.0-flash',
-      key: env.GEMINI_API_KEY,
-      timeoutMs: 6000,
-      // Not every OpenAI-compatible layer accepts `seed`, and one rejected
-      // field would fail the whole request. Variety here comes from
-      // temperature instead.
-      omitSeed: true,
-      // Calibrated separately once measured: a different model family reads the
-      // same brief differently, which is the whole reason tunes are per
-      // provider. Starting from the Llama tune is a guess, not a measurement.
-      tune: LLAMA_TUNE,
-    },
-    {
       name: 'groq',
       url: 'https://api.groq.com/openai/v1/chat/completions',
       model: 'llama-3.3-70b-versatile',
@@ -161,6 +143,44 @@ function providers(env) {
       tune: LLAMA_TUNE,
     },
     {
+      // Behind the Groq models, not ahead of them, and that placement is a
+      // measurement rather than a preference. Google's free tier was expected to
+      // be the most generous allowance here; measured, it answers 503 "currently
+      // experiencing high demand" after fifteen seconds, or not at all. A
+      // provider that fails SLOWLY is the most expensive kind, because the race
+      // pays its grace period on every request. Promote it once it can serve.
+      name: 'gemini',
+      // Switched off, not deleted: the key, the tune and the wiring all work,
+      // and flipping this back to true is the whole re-enable. See below.
+      enabled: false,
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      model: 'gemini-3.5-flash',
+      key: env.GEMINI_API_KEY,
+      timeoutMs: 25000,
+      // Not every OpenAI-compatible layer accepts `seed`, and one rejected
+      // field would fail the whole request. Variety here comes from
+      // temperature instead.
+      omitSeed: true,
+      // Calibrated separately once measured: a different model family reads the
+      // same brief differently, which is the whole reason tunes are per
+      // provider. Starting from the Llama tune is a guess, not a measurement.
+      tune: LLAMA_TUNE,
+    },
+    {
+      // The same family behind a floating alias. Pinning a version is what just
+      // cost an afternoon: gemini-2.0-flash and gemini-2.5-flash both answer
+      // 404 "no longer available to new users", so a pinned name is a dated
+      // name. The alias cannot be retired out from under the site.
+      name: 'gemini-latest',
+      enabled: false,
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      model: 'gemini-flash-latest',
+      key: env.GEMINI_API_KEY,
+      timeoutMs: 8000,
+      omitSeed: true,
+      tune: LLAMA_TUNE,
+    },
+    {
       name: 'agnes',
       url: 'https://apihub.agnes-ai.com/v1/chat/completions',
       model: 'agnes-2.0-flash',
@@ -174,7 +194,7 @@ function providers(env) {
       timeoutMs: 12000,
       tune: null,   // the defaults below were calibrated against this model
     },
-  ].filter(function (p) { return !!p.key; });
+  ].filter(function (p) { return !!p.key && p.enabled !== false; });
 }
 
 // The page holds a fixed number of Braille CELLS, and Italian words are longer
@@ -286,7 +306,8 @@ function raceProviders(chain, language, idea, targetWords, log) {
         clearTimeout(hedge);
         if (e.kind === 'busy') sawBusy = true;
         cooldownUntil[p.name] = Date.now() + COOLDOWN_MS;
-        log.push(p.name + ':' + (e.kind || 'err') + ':' + (Date.now() - t0) + 'ms');
+        log.push(p.name + ':' + (e.kind || 'err') + ':' + (Date.now() - t0) + 'ms' +
+                 (e.detail ? ' (' + String(e.detail).replace(/\s+/g, ' ').slice(0, 300) + ')' : ''));
         failed += 1;
         if (failed === ordered.length) {
           if (settled) return;
@@ -352,15 +373,22 @@ async function askProvider(p, language, idea, targetWords) {
   });
 
   if (res.status === 429) {
-    const e = new Error(p.name + '-rate-limited');
+    // Keep the upstream's own words. "Rate limited" covers two very different
+    // situations — an allowance temporarily spent, and an allowance that is
+    // structurally zero for this key — and only the body tells them apart.
+    let why = '';
+    try { why = (await res.text()).slice(0, 400); } catch (err) { /* ignore */ }
+    const e = new Error(p.name + ' 429 ' + why);
     e.kind = 'busy';
+    e.detail = why;
     throw e;
   }
   if (!res.ok) {
     let detail = '';
-    try { detail = (await res.text()).slice(0, 200); } catch (err) { /* ignore */ }
+    try { detail = (await res.text()).slice(0, 400); } catch (err) { /* ignore */ }
     const e = new Error(p.name + ' HTTP ' + res.status + ' ' + detail);
     e.kind = 'upstream';
+    e.detail = 'HTTP ' + res.status + ' ' + detail;
     throw e;
   }
 
@@ -412,6 +440,26 @@ export default {
 
     if (!allowed) return reply({ error: 'origin' }, 403, origin, false);
     if (request.method !== 'POST') return reply({ error: 'method' }, 405, origin, allowed);
+
+    // Diagnostic: run ONE provider in isolation and report what it did. In a
+    // race a slow provider simply loses and leaves no trace, which hides the
+    // difference between "refused instantly" and "took fifteen seconds to say
+    // no" — and those two need opposite fixes. Behind the origin check, since
+    // it spends a real model call.
+    if (request.method === 'GET' && new URL(request.url).pathname === '/probe') {
+      const want = new URL(request.url).searchParams.get('p') || '';
+      const lang = new URL(request.url).searchParams.get('lang') === 'it' ? 'Italian' : 'English';
+      const p = chain.filter(function (x) { return x.name === want; })[0];
+      if (!p) return reply({ error: 'unknown-provider', known: chain.map(function (x) { return x.name; }) }, 400, origin, allowed);
+      const t0 = Date.now();
+      try {
+        const story = await askProvider(p, lang, 'un gatto curioso', 0);
+        return reply({ ok: true, model: p.model, ms: Date.now() - t0, story: story }, 200, origin, allowed);
+      } catch (e) {
+        return reply({ ok: false, model: p.model, ms: Date.now() - t0, kind: e.kind || 'err', detail: String(e.message).slice(0, 700) }, 200, origin, allowed);
+      }
+    }
+
     if (chain.length === 0) return reply({ error: 'unconfigured' }, 503, origin, allowed);
 
     let body;
