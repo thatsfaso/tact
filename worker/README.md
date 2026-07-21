@@ -72,6 +72,31 @@ Put that URL in `index.html`, in the `CLOUD_ENDPOINT` constant near the top of
 the story-generation script. Leaving it empty disables the cloud path entirely
 and the page uses in-browser generation, which is a safe default.
 
+## If you forked this project
+
+You do **not** need any of this to run Tact. Clone the repository, open
+`index.html`, and it works: the page generates the story with its in-browser
+model, and if that is unavailable it turns your own words into a real Braille
+page. Nothing here is required.
+
+What you do not get without your own key is the fast path. The endpoint in
+`index.html` points at this project's own Worker, which accepts requests only
+from its own origins, so a fork receives `403` and the page falls back
+automatically. That is by design rather than an obstacle: one project's free
+allowance cannot fund everybody's stories.
+
+To get sub-second generation on your own deployment:
+
+1. Get a free key from <https://console.groq.com>
+2. Deploy this Worker to your own Cloudflare account (steps above)
+3. Add your site's origin to `ALLOWED_ORIGINS` in `story-proxy.js`
+4. Point `CLOUD_ENDPOINT` in `index.html` at your Worker URL
+
+The origin check is not a security boundary — any non-browser client can send
+whatever header it likes — and it is not meant to be one. The real protection
+is that the system prompt is fixed server-side, so the endpoint can only ever
+write a children's story and cannot be repurposed as a general-purpose model.
+
 ## Notes
 
 - The key is stored encrypted by Cloudflare and is never sent to the browser.

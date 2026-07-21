@@ -41,7 +41,13 @@ const ALLOWED_ORIGINS = [
   'https://tactbraille.com',
   'https://www.tactbraille.com',
   'https://thatsfaso.github.io',
-  'http://localhost:8080',
+  // 'http://localhost:8080' was here and has been removed deliberately.
+  // This is an open-source project, so cloning it and serving it locally is the
+  // most natural thing a reader of the repository can do — and with localhost
+  // allowed, every one of those requests silently spent THIS deployment's model
+  // quota. The allowance is the binding constraint on the whole service, so the
+  // convenience was not worth it. Add it back temporarily when developing
+  // against the live Worker; a fork's own deployment should list its own origin.
 ];
 
 // Providers in order of preference. Groq first: llama-3.3-70b-versatile is a
