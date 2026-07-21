@@ -61,3 +61,10 @@ paper/missfont.log
 
 # Wrangler local state (contains account identifiers)
 worker/.wrangler/
+
+# Local working material that must never reach the public repository
+.claude/
+TACT_mockups_preview/
+ad_assets/
+paper/tact_it.tex
+paper/tact_it.pdf
