@@ -178,8 +178,25 @@ function providers(env) {
       tune: LLAMA_TUNE,
     },
     {
+      // A different model FAMILY on a genuinely free tier (no card). Mistral
+      // is a European company and its Italian is strong — the quality of the
+      // Italian prose, not the parameter count, is what actually limits this
+      // service. Starts from the Llama tune; recalibrate once measured, since
+      // every family reads the same brief differently. Inert until
+      // MISTRAL_API_KEY is set (from console.mistral.ai).
+      name: 'mistral',
+      url: 'https://api.mistral.ai/v1/chat/completions',
+      model: 'mistral-small-latest',
+      key: env.MISTRAL_API_KEY,
+      timeoutMs: 8000,
+      // Mistral validates request bodies strictly and its seed field is named
+      // `random_seed`; sending OpenAI's `seed` risks a rejected request.
+      omitSeed: true,
+      tune: LLAMA_TUNE,
+    },
+    {
       // Same account as `groq`, different model, therefore a different
-      // rate-limit bucket. When both 70B allowances above run out, the next
+      // rate-limit bucket. When the 70B allowance above runs out, the next
       // stop should be another model that answers in a second — not a slow
       // one, and certainly not a 1.8 GB download. Slightly weaker prose is a
       // far better trade than either.
@@ -483,6 +500,28 @@ export default {
       }
     }
 
+    // Diagnostic: list the models a provider's key can actually reach. Model
+    // ids drift under every provider — Agnes retired 2.5, Google retired the
+    // pinned Flash names, Cerebras named its 70B differently than Groq — and
+    // each time the symptom was the same opaque 404. Asking the provider
+    // beats guessing. Behind the origin check and rate limits like /probe.
+    if (request.method === 'GET' && new URL(request.url).pathname === '/models') {
+      const want = new URL(request.url).searchParams.get('p') || '';
+      const p = chain.filter(function (x) { return x.name === want; })[0];
+      if (!p) return reply({ error: 'unknown-provider', known: chain.map(function (x) { return x.name; }) }, 400, origin, allowed);
+      try {
+        const res = await fetch(p.url.replace('/chat/completions', '/models'), {
+          headers: { 'Authorization': 'Bearer ' + String(p.key).trim() },
+          signal: AbortSignal.timeout(8000),
+        });
+        const data = await res.json();
+        const ids = (data.data || []).map(function (m) { return m.id; });
+        return reply({ ok: res.ok, status: res.status, models: ids }, 200, origin, allowed);
+      } catch (e) {
+        return reply({ ok: false, detail: String(e.message).slice(0, 300) }, 200, origin, allowed);
+      }
+    }
+
     // Diagnostic: run ONE provider in isolation and report what it did. In a
     // race a slow provider simply loses and leaves no trace, which hides the
     // difference between "refused instantly" and "took fifteen seconds to say
@@ -491,13 +530,19 @@ export default {
     // the POST-only check below, which would otherwise 405 it — that exact
     // ordering mistake once left this endpoint unreachable.)
     if (request.method === 'GET' && new URL(request.url).pathname === '/probe') {
-      const want = new URL(request.url).searchParams.get('p') || '';
-      const lang = new URL(request.url).searchParams.get('lang') === 'it' ? 'Italian' : 'English';
-      const p = chain.filter(function (x) { return x.name === want; })[0];
+      const u = new URL(request.url);
+      const want = u.searchParams.get('p') || '';
+      const lang = u.searchParams.get('lang') === 'it' ? 'Italian' : 'English';
+      let p = chain.filter(function (x) { return x.name === want; })[0];
       if (!p) return reply({ error: 'unknown-provider', known: chain.map(function (x) { return x.name; }) }, 400, origin, allowed);
+      // ?m=<id> tries a different model on the same provider account, so
+      // candidates surfaced by /models can be auditioned without a redeploy.
+      const override = u.searchParams.get('m');
+      if (override) p = Object.assign({}, p, { model: override });
+      const idea = u.searchParams.get('idea') || 'un gatto curioso';
       const t0 = Date.now();
       try {
-        const story = await askProvider(p, lang, 'un gatto curioso', 0);
+        const story = await askProvider(p, lang, idea.slice(0, 300), 0);
         return reply({ ok: true, model: p.model, ms: Date.now() - t0, story: story }, 200, origin, allowed);
       } catch (e) {
         return reply({ ok: false, model: p.model, ms: Date.now() - t0, kind: e.kind || 'err', detail: String(e.message).slice(0, 700) }, 200, origin, allowed);
