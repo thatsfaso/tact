@@ -143,44 +143,6 @@ function providers(env) {
       tune: LLAMA_TUNE,
     },
     {
-      // Behind the Groq models, not ahead of them, and that placement is a
-      // measurement rather than a preference. Google's free tier was expected to
-      // be the most generous allowance here; measured, it answers 503 "currently
-      // experiencing high demand" after fifteen seconds, or not at all. A
-      // provider that fails SLOWLY is the most expensive kind, because the race
-      // pays its grace period on every request. Promote it once it can serve.
-      name: 'gemini',
-      // Switched off, not deleted: the key, the tune and the wiring all work,
-      // and flipping this back to true is the whole re-enable. See below.
-      enabled: false,
-      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-      model: 'gemini-3.5-flash',
-      key: env.GEMINI_API_KEY,
-      timeoutMs: 25000,
-      // Not every OpenAI-compatible layer accepts `seed`, and one rejected
-      // field would fail the whole request. Variety here comes from
-      // temperature instead.
-      omitSeed: true,
-      // Calibrated separately once measured: a different model family reads the
-      // same brief differently, which is the whole reason tunes are per
-      // provider. Starting from the Llama tune is a guess, not a measurement.
-      tune: LLAMA_TUNE,
-    },
-    {
-      // The same family behind a floating alias. Pinning a version is what just
-      // cost an afternoon: gemini-2.0-flash and gemini-2.5-flash both answer
-      // 404 "no longer available to new users", so a pinned name is a dated
-      // name. The alias cannot be retired out from under the site.
-      name: 'gemini-latest',
-      enabled: false,
-      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-      model: 'gemini-flash-latest',
-      key: env.GEMINI_API_KEY,
-      timeoutMs: 8000,
-      omitSeed: true,
-      tune: LLAMA_TUNE,
-    },
-    {
       name: 'agnes',
       url: 'https://apihub.agnes-ai.com/v1/chat/completions',
       model: 'agnes-2.0-flash',
@@ -194,7 +156,7 @@ function providers(env) {
       timeoutMs: 12000,
       tune: null,   // the defaults below were calibrated against this model
     },
-  ].filter(function (p) { return !!p.key && p.enabled !== false; });
+  ].filter(function (p) { return !!p.key; });
 }
 
 // The page holds a fixed number of Braille CELLS, and Italian words are longer
