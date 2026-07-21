@@ -26,15 +26,20 @@ You need a free Cloudflare account, plus at least one model key: Groq from
 cd worker
 npx wrangler login          # opens the browser, authorises your account
 npx wrangler secret put GROQ_API_KEY      # from console.groq.com, tried first
-npx wrangler secret put CEREBRAS_API_KEY  # from cloud.cerebras.ai, same 70B model
+npx wrangler secret put MISTRAL_API_KEY   # from console.mistral.ai, second seat
 npx wrangler secret put AGNES_API_KEY     # from agnes-ai.com, the fallback
 npx wrangler deploy
 ```
 
-The Cerebras key is worth the extra two minutes: it serves the same
-llama-3.3-70b as Groq's best model on an independent free allowance, so the
-day's budget of best-quality stories roughly doubles, and exhausting one
-account's quota no longer means dropping to a smaller model.
+The Mistral key is worth the extra two minutes: it is an independent free
+allowance from a different company, so exhausting Groq's daily quota no
+longer means dropping straight to the smaller model.
+
+A provider earns a seat here only after a live test on a real key — first
+`GET /models?p=<name>` to see which model ids the key can actually reach,
+then `GET /probe?p=<name>` for a real story. Free tiers drift: three
+providers whose remembered terms looked fine (Gemini, Agnes 2.5, Cerebras)
+failed exactly that pair of checks.
 
 Either key alone is enough: a provider whose key is missing is skipped.
 

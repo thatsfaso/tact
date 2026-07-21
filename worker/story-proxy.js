@@ -31,7 +31,7 @@
  *
  * Secrets: set each with `npx wrangler secret put <NAME>`.
  *   GROQ_API_KEY      — from console.groq.com (free)
- *   CEREBRAS_API_KEY  — from cloud.cerebras.ai (free)
+ *   MISTRAL_API_KEY   — from console.mistral.ai (free)
  *   AGNES_API_KEY     — from agnes-ai.com (free)
  * A provider whose key is missing is simply skipped.
  *
@@ -148,6 +148,32 @@ const LLAMA_TUNE = {
   },
 };
 
+// Mistral, measured, is the opposite temperament from the Llamas: it OBEYS
+// the numeric rules. The Llama tune biases its English ask far downward
+// (target 50, four-to-five sentences) to compensate for models that overshoot
+// every number they are given — and Mistral, taking those numbers at their
+// word, landed English at 46-53 where the page wants ~75. Italian under the
+// same tune landed 66-68, near-perfect, so only English moves.
+const MISTRAL_TUNE = Object.assign({}, LLAMA_TUNE, {
+  sentences: { Italian: 'FIVE or SIX', English: 'FIVE or SIX' },
+  sentMax: { Italian: 'six', English: 'six' },
+  target: { Italian: '58', English: '72' },
+  // Raising the numeric target moved Mistral's English by nothing: like the
+  // Llamas, it tracks the example's length almost one for one. The shared
+  // English examples are biased short on purpose (Llama overshoots); Mistral
+  // needs them at the length the page actually wants, so it gets its own set,
+  // written at ~75 words. Italian keeps the shared examples, which already
+  // land it at 66-68.
+  example: {
+    Italian: LLAMA_TUNE.example.Italian,
+    English: [
+      'The little snail crept out into the wet garden, where the air smelled of rain and warm earth. That day she decided to climb the tall leaf that swayed high above her. Her soft belly felt every bump of the green stem as she went up. The wind pushed her back, so she held on tighter until it passed. At the top the sun wrapped her like a warm blanket, and she rested there, smiling, while the garden hummed below.',
+      'The old drum slept in the attic under a soft blanket of dust. No one had played it for many winters, and its worn skin was cold and still. One morning a small hand found it and wiped it clean with a sleeve. The first beat was shy and quiet, but the second rolled through the whole house like thunder. The dust danced in the light like snow, and from that day the drum was never cold again.',
+      'The silver fish lived where the water was deep and dark and still. Above him passed wide slow shadows that made the soft weeds tremble. One day he followed a thread of warmer current and swam slowly up. The water grew brighter around him, and he heard the waves rumbling over his head. He touched the air with his nose for the very first time. It was salty and light, and he was not afraid.',
+    ],
+  },
+});
+
 function providers(env) {
   return [
     {
@@ -161,38 +187,29 @@ function providers(env) {
       timeoutMs: 5000,
       tune: LLAMA_TUNE,
     },
+    // Cerebras sat here briefly and is gone on measurement, with a lesson
+    // worth keeping: its key could LIST three models yet every inference call
+    // answered 402 payment_required — the free tier is a shop window. This is
+    // the third provider (after Gemini's retired model names and Agnes's
+    // retired 2.5) whose remembered terms did not survive contact with the
+    // live API. Providers earn a seat in this list with a live /models call
+    // and a live /probe story on the actual key, never with recollection.
     {
-      // The SAME model on a different company's free tier, which makes it the
-      // best fallback in the list: when Groq's daily 70B allowance runs out,
-      // this continues with identical weights — same prose quality, and the
-      // tune calibrated against this model carries over exactly. Added when
-      // Groq froze Developer-tier upgrades, but it earns its place regardless:
-      // two independent allowances for the good model roughly double the
-      // stories per day that get it. Inert until CEREBRAS_API_KEY is set
-      // (free, no card, from cloud.cerebras.ai).
-      name: 'cerebras',
-      url: 'https://api.cerebras.ai/v1/chat/completions',
-      model: 'llama-3.3-70b',
-      key: env.CEREBRAS_API_KEY,
-      timeoutMs: 5000,
-      tune: LLAMA_TUNE,
-    },
-    {
-      // A different model FAMILY on a genuinely free tier (no card). Mistral
-      // is a European company and its Italian is strong — the quality of the
-      // Italian prose, not the parameter count, is what actually limits this
-      // service. Starts from the Llama tune; recalibrate once measured, since
-      // every family reads the same brief differently. Inert until
-      // MISTRAL_API_KEY is set (from console.mistral.ai).
+      // A different model FAMILY on a genuinely free tier (no card), and the
+      // best prose in the chain: auditioned on live stories, its Italian is
+      // rich, sensory and correctly arced where the 8B drops into incoherence
+      // — and Italian prose quality, not parameter count, is what actually
+      // limits this service. Medium beat small on story shape in the same
+      // audition. Answers in 0.9-1.7s warm.
       name: 'mistral',
       url: 'https://api.mistral.ai/v1/chat/completions',
-      model: 'mistral-small-latest',
+      model: 'mistral-medium-latest',
       key: env.MISTRAL_API_KEY,
       timeoutMs: 8000,
       // Mistral validates request bodies strictly and its seed field is named
       // `random_seed`; sending OpenAI's `seed` risks a rejected request.
       omitSeed: true,
-      tune: LLAMA_TUNE,
+      tune: MISTRAL_TUNE,
     },
     {
       // Same account as `groq`, different model, therefore a different
