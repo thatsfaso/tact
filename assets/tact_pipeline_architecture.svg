@@ -37,7 +37,7 @@
 <g>
 <rect x="380" y="300" width="250" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
 <text x="505" y="320" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#712B13">Tactile graphics</text>
-<text x="505" y="340" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#993C1D">Keyword picker · ~89 shapes (D021)</text>
+<text x="505" y="340" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#993C1D">Keyword picker · 93 shapes (D021)</text>
 </g>
 
 <path d="M175 356 L340 400" fill="none" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
