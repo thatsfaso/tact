@@ -1,12 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 <!-- TACT shape: elephant | category: animals | license: CC0 | source: handcrafted -->
 <g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 40,56 Q 48,34 74,34 Q 96,34 104,48 Q 136,42 158,56 Q 178,68 176,94 Q 175,112 162,120 L 164,168 L 148,168 L 145,128 Q 120,136 98,130 L 94,168 L 78,168 L 76,122 Q 60,114 56,96 Q 48,92 44,80 Q 40,68 40,56 Z"/>
-  <path d="M 42,60 Q 24,66 24,88 Q 24,108 40,106"/>
-  <path d="M 56,74 Q 46,82 46,94 Q 46,102 40,106" stroke-width="4"/>
-  <ellipse cx="94" cy="66" rx="19" ry="25"/>
-  <circle cx="60" cy="58" r="4" fill="#000000"/>
-  <path d="M 48,88 Q 56,96 66,94" stroke-width="4"/>
-  <path d="M 170,104 L 176,140" stroke-width="4"/>
+  <path d="M 52,74 Q 54,54 80,50 L 140,50 Q 166,54 168,82 L 168,116 Q 168,126 158,128 L 158,154 L 142,154 L 142,130 L 106,130 L 106,154 L 90,154 L 90,128 Q 62,126 54,100 Q 50,86 52,74 Z"/>
+  <path d="M 54,84 Q 40,94 38,116 Q 36,138 46,148 Q 55,156 62,148 Q 66,142 60,136" stroke-width="9"/>
+  <path d="M 92,58 Q 78,60 72,74 Q 66,88 74,102 Q 82,114 98,112 Q 112,110 114,94 Q 116,76 108,66 Q 102,58 92,58 Z"/>
+  <circle cx="64" cy="74" r="4" fill="#000000"/>
+  <path d="M 168,90 Q 180,100 176,120" stroke-width="4"/>
+  <path d="M 176,120 L 170,128 M 176,120 L 182,128" stroke-width="4"/>
 </g>
 </svg>

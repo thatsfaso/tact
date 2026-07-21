@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: robot | category: objects | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="70" y="44" width="60" height="44" rx="8"/>
+  <path d="M 100,44 L 100,30" stroke-width="4"/>
+  <circle cx="100" cy="26" r="5"/>
+  <circle cx="86" cy="62" r="5" fill="#000000"/>
+  <circle cx="114" cy="62" r="5" fill="#000000"/>
+  <path d="M 88,76 L 112,76" stroke-width="4"/>
+  <rect x="64" y="96" width="72" height="52" rx="8"/>
+  <rect x="88" y="108" width="24" height="18" rx="3" stroke-width="4"/>
+  <path d="M 64,104 L 44,110 L 44,130" />
+  <path d="M 136,104 L 156,110 L 156,130" />
+  <circle cx="44" cy="137" r="6" stroke-width="4"/>
+  <circle cx="156" cy="137" r="6" stroke-width="4"/>
+  <path d="M 82,148 L 82,166 M 118,148 L 118,166" />
+  <path d="M 72,168 L 92,168 M 108,168 L 128,168" stroke-width="5"/>
+</g>
+</svg>

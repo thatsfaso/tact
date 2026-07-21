@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: penguin | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 72,64 Q 72,32 100,32 Q 128,32 128,64 L 132,110 Q 134,144 100,148 Q 66,144 68,110 Z"/>
+  <path d="M 84,74 Q 80,116 100,132 Q 120,116 116,74 Q 100,64 84,74 Z" stroke-width="5"/>
+  <circle cx="90" cy="52" r="3.5" fill="#000000"/>
+  <circle cx="110" cy="52" r="3.5" fill="#000000"/>
+  <path d="M 94,60 L 100,68 L 106,60 Z" fill="#000000" stroke-width="3"/>
+  <path d="M 72,76 Q 54,88 56,110 Q 66,104 70,96 M 128,76 Q 146,88 144,110 Q 134,104 130,96" />
+  <path d="M 86,148 L 78,160 L 98,158 M 114,148 L 122,160 L 102,158" stroke-width="5"/>
+</g>
+</svg>

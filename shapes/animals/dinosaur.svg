@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<!-- TACT shape: dinosaur | category: animals | license: CC0 | source: handcrafted -->
+<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M 40,58 Q 36,42 52,38 Q 68,34 74,48 Q 78,58 72,66 L 80,84 Q 98,74 124,78 Q 156,84 162,112 Q 166,130 152,140 L 152,158 L 136,158 L 136,146 L 104,146 L 104,158 L 88,158 L 88,140 Q 70,132 66,110 L 58,80 Q 44,74 40,58 Z"/>
+  <circle cx="52" cy="52" r="3.5" fill="#000000"/>
+  <path d="M 40,62 Q 48,68 58,66" stroke-width="4"/>
+  <path d="M 84,80 L 92,64 L 102,78 M 108,76 L 116,60 L 126,76 M 132,80 L 140,66 L 148,82" stroke-width="5"/>
+  <path d="M 162,118 Q 184,124 190,142 Q 176,144 162,134" />
+</g>
+</svg>
