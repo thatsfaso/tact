@@ -174,6 +174,31 @@ const MISTRAL_TUNE = Object.assign({}, LLAMA_TUNE, {
   },
 });
 
+// Agnes was the model the plain defaults were first calibrated against, but the
+// pagination has changed since, and untuned it now overshoots: an English idea
+// returns about 74 words and spills onto a third, near-empty card. Like every
+// other model it tracks the example's length far more than the numeric target,
+// and the default example had no Italian counterpart, leaving Italian
+// unanchored. So Agnes gets its own tune: per-language examples sized for two
+// full cards, biased a little short because Agnes runs over. Measured live,
+// since Agnes is what answers once Groq's daily quota is spent.
+const AGNES_TUNE = {
+  sentences: { Italian: 'FIVE or SIX', English: 'FIVE or SIX' },
+  sentMax: { Italian: 'six', English: 'six' },
+  minWords: 8, maxWords: 13,
+  target: { Italian: '56', English: '64' },
+  example: {
+    English: [
+      'The little snail crept out into the wet garden, where the air smelled of rain. That day she decided to climb the tall leaf above her. Her soft belly felt every bump of the green stem as she went up. The wind pushed her back, so she held on until it passed. At the top the sun warmed her, and she rested there, smiling.',
+      'The old drum slept in the attic under a blanket of dust. No one had played it for many winters, and its skin was cold. One morning a small hand found it and wiped it clean. The first beat was shy, but the second rolled through the whole house. The dust danced in the light, and the drum was never cold again.',
+    ],
+    Italian: [
+      'La piccola lumaca uscì nel giardino bagnato, e l\'aria sapeva di pioggia. Voleva arrivare in cima alla foglia più alta, così cominciò a salire. La sua pancia sentiva ogni nodo del gambo mentre andava su. Il vento la spingeva indietro, ma lei si tenne stretta finché non passò. In cima il sole la avvolse come una coperta tiepida.',
+      'Il vecchio tamburo dormiva in soffitta, coperto di polvere. Nessuno lo suonava da tanti inverni, e la sua pelle era fredda. Una mano piccola lo trovò e lo pulì con la manica. Il primo colpo fu timido, ma il secondo riempì tutta la casa. La polvere danzava nell\'aria, e il tamburo non ebbe più freddo.',
+    ],
+  },
+};
+
 function providers(env) {
   return [
     {
@@ -236,7 +261,7 @@ function providers(env) {
       // anyway. Healthy Agnes replies in about eight seconds; past twelve it is
       // not coming, and the in-browser model is the better use of the time.
       timeoutMs: 12000,
-      tune: null,   // the defaults below were calibrated against this model
+      tune: AGNES_TUNE,
     },
   ].filter(function (p) { return !!p.key; });
 }
