@@ -199,6 +199,28 @@ const AGNES_TUNE = {
   },
 };
 
+// Qwen borrowed Mistral's brief at first and came out well in English (67-71
+// words, two full-ish cards) but a little short in Italian (52-61, the last
+// card only half full). The lever is the example, not the number, so Qwen gets
+// its own tune: Mistral's English examples, which already land it right, and
+// longer Italian examples sized to fill the second card.
+// The lever is the example length, and Qwen's Italian variance is wide (about
+// plus or minus twelve words), so the example is set where even a long draw
+// stays inside two cards. Examples at 65 words pushed one story to 76 and a
+// near-empty third page; at 57 the cards came out half full. Sixty is the
+// middle that fills better than 57 without risking the third-page spill the
+// reader hates most. English already lands right on Mistral's examples.
+const QWEN_TUNE = Object.assign({}, MISTRAL_TUNE, {
+  target: { Italian: '60', English: '72' },
+  example: {
+    English: MISTRAL_TUNE.example.English,
+    Italian: [
+      'La piccola lumaca uscì nel giardino bagnato, e l\'aria fresca sapeva di pioggia. Quel giorno decise di salire sulla foglia più alta che ondeggiava sopra di lei. La sua pancia morbida sentiva ogni nodo del gambo mentre saliva. Il vento la spingeva indietro, ma lei si tenne stretta finché non passò. In cima il sole la avvolse come una coperta tiepida.',
+      'Il vecchio tamburo dormiva in soffitta, coperto da una coltre di polvere. Nessuno lo suonava da tanti inverni, e la sua pelle era fredda. Una mattina una mano piccola lo trovò e lo pulì con la manica. Il primo colpo fu timido, ma il secondo rimbombò per tutta la casa. La polvere danzava nella luce, e il tamburo non ebbe più freddo.',
+    ],
+  },
+});
+
 function providers(env) {
   return [
     {
@@ -217,10 +239,7 @@ function providers(env) {
       model: 'qwen/qwen3.8-27b',
       key: env.GROQ_API_KEY,
       timeoutMs: 6000,
-      // Qwen runs a touch short on the Llama brief, so it borrows Mistral's,
-      // whose per-language examples are sized for two full cards. Verified
-      // live after deploy and adjusted if needed.
-      tune: MISTRAL_TUNE,
+      tune: QWEN_TUNE,
     },
     // Cerebras sat here briefly and is gone on measurement, with a lesson
     // worth keeping: its key could LIST three models yet every inference call
