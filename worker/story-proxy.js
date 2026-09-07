@@ -202,15 +202,25 @@ const AGNES_TUNE = {
 function providers(env) {
   return [
     {
-      name: 'groq',
+      // Was llama-3.3-70b-versatile until Groq retired the whole Llama 3.x
+      // catalog overnight: every call started answering HTTP 404 "model does
+      // not exist", taking the primary provider down with no warning. A live
+      // /models call showed what the key can now reach, and a live /probe on
+      // each candidate picked the replacement. qwen3.8-27b was the only one
+      // that wrote a clean, complete story in BOTH languages (gpt-oss-120b
+      // returned an empty story for Italian, gpt-oss-20b for both). It answers
+      // in a few hundred milliseconds. Fourth deprecation caught this way, and
+      // the reason /models and /probe exist: a provider earns its seat on a
+      // live test, never on a remembered model id.
+      name: 'groq-qwen',
       url: 'https://api.groq.com/openai/v1/chat/completions',
-      model: 'llama-3.3-70b-versatile',
+      model: 'qwen/qwen3.8-27b',
       key: env.GROQ_API_KEY,
-      // This model answers healthy requests in well under a second, so a long
-      // leash buys nothing and costs everything: it is the interval a reader
-      // stares at a spinner before the hedge rescues them.
-      timeoutMs: 5000,
-      tune: LLAMA_TUNE,
+      timeoutMs: 6000,
+      // Qwen runs a touch short on the Llama brief, so it borrows Mistral's,
+      // whose per-language examples are sized for two full cards. Verified
+      // live after deploy and adjusted if needed.
+      tune: MISTRAL_TUNE,
     },
     // Cerebras sat here briefly and is gone on measurement, with a lesson
     // worth keeping: its key could LIST three models yet every inference call
@@ -237,16 +247,18 @@ function providers(env) {
       tune: MISTRAL_TUNE,
     },
     {
-      // Same account as `groq`, different model, therefore a different
-      // rate-limit bucket. When the 70B allowance above runs out, the next
-      // stop should be another model that answers in a second — not a slow
-      // one, and certainly not a 1.8 GB download. Slightly weaker prose is a
-      // far better trade than either.
-      name: 'groq-fast',
+      // Same Groq account as groq-qwen, different model, so a different
+      // rate-limit bucket: when Qwen's allowance runs out, this keeps a
+      // sub-second model in play instead of dropping to a slow one. gpt-oss-120b
+      // writes the best English in the whole chain; its weakness is Italian,
+      // where it sometimes returns an empty story. That is acceptable HERE, as
+      // a fallback: an empty story simply throws and the chain moves on to
+      // Mistral or Agnes, and most of the time Qwen above has already answered.
+      name: 'groq-oss',
       url: 'https://api.groq.com/openai/v1/chat/completions',
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-120b',
       key: env.GROQ_API_KEY,
-      timeoutMs: 10000,
+      timeoutMs: 8000,
       tune: LLAMA_TUNE,
     },
     {
