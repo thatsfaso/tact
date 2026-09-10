@@ -794,22 +794,27 @@ window.TACT = (function () {
   var CORNER_R=10; // rounded page corners (mm) — soft to hold, matches the preview
   var CHAMFER=0.4; // bottom-edge chamfer (mm) — absorbs first-layer spread
   var DOT_R=0.8, DOT_TOTAL_H=0.85, CYL_H=0.35;
-  // L-shaped text layout — MIRRORS the React LINE_WIDTHS profile so the print
-  // matches the preview: full-width rows on top, narrower rows running down the
-  // left BESIDE a bottom-right corner illustration. Lines lay top-down from
-  // LINE_Y0, left-aligned at TZ_X.
+  // Text layout — MIRRORS the React LINE_WIDTHS profile so the print matches the
+  // preview. Every braille line runs the FULL page width; the picture sits as a
+  // band across the bottom, never beside the text. This replaced an L-shape that
+  // wrapped 12-cell lines around a corner picture: a teacher of blind readers
+  // reported that those short half-lines are uncomfortable to read, and the
+  // convention is that braille lines run full width. The cost is about 14% fewer
+  // cells on an illustrated page (nine full lines rather than the old thirteen),
+  // accepted because readability outweighs density for the child.
+  // Lines lay top-down from LINE_Y0, left-aligned at TZ_X.
   var TZ_X=10, CELL_W=6.0, LINE_H=10.0, LINE_Y0=135;
-  // Two page profiles. ILLUSTRATED pages (odd) keep the L-shape: full rows on top,
-  // narrow rows down the left beside a bottom-right picture. TEXT pages (even) drop
-  // the picture and use the whole width on every line, so they hold more of the
-  // story and read as full. Both share the same 13 line positions.
-  var LINE_WIDTHS=[21,21,21,21,21,21,21,12,12,12,12,12,12]; // 7 full + 6 narrow (illustrated)
+  // Two page profiles, both full-width on every line. ILLUSTRATED pages (odd) give
+  // the bottom band to the picture, so they hold nine lines. TEXT pages (even) drop
+  // the picture and use all thirteen lines, holding more of the story.
+  var LINE_WIDTHS=[21,21,21,21,21,21,21,21,21];               // 9 full (illustrated, picture band below)
   var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,21]; // 13 full (text-only)
   // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
   var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
-  // Illustration zone: bottom-right corner, with the 6 narrow rows (12-cell text
-  // ends at x≤82) running down its left side at the same height.
-  var ILL_X=86, ILL_Y=12, ILL_W=54, ILL_H=54, ILL_ABOVE=0.9, ILL_PIX=2;
+  // Illustration zone: a full-width band across the bottom. The shape is drawn
+  // aspect-preserving and centred inside it (see rasterizeIll), so the wide band
+  // never stretches it; the empty sides simply carry no relief.
+  var ILL_X=10, ILL_Y=12, ILL_W=130, ILL_H=38, ILL_ABOVE=0.9, ILL_PIX=2;
 
   // Wrap cells into lines whose max width varies per line (widths profile).
   function layoutLines(cells, widths) {
@@ -958,7 +963,7 @@ window.TACT = (function () {
   }
 
   // full: text-only page (even) uses the full-width profile and draws no picture.
-  // Otherwise the L-shaped illustrated profile is used and illPillars are raised.
+  // Otherwise the illustrated profile is used and illPillars are raised as a bottom band.
   function generateSTL(brailleCells,pageNum,slug,illPillars,full){
     var widths = full ? LINE_WIDTHS_FULL : LINE_WIDTHS;
     var tris=[];
@@ -997,7 +1002,7 @@ window.TACT = (function () {
   window.TACT.generateSTL=generateSTL;
 
   // Even pages (pageNum 2,4,...) are text-only: full-width profile, no picture.
-  // Odd pages carry the illustration from svgUrl in the L-shaped profile.
+  // Odd pages carry the illustration from svgUrl as a bottom band.
   window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl,fullPage){
     // The page decides the profile (the last card may carry a picture even when
     // its number is even), so trust the flag and fall back to parity only if the
@@ -1217,17 +1222,16 @@ function layoutBrailleLines(cells, cellsPerLine = 22) {
   return lines;
 }
 
-// ─── L-shaped page layout ─────────────────────────────────────────────────────
-// Full-width lines on top, then narrower lines that run BESIDE a corner
-// illustration (bottom-right). One page holds more Braille (→ fewer pages) while
-// the illustration tucks into the corner. These numbers are mirrored by the STL
-// generator (window.TACT_LAYOUT) so the print matches the preview exactly.
+// ─── Page layout ──────────────────────────────────────────────────────────────
+// Every braille line runs the full page width. Illustrated pages give the bottom
+// of the page to a picture band and so hold fewer lines; text-only pages use the
+// whole page. These numbers are mirrored by the STL generator
+// (window.TACT_LAYOUT) so the print matches the preview exactly.
 // Page geometry (mm) — single source of truth, shared with the STL generator
 // (window.TACT_LAYOUT) so the on-screen preview is a true-to-scale mirror of the
-// printed page. Full-width rows on top, then narrow rows down the left side
-// beside (and below) the bottom-right corner illustration.
+// printed page.
 const LAYOUT = window.TACT_LAYOUT;
-const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;              // illustrated pages (odd): L-shape
+const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;              // illustrated pages (odd): 9 full lines + band
 const LINE_WIDTHS_FULL = LAYOUT.LINE_WIDTHS_FULL;   // text-only pages (even): full width
 const FULL_LINE_CELLS = LINE_WIDTHS[0];
 // Page profile by 1-based page number: odd pages carry the illustration, even
@@ -1372,7 +1376,7 @@ const COPY = {
         ]},
         { name: "Reading the page", items: [
           { q: "How is the page read?",
-            a: "The braille sits at the top and takes the wider part of the page. When there is an illustration it sits in the bottom right corner, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
+            a: "The braille fills the page in full-width lines. When there is an illustration it sits as a band across the bottom, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
           { q: "What is Grade 1 braille?",
             a: "It is braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
         ]},
@@ -1446,7 +1450,7 @@ const COPY = {
         ]},
         { name: "Leggere la pagina", items: [
           { q: "Come si legge la pagina?",
-            a: "Il braille sta in alto e occupa la parte più larga della pagina. Quando c'è un'illustrazione si trova nell'angolo in basso a destra, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
+            a: "Il braille riempie la pagina con righe a tutta larghezza. Quando c'è un'illustrazione si trova in una fascia lungo il fondo, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
           { q: "Cos'è il braille di Grado 1?",
             a: "È il braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
         ]},
@@ -1479,10 +1483,13 @@ function ShapeRenderer({ illustration }) {
     fetch('shapes/' + relPath + '.svg')
       .then(r => r.ok ? r.text() : Promise.reject())
       .then(txt => {
-        // Remove fixed pixel dimensions so the SVG scales with its container
+        // The shape files carry only a viewBox, so force the <svg> to fill its
+        // container while preserving aspect ratio and centring. Without this the
+        // shape renders small and left-aligned in the wide bottom band.
         const normalized = txt
-          .replace(/\swidth="[^"]*"/, ' width="100%"')
-          .replace(/\sheight="[^"]*"/, ' height="100%"');
+          .replace(/\swidth="[^"]*"/, '')
+          .replace(/\sheight="[^"]*"/, '')
+          .replace(/<svg\b/, '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"');
         setSvgMarkup(normalized);
       })
       .catch(() => {});
@@ -1492,7 +1499,7 @@ function ShapeRenderer({ illustration }) {
     return (
       <div
         dangerouslySetInnerHTML={{ __html: svgMarkup }}
-        style={{ width: '100%', height: '100%', lineHeight: 0, display: 'flex' }}
+        style={{ width: '100%', height: '100%', lineHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       />
     );
   }
@@ -1767,7 +1774,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
   // Use Liblouis cells when available, JS fallback otherwise
   const cells = useMemo(() => p.brailleCells || textToBrailleCells(p.text), [p]);
 
-  // Odd pages carry the illustration (L-shape); even pages are text-only (full
+  // Odd pages carry the illustration (bottom band); even pages are text-only (full
   // width). Derive from the page number so preview, STL and pagination agree.
   const textOnly = !pageIsIllustrated(page + 1, pages.length, p.text);
   const pageWidths = widthsForRendering(page + 1, pages.length, p.text);
@@ -1858,13 +1865,12 @@ function StoryResult({ pages, lang, t, onAgain }) {
               ))}
             </svg>
 
-            {/* Illustration in its true mm zone (bottom-right), with the L-shaped
-                dotted divider (top + left edges) at the exact zone boundary.
-                Only on illustrated (odd) pages; text-only pages use full width. */}
+            {/* Illustration in its true mm zone: a full-width band across the
+                bottom, marked off by a dashed line above it. Only on illustrated
+                (odd) pages; text-only pages use the whole page for braille. */}
             {!textOnly && p.illustration && (
               <div style={{ position: "absolute", ...illBox,
                   borderTop: "1px dashed rgba(10,10,12,0.22)",
-                  borderLeft: "1px dashed rgba(10,10,12,0.22)",
                   padding: "3%",
                   display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <ShapeRenderer illustration={p.illustration} />
