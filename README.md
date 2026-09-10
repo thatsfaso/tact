@@ -10,7 +10,7 @@
 [![Languages](https://img.shields.io/badge/languages-IT%20%7C%20EN-0a0a0c.svg?style=flat-square)](#bilingual-by-design)
 [![No account](https://img.shields.io/badge/account-none%20required-0a0a0c.svg?style=flat-square)](#try-it-now)
 
-<sub>📄 The full design and engineering report — every decision, every study, every rejected alternative — lives in <a href="paper/tact.pdf"><b>paper/tact.pdf</b></a>.</sub>
+<sub>📄 The full design and engineering report — every decision, every study, every rejected alternative — lives in <a href="paper/v2/tact.pdf"><b>paper/v2/tact.pdf</b></a>.</sub>
 
 </div>
 
@@ -33,7 +33,7 @@ flowchart LR
     A["🎙️ Voice or text\n'a fox who guarded a castle'"] --> B["Story writing\n(in-browser language model)"]
     B --> C["Grade 1 braille\ntranslation — IT / EN"]
     B --> D["Illustration matching\n93 tactile shapes"]
-    C --> E["Page layout\nsquare, corner illustration"]
+    C --> E["Page layout\nsquare, bottom band"]
     D --> E
     E --> F["Binary STL export"]
     F --> G["🖨️ FDM 3D printer\nTPU / PETG"]

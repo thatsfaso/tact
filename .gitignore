@@ -47,17 +47,17 @@ settings.local.json
 *.gguf
 *.ggml
 
-# LaTeX build artifacts (paper/tact.pdf itself is tracked)
-paper/*.aux
-paper/*.log
-paper/*.out
-paper/*.toc
-paper/*.bbl
-paper/*.blg
-paper/*.fls
-paper/*.fdb_latexmk
-paper/*.synctex.gz
-paper/missfont.log
+# LaTeX build artifacts (paper/v1 and paper/v2 tact.pdf are tracked)
+paper/**/*.aux
+paper/**/*.log
+paper/**/*.out
+paper/**/*.toc
+paper/**/*.bbl
+paper/**/*.blg
+paper/**/*.fls
+paper/**/*.fdb_latexmk
+paper/**/*.synctex.gz
+paper/**/missfont.log
 
 # Wrangler local state (contains account identifiers)
 worker/.wrangler/
@@ -65,5 +65,5 @@ worker/.wrangler/
 # Local working material that must never reach the public repository
 TACT_mockups_preview/
 ad_assets/
-paper/tact_it.tex
-paper/tact_it.pdf
+paper/**/tact_it.tex
+paper/**/tact_it.pdf
