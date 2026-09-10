@@ -4,7 +4,7 @@
 \usepackage{cite,amsmath,amssymb,graphicx,booktabs,url}
 \usepackage[hidelinks]{hyperref}
 \hypersetup{
-  pdftitle={Tact: A Zero-Cost, Browser-Based Pipeline for On-Demand Tactile braille Storybooks},
+  pdftitle={Tact: A Zero-Cost, Browser-Based Pipeline for On-Demand Tactile Braille Storybooks},
   pdfauthor={Iliano Fasolino},
   pdfsubject={Accessible on-demand tactile braille storybooks via a zero-cost browser pipeline with graceful degradation},
   pdfkeywords={Braille, tactile graphics, accessibility, assistive technology, blind children, braille literacy, 3D printing, fused deposition modeling, in-browser LLM, WebGPU, human-computer interaction}
@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title{Tact: A Zero-Cost, Browser-Based Pipeline for On-Demand Tactile braille Storybooks}
+\title{Tact: A Zero-Cost, Browser-Based Pipeline for On-Demand Tactile Braille Storybooks}
 
 \author{\IEEEauthorblockN{Iliano Fasolino}
 \IEEEauthorblockA{Independent Researcher\\
@@ -25,6 +25,10 @@ Milan, Italy}}
 \begin{abstract}
 Braille literacy among blind school-age children fell from roughly 50 percent in 1960 to under 10 percent today, and the decline is a content problem, not a technology problem: producing one illustrated braille page still requires specialized software and trained labor, so almost nothing in the existing catalog is personalized to an individual child. We present Tact, a system that converts a spoken or typed story idea into a printable braille page with a matching raised tactile illustration, computed inside a web browser with no account and no mandatory cost, and able to run with no server at all. This paper documents the full engineering history behind that system, rather than a narrow slice of it. It covers the target population and the ethical framing behind an explicit sighted-operator model, the hardware rationale for desktop fused deposition modeling over purpose-built embossing, and the physical braille geometry and its printer-specific calibration. It documents the architecture that lets a language model run on the reader's own device, the later addition of a faster hosted path in front of it after an independent reimplementation exposed the cost of a 1.8 gigabyte first-use download, and the fallback chain that keeps the system working when that path is absent, the investigation that replaced a general-purpose braille translation library with a small deterministic implementation after it failed in production, and the evolution of the page layout from an inherited portrait specification to a verified square design, and its later revision from the field feedback of a teacher of blind readers. It further documents the construction of a 93-shape hand-drawn tactile illustration library derived from a frequency study of fairy-tale subjects, and the synthesized sound design used to make a voice-first interface legible without a screen. We report the verification performed to date, the ethical commitments the project has made, and the work required before the system can be considered ready for real blind and low-vision readers.
 \end{abstract}
+
+\begin{IEEEkeywords}
+braille, tactile graphics, accessibility, assistive technology, blind children, braille literacy, 3D printing, fused deposition modeling, in-browser language model, WebGPU, human-computer interaction
+\end{IEEEkeywords}
 
 \section{Introduction}\label{sec:intro}
 
@@ -302,22 +306,22 @@ That fix was later withdrawn, and the reasoning is worth recording because the i
 
 \subsection{A Third Revision from Expert Field Feedback}\label{sec:layoutrevision}
 
-The corner layout was a deliberate bet: it accepted six braille lines of only 12 cells, a little over half the page width, in exchange for roughly a third more braille per illustrated page. The bet was made without input from an experienced braille reader, and it was the wrong one. The layout was evaluated by Chris Bischke, a certified teacher of students with visual impairments and coordinator of a university teacher-preparation program in sensory impairments, who read a printed page and reported that the short lines running beside the corner illustration are uncomfortable to read. The convention exists for a concrete reason: standard braille runs every line to the full width of the page, and half-width lines force the reading finger to return early and repeatedly, a friction the density gain did not justify. This was exactly the objection the corner layout had been designed to risk, and it took contact with a reader of that expertise to weigh it correctly rather than optimistically.
+The corner layout was a deliberate bet: it accepted six braille lines of only 12 cells, a little over half the page width, in exchange for roughly a third more braille per illustrated page. The bet was made without input from an experienced braille reader, and it was the wrong one. The layout was evaluated by Chris Bischke, Ph.D., TVI, DT/V, Director of the Multi-University Consortium Teacher Preparation Program in Sensory Impairments at the University of Utah and Utah State University, and Professor and Program Coordinator of the Visual Impairments Program in the Department of Special Education at the University of Utah. Reading a printed page, he reported that the short lines running beside the corner illustration are uncomfortable to read. The convention exists for a concrete reason: standard braille runs every line to the full width of the page, and half-width lines force the reading finger to return early and repeatedly, a friction the density gain did not justify. This was exactly the objection the corner layout had been designed to risk, and it took contact with a reader of that expertise to weigh it correctly rather than optimistically.
 
 The layout was revised accordingly. Every braille line now runs the full 21-cell width, and the illustration occupies a full-width band across the bottom of the page, drawn aspect-preserving and centered so the wide band never stretches it (Fig.~\ref{fig:layoutrevision}). The cost is quantifiable and was accepted on purpose: an illustrated page now holds nine full-width lines in place of the earlier seven full and six half lines, about 14 percent fewer cells, which at most adds an occasional page to a longer story. For a child learning to read by touch, the readability of every line outweighs that density, and the revision also simplified the geometry, since the picture band and the text region no longer interleave. The episode is the clearest instance in this project of a principle the rest of the paper only implies: an accessibility decision is not validated by measurement alone, but by the judgment of the reader it is built for.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{tact_layout_old_vs_new.png}
+\includegraphics[width=0.9\textwidth]{tact_layout_old_vs_new.png}
 \caption{The illustrated page before and after expert field feedback. The earlier corner layout (left) wrapped six half-width braille lines beside a bottom-right illustration; the revised layout (right) runs every line to the full page width and places the illustration as a band across the bottom. The revision costs about 14 percent of the braille cells on an illustrated page and removes every short line, a trade accepted on the judgment of an experienced teacher of braille readers.}
 \label{fig:layoutrevision}
-\end{figure}
+\end{figure*}
 
 \subsection{Sizing Text to a Page That Cannot Be Resized}
 
 An attempt was made to solve the problem upstream instead, by asking the language model for the number of words that exactly fills the available cards. This failed, and the measurements explain why. The window that fills two cards without spilling onto a third is narrow, approximately 63 to 70 words in Italian and 74 to 80 in English; the asymmetry is itself a braille effect, since Italian words are longer and every capital letter consumes an additional cell for the capital indicator. Against a window of roughly $\pm5$ words, the model's output varied by approximately $\pm20$ words, and it saturated: constrained to seven sentences it would not exceed roughly 70 words regardless of the number requested. Successive prompt revisions moved conformity between 17 and 43 percent without converging, because no phrasing can make a model hit a target narrower than its own variance.
 
-The problem was therefore moved out of the prompt and into the layout. Pages are filled greedily, so every page before the last is completely full, and the leftover collects on the final card, which is then given the illustration whenever the remaining text still fits the narrower L-shaped profile. The picture occupies the corner the words do not reach, and the card reads as composed rather than unfinished. A final card that is already full receives no illustration, because it does not need one. Under this scheme, measured across the same corpus, no card was left sparse without a picture, every page before the last was completely full, and 76 percent of stories fit two cards.
+The problem was therefore moved out of the prompt and into the layout. Pages are filled greedily, so every page before the last is completely full, and the leftover collects on the final card, which is then given the illustration whenever the remaining text still fits the shorter nine-line illustrated profile. The picture occupies the band the text does not reach, and the card reads as composed rather than unfinished. A final card that is already full receives no illustration, because it does not need one. Under this scheme, measured across the same corpus, no card was left sparse without a picture, every page before the last was completely full, and 76 percent of stories fit two cards.
 
 \subsection{Why Preview-Print Fidelity Is Not a Cosmetic Concern Here}
 
@@ -582,7 +586,7 @@ Grade 1 braille denotes uncontracted braille, one cell per character, with no sh
 
 The author thanks Francesco Giuliani, whose independent reimplementation of this system \cite{tattodev} demonstrated that reaching a language model over the network, rather than downloading one into the browser, removes a barrier this project had underestimated. The hosted path described in Section~\ref{sec:hosted} exists because of that work. The two projects share no code and are developed independently.
 
-The author also thanks Chris Bischke, a certified teacher of students with visual impairments and coordinator of a university teacher-preparation program in sensory impairments, whose hands-on evaluation of a printed page produced the field feedback that drove the layout revision in Section~\ref{sec:layoutrevision}, the lowercase treatment of \emph{braille} throughout, and the addition of a standard braille file export for readers and embossers. His judgment corrected decisions that measurement alone had left optimistic.
+The author also thanks Chris Bischke, Ph.D., TVI, DT/V, Director of the Multi-University Consortium Teacher Preparation Program in Sensory Impairments (The University of Utah and Utah State University) and Professor and Program Coordinator of the Visual Impairments Program in the Department of Special Education at The University of Utah, whose hands-on evaluation of a printed page produced the field feedback that drove the layout revision in Section~\ref{sec:layoutrevision}, the lowercase treatment of \emph{braille} throughout, and the addition of a standard braille file export for readers and embossers. His judgment corrected decisions that measurement alone had left optimistic.
 
 \begin{thebibliography}{00}
 
