@@ -6,8 +6,8 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>Tact by Iliano Fasolino - Braille storybooks you can print at home</title>
-<meta name="description" content="Tact, created by Iliano Fasolino, turns a spoken or typed idea into a Braille page with a raised tactile picture, ready to print on a home 3D printer. Free, open source, Italian and English." />
+<title>Tact by Iliano Fasolino - braille storybooks you can print at home</title>
+<meta name="description" content="Tact, created by Iliano Fasolino, turns a spoken or typed idea into a braille page with a raised tactile picture, ready to print on a home 3D printer. Free, open source, Italian and English." />
 <meta name="author" content="Iliano Fasolino" />
 <link rel="canonical" href="https://tactbraille.com/" />
 
@@ -22,12 +22,12 @@
 
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Tact" />
-<meta property="og:title" content="Tact by Iliano Fasolino - Braille storybooks you can print at home" />
+<meta property="og:title" content="Tact by Iliano Fasolino - braille storybooks you can print at home" />
 <meta property="og:description" content="A story a blind child asks for, turned into a page they can read with their own hands, printed at home for the cost of the filament." />
 <meta property="og:url" content="https://tactbraille.com/" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Tact by Iliano Fasolino" />
-<meta name="twitter:description" content="Braille storybooks with raised tactile pictures, generated in the browser and printed at home." />
+<meta name="twitter:description" content="braille storybooks with raised tactile pictures, generated in the browser and printed at home." />
 
 <script type="application/ld+json">
 {
@@ -40,7 +40,7 @@
       "givenName": "Iliano",
       "familyName": "Fasolino",
       "jobTitle": "Master's student in Computer Science",
-      "description": "Master's student in Computer Science at the University of Milan and creator of Tact, an open source tool that turns spoken story ideas into printable Braille pages with tactile illustrations for blind children.",
+      "description": "Master's student in Computer Science at the University of Milan and creator of Tact, an open source tool that turns spoken story ideas into printable braille pages with tactile illustrations for blind children.",
       "affiliation": {
         "@type": "CollegeOrUniversity",
         "name": "Universit\u00e0 degli Studi di Milano",
@@ -54,7 +54,7 @@
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Any modern web browser",
       "url": "https://tactbraille.com/",
-      "description": "Turns a spoken or typed story idea into a Grade 1 Braille page with a raised tactile illustration, exported as a print-ready STL file for consumer FDM 3D printers.",
+      "description": "Turns a spoken or typed story idea into a Grade 1 braille page with a raised tactile illustration, exported as a print-ready STL file for consumer FDM 3D printers.",
       "author": { "@id": "https://tactbraille.com/#iliano-fasolino" },
       "creator": { "@id": "https://tactbraille.com/#iliano-fasolino" },
       "license": "https://opensource.org/licenses/MIT",
@@ -632,7 +632,7 @@ window.TACT = (function () {
   // story come alive under the fingers.
   function buildSystemPrompt(lang) {
     return (
-    'You are a beloved children\'s picture-book author writing for young blind children who will read your words in Braille. Your stories are warm, vivid, and gently magical.\n\n' +
+    'You are a beloved children\'s picture-book author writing for young blind children who will read your words in braille. Your stories are warm, vivid, and gently magical.\n\n' +
     'Write a complete little story from the user\'s idea. Craft it with care:\n' +
     '- Give it a clear arc: a calm beginning, a small wish or problem, a turn, and a warm, satisfying ending.\n' +
     '- Use rich SENSORY detail a blind child can feel: textures, sounds, warmth, smell, movement. Favour touch and sound over colour and sight.\n' +
@@ -982,7 +982,7 @@ window.TACT = (function () {
     // Binary STL
     var buf=new ArrayBuffer(80+4+tris.length*50);
     var dv=new DataView(buf);
-    var h='TACT Braille page - thatsfaso/tact';
+    var h='TACT braille page - thatsfaso/tact';
     for(var i=0;i<80;i++)dv.setUint8(i,h.charCodeAt(i)||0);
     dv.setUint32(80,tris.length,true);
     var off=84;
@@ -1267,6 +1267,40 @@ function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS) {
   return lines;
 }
 
+// ─── Braille ASCII (.brf) export ──────────────────────────────────────────────
+// A .brf is the file a braille teacher opens in Duxbury and sends to an
+// embosser. It encodes the actual braille CELLS Tact produced (capital and
+// number signs included), one Braille ASCII character per cell, laid out as a
+// clean braille document: 40-cell lines, the paragraph opening in cell 3 with
+// runovers at cell 1, which is the standard formatting. This lets anyone verify
+// and emboss the braille without owning a 3D printer — the gap a TVI hit when
+// the only output was an .stl their computer would not open.
+const BRAILLE_ASCII = " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=";
+function cellToBrailleAscii(cell) {
+  if (cell === "BR") return "\n";
+  if (!Array.isArray(cell)) return " ";
+  let bits = 0;
+  for (const d of cell) bits |= 1 << (d - 1);
+  return BRAILLE_ASCII[bits] || " ";
+}
+function storyToBRF(text) {
+  const cells = textToBrailleCells(text);
+  const indented = [[], []].concat(cells);            // paragraph opens in cell 3
+  const lines = layoutBrailleLinesVar(indented, [40]); // 40-cell braille page width
+  return lines
+    .map((line) => line.map(cellToBrailleAscii).join("").replace(/\s+$/, ""))
+    .join("\r\n") + "\r\n";
+}
+function downloadBRF(text, slug) {
+  const blob = new Blob([storyToBRF(text)], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (slug || "tact") + ".brf";
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
 function BrailleCell({ dots }) {
   const has = (n) => dots && dots.includes(n);
   return (
@@ -1286,7 +1320,7 @@ const COPY = {
   en: {
     eyebrow:    "Stories you can read with your fingers",
     headline:   "Tell me a story…",
-    sub:        "Speak your idea. We'll write it, translate it to Braille, and prepare a tactile page you can print at home.",
+    sub:        "Speak your idea. We'll write it, translate it to braille, and prepare a tactile page you can print at home.",
     tap:        "Tap to speak",
     listening:  "Listening…",
     stop:       "Tap to stop",
@@ -1297,24 +1331,26 @@ const COPY = {
     generating: "Writing your story…",
     modelDownloading: "Downloading AI model…",
     modelCached: "Loading AI model (already on your device)…",
-    brailleTranslating: "Translating to Braille…",
+    brailleTranslating: "Translating to braille…",
     facts: [
       "Braille was invented by Louis Braille when he was 15. Homework existed back then too.",
-      "Trained fingertips read Braille at up to 125 words a minute. Speedy little readers!",
+      "Trained fingertips read braille at up to 125 words a minute. Speedy little readers!",
       "A 3D printer builds your page layer by layer, like a very thin lasagna.",
       "The dots on your page will be about as tall as two sheets of paper stacked up.",
-      "Cats can't read Braille. They prefer to sit on it.",
-      "The very first Braille books were huge — bigger than a pizza box.",
+      "Cats can't read braille. They prefer to sit on it.",
+      "The very first braille books were huge — bigger than a pizza box.",
       "Each of your fingertips has about 3,000 touch sensors. Tiny superheroes.",
-      "Astronauts' fingers puff up in space, which makes reading Braille extra tricky.",
-      "An elephant's trunk is sensitive enough to pick up a single blade of grass. Great Braille potential.",
+      "Astronauts' fingers puff up in space, which makes reading braille extra tricky.",
+      "An elephant's trunk is sensitive enough to pick up a single blade of grass. Great braille potential.",
     ],
     yourStory:  "Your story",
     page:       "Page",
     of:         "of",
     download:   "Download print file",
+    downloadBraille: "Download braille",
+    downloadBrailleHint: "A .brf braille file to open in Duxbury or send to an embosser",
     again:      "Tell another",
-    demoNotice: "AI writing off · your own words become real Braille",
+    demoNotice: "AI writing off · your own words become real braille",
     hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
     footer: "Open source · No account · Works with any FDM 3D printer",
     help: {
@@ -1336,9 +1372,9 @@ const COPY = {
         ]},
         { name: "Reading the page", items: [
           { q: "How is the page read?",
-            a: "The Braille sits at the top and takes the wider part of the page. When there is an illustration it sits in the bottom right corner, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
-          { q: "What is Grade 1 Braille?",
-            a: "It is Braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
+            a: "The braille sits at the top and takes the wider part of the page. When there is an illustration it sits in the bottom right corner, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
+          { q: "What is Grade 1 braille?",
+            a: "It is braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
         ]},
         { name: "About", items: [
           { q: "Who made this?",
@@ -1358,7 +1394,7 @@ const COPY = {
   it: {
     eyebrow:    "Storie da leggere con le dita",
     headline:   "Raccontami una storia…",
-    sub:        "Dimmi la tua idea. La scriviamo, la traduciamo in Braille e prepariamo una pagina tattile da stampare a casa.",
+    sub:        "Dimmi la tua idea. La scriviamo, la traduciamo in braille e prepariamo una pagina tattile da stampare a casa.",
     tap:        "Tocca e parla",
     listening:  "Ti ascolto…",
     stop:       "Tocca per fermare",
@@ -1369,24 +1405,26 @@ const COPY = {
     generating: "Sto scrivendo la storia…",
     modelDownloading: "Scarico il modello AI…",
     modelCached: "Carico il modello AI (già sul tuo dispositivo)…",
-    brailleTranslating: "Traduco in Braille…",
+    brailleTranslating: "Traduco in braille…",
     facts: [
-      "Il Braille l'ha inventato Louis Braille a 15 anni. Sì, i compiti esistevano anche allora.",
-      "Le dita allenate leggono il Braille fino a 125 parole al minuto. Una bella corsa!",
+      "Il braille l'ha inventato Louis Braille a 15 anni. Sì, i compiti esistevano anche allora.",
+      "Le dita allenate leggono il braille fino a 125 parole al minuto. Una bella corsa!",
       "La stampante 3D costruisce la pagina strato dopo strato, come una lasagna sottilissima.",
       "I puntini della tua pagina saranno alti come due fogli di carta impilati.",
-      "I gatti non leggono il Braille: preferiscono sedercisi sopra.",
-      "I primi libri in Braille erano enormi, più grandi di una scatola della pizza.",
+      "I gatti non leggono il braille: preferiscono sedercisi sopra.",
+      "I primi libri in braille erano enormi, più grandi di una scatola della pizza.",
       "Ogni tuo polpastrello ha circa 3.000 sensori del tatto. Piccoli supereroi.",
-      "Nello spazio le dita degli astronauti si gonfiano: leggere il Braille diventa difficilissimo.",
-      "La proboscide di un elefante sente anche un filo d'erba. Un talento naturale per il Braille.",
+      "Nello spazio le dita degli astronauti si gonfiano: leggere il braille diventa difficilissimo.",
+      "La proboscide di un elefante sente anche un filo d'erba. Un talento naturale per il braille.",
     ],
     yourStory:  "La tua storia",
     page:       "Pagina",
     of:         "di",
     download:   "Scarica file di stampa",
+    downloadBraille: "Scarica braille",
+    downloadBrailleHint: "Un file braille .brf da aprire in Duxbury o inviare a un embosser",
     again:      "Un'altra storia",
-    demoNotice: "Scrittura AI non attiva · le tue parole diventano Braille reale",
+    demoNotice: "Scrittura AI non attiva · le tue parole diventano braille reale",
     hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
     footer: "Open source · Senza account · Funziona con ogni stampante FDM",
     help: {
@@ -1408,9 +1446,9 @@ const COPY = {
         ]},
         { name: "Leggere la pagina", items: [
           { q: "Come si legge la pagina?",
-            a: "Il Braille sta in alto e occupa la parte più larga della pagina. Quando c'è un'illustrazione si trova nell'angolo in basso a destra, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
-          { q: "Cos'è il Braille di Grado 1?",
-            a: "È il Braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
+            a: "Il braille sta in alto e occupa la parte più larga della pagina. Quando c'è un'illustrazione si trova nell'angolo in basso a destra, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
+          { q: "Cos'è il braille di Grado 1?",
+            a: "È il braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
         ]},
         { name: "Il progetto", items: [
           { q: "Chi l'ha realizzato?",
@@ -1881,6 +1919,16 @@ function StoryResult({ pages, lang, t, onAgain }) {
               {t.download}
               <span className="mono text-[10px] opacity-60 ml-1">.STL</span>
             </button>
+            <button className="btn btn-ghost" title={t.downloadBrailleHint} onClick={() => {
+              // The whole story as one braille document, for anyone who reads or
+              // embosses braille rather than printing in 3D (Duxbury, an embosser).
+              window.SFX && window.SFX.play("download");
+              downloadBRF(pages.map((pg) => pg.text).join(" "), "tact");
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              {t.downloadBraille}
+              <span className="mono text-[10px] opacity-60 ml-1">.BRF</span>
+            </button>
             <button className="btn btn-ghost" onClick={onAgain}>{t.again}</button>
           </div>
 
@@ -2131,9 +2179,11 @@ function App() {
 
   const toggleListen = () => {
     if (phase === "listening") {
-      if (srRef.current) { srRef.current.stop(); srRef.current = null; }
+      // Stop listening, but let onend decide what happens: if words were
+      // captured they are submitted, otherwise we return to idle. This is what
+      // lets a reader speak a full sentence and tap stop when they are done.
+      if (srRef.current) { srRef.current.stop(); }
       window.SFX && window.SFX.play("listenEnd");
-      setPhase("idle");
       return;
     }
     window.SFX && window.SFX.play("listenStart");
@@ -2154,17 +2204,31 @@ function App() {
     const sr = new SR();
     srRef.current = sr;
     sr.lang = lang === "it" ? "it-IT" : "en-US";
-    sr.continuous = false;
-    sr.interimResults = false;
+    // Continuous, so a slow or thoughtful speaker is never cut off mid-sentence:
+    // the old setting stopped at the first pause and submitted whatever it had.
+    // Now recognition runs until the reader taps stop (or the browser ends it),
+    // and only then is the whole idea submitted. Interim results make the words
+    // appear live, which is also the feedback a low-vision user leans on.
+    sr.continuous = true;
+    sr.interimResults = true;
+    let finalTranscript = "";
     sr.onresult = (e) => {
-      const phrase = e.results[0][0].transcript;
-      setText(phrase);
-      srRef.current = null;
-      window.SFX && window.SFX.play("listenEnd");
-      doSubmit(phrase);
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const chunk = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalTranscript += chunk;
+        else interim += chunk;
+      }
+      setText((finalTranscript + interim).trim());
     };
-    sr.onerror = () => { srRef.current = null; setPhase("idle"); window.SFX && window.SFX.play("listenEnd"); };
-    sr.onend   = () => { srRef.current = null; };
+    const finishListening = () => {
+      srRef.current = null;
+      const phrase = finalTranscript.trim();
+      if (phrase) { setText(phrase); doSubmit(phrase); }
+      else setPhase("idle");
+    };
+    sr.onerror = () => { window.SFX && window.SFX.play("listenEnd"); finishListening(); };
+    sr.onend   = finishListening;
     try {
       sr.start();
     } catch (err) {
