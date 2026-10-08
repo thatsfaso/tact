@@ -240,11 +240,37 @@
     return ctx;
   }
 
-  ["pointerdown", "keydown", "touchstart"].forEach(function(ev) {
-    window.addEventListener(ev, function() {
-      var c = ensure();
-      if (c && c.state === "suspended") c.resume();
-    }, { once: false, passive: true });
+  // iPhones route Web Audio through the ringer, so with the silent switch on
+  // every chime was muted. Declaring the page as "playback" (Safari 16.4+)
+  // makes it behave like a video instead. Older iOS gets the same result from
+  // one silent <audio> play inside a tap.
+  var SILENT_WAV = "data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+  var recording = false;
+  var silentPlayed = false;
+  function setSession(type) {
+    try { if (navigator.audioSession) navigator.audioSession.type = type; } catch (e) {}
+  }
+
+  function wake() {
+    var c = ensure();
+    if (!c) return;
+    if (!recording) setSession("playback");
+    if (!navigator.audioSession && !silentPlayed) {
+      silentPlayed = true;
+      try { var a = new Audio(SILENT_WAV); a.setAttribute("playsinline", ""); a.play().catch(function() { silentPlayed = false; }); } catch (e) {}
+    }
+    // Safari can also leave the context "interrupted" (after the mic, a call,
+    // or switching apps), not only "suspended".
+    if (c.state !== "running") c.resume().catch(function() {});
+  }
+
+  // Safari only unlocks audio on the end of a tap (touchend/click), never on
+  // touchstart, so listen to both ends of the gesture.
+  ["pointerdown", "pointerup", "touchstart", "touchend", "click", "keydown"].forEach(function(ev) {
+    window.addEventListener(ev, wake, { once: false, passive: true });
+  });
+  document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "visible" && ctx && ctx.state !== "running") ctx.resume().catch(function() {});
   });
 
   function envelope(node, t0, attack, hold, release, peak) {
@@ -398,7 +424,16 @@
   };
 
   window.SFX = {
-    play: function(name) { if (sounds[name]) sounds[name](); },
+    play: function(name) {
+      if (ctx && ctx.state !== "running") ctx.resume().catch(function() {});
+      if (sounds[name]) sounds[name]();
+    },
+    // The microphone cannot run under a "playback" session, so hand the
+    // session back to Safari while listening and take it again afterwards.
+    recording: function(on) {
+      recording = !!on;
+      setSession(on ? "auto" : "playback");
+    },
     startPad: function() { return sounds.startPad(); },
     startLoader: function() { return sounds.startLoader(); },
     isEnabled: function() { return enabled; },
@@ -2253,6 +2288,7 @@ function App() {
     };
     const finishListening = () => {
       srRef.current = null;
+      window.SFX && window.SFX.recording && window.SFX.recording(false);
       const phrase = finalTranscript.trim();
       if (phrase) { setText(phrase); doSubmit(phrase); }
       else setPhase("idle");
@@ -2260,8 +2296,10 @@ function App() {
     sr.onerror = () => { window.SFX && window.SFX.play("listenEnd"); finishListening(); };
     sr.onend   = finishListening;
     try {
+      window.SFX && window.SFX.recording && window.SFX.recording(true);
       sr.start();
     } catch (err) {
+      window.SFX && window.SFX.recording && window.SFX.recording(false);
       // start() can throw synchronously (mic blocked, InvalidStateError, etc.)
       // — recover instead of stranding the UI on the listening screen.
       console.warn("[TACT] speech recognition could not start:", err && err.message);
