@@ -862,7 +862,9 @@ window.TACT = (function () {
   // Illustration zone: a full-width band across the bottom. The shape is drawn
   // aspect-preserving and centred inside it (see rasterizeIll), so the wide band
   // never stretches it; the empty sides simply carry no relief.
-  var ILL_X=10, ILL_Y=12, ILL_W=130, ILL_H=38, ILL_ABOVE=0.9, ILL_PIX=2;
+  // ILL_ABOVE: illustration relief rises 1.0mm, 0.15mm above the 0.85mm dots,
+  // so a fingertip tells picture from text by height alone, as the paper specifies.
+  var ILL_X=10, ILL_Y=12, ILL_W=130, ILL_H=38, ILL_ABOVE=1.0, ILL_PIX=2;
 
   // Wrap cells into lines whose max width varies per line (widths profile).
   function layoutLines(cells, widths) {
