@@ -351,16 +351,16 @@ Illustrations are chosen automatically by scanning a story's text for keywords, 
 
 \subsection{From Vector Shape to Printable Relief}
 
-At export time, the chosen illustration's SVG file is rasterized onto a small canvas sized to the illustration zone, preserving aspect ratio and centering the result so the shape is never stretched to fill a differently proportioned space. Each dark pixel becomes a small square pillar in the resulting three-dimensional mesh, raised to approximately 0.9 millimeters, slightly higher than the 0.85 millimeter braille dots, specifically so a fingertip can distinguish illustration from text by height alone, without needing to consciously interpret the difference.
+At export time, the chosen illustration's SVG file is rasterized onto a small canvas sized to the illustration zone, preserving aspect ratio and centering the result so the shape is never stretched to fill a differently proportioned space. Each dark pixel becomes a small square pillar in the resulting three-dimensional mesh, raised to 1.0 millimeters in design space, 0.15 millimeters higher than the 0.85 millimeter braille dots, specifically so a fingertip can distinguish illustration from text by height alone, without needing to consciously interpret the difference. These are design-space heights before FDM shrinkage; post-print braille height on the reference build is approximately 0.60 millimeters (Table~\ref{tab:shrinkage}).
 
 \section{Physical Fabrication}\label{sec:fabrication}
 
 \subsection{Braille Dot Geometry}
 
-All dot geometry follows ISO 17049:2013, the international standard for accessible design and the physical application of braille on signage and equipment \cite{iso17049}, over-built by roughly 20 to 30 percent in every dimension to pre-compensate for a well-documented, consistent property of budget FDM printing: it under-produces small raised features relative to the design file. Table~\ref{tab:shrinkage} reports the designed dimensions against typically measured printed dimensions, and Fig.~\ref{fig:shrinkage} visualizes the same comparison.
+All dot geometry follows ISO 17049:2013, the international standard for accessible design and the physical application of braille on signage and equipment \cite{iso17049}, over-built by roughly 20 to 30 percent in every dimension to pre-compensate for a well-documented property of budget FDM printing: it under-produces small raised features relative to the design file. Table~\ref{tab:shrinkage} reports the designed dimensions against measurements from a single reference print (budget FDM, PLA filament; printed dots measured with a digital caliper on one page), not a multi-printer distribution, and Fig.~\ref{fig:shrinkage} visualizes the same comparison.
 
 \begin{table}[t]
-\caption{Designed versus typically printed dot geometry on budget FDM printers.}
+\caption{Designed versus printed dot geometry from a single reference budget FDM build (PLA; caliper on one page).}
 \label{tab:shrinkage}
 \centering
 \begin{tabular}{lrrr}
@@ -378,11 +378,11 @@ Base plate thickness & 0.5 mm & 0.48 mm & $-4\%$ \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{chart-shrinkage.pdf}
-\caption{Designed versus printed dot geometry on budget FDM printers. Both printed values land inside the ISO 17049:2013 tolerance band and the 0.6 to 0.9 millimeter range identified as optimal in blind-reader surveys, confirming that the 20 to 30 percent over-design correction is calibrated rather than arbitrary.}
+\caption{Designed versus printed dot geometry from a single reference budget FDM build. The printed values fall inside the ISO 17049:2013 tolerance band \cite{iso17049}. The 20 to 30 percent over-design is an engineering correction observed on that reference print, not a multi-run calibration.}
 \label{fig:shrinkage}
 \end{figure}
 
-Both printed values land inside the ISO tolerance band and inside the 0.6 to 0.9 millimeter range identified in blind-reader surveys as the optimal tactile dot height range; the over-design is a calibrated correction, not a guess. The dot profile itself combines a short cylindrical base with a hemispherical cap, rather than a pure hemisphere. A pure hemisphere at this diameter sits at the low end of the acceptable height range, and it prints with sharper curvature than budget FDM handles cleanly. The cylindrical base lifts the sphere's center of curvature instead, producing a rounder, gentler cap that is both more forgiving to print and more comfortable under a young fingertip. Every dot is rendered as sixteen-sided geometry, sufficient that no FDM printer could resolve additional smoothness, and no more, keeping file size and slicing time low. Fig.~\ref{fig:mockup} shows both the top-view page layout and this cross-section profile together, alongside the material and print settings used for the reference build.
+Both printed values on the reference build land inside the ISO 17049:2013 tolerance band \cite{iso17049}; the over-design is an engineering correction documented on that single print, not a multi-run calibrated fit and not a claim about reader preference surveys. The dot profile itself combines a short cylindrical base with a hemispherical cap, rather than a pure hemisphere. A pure hemisphere at this diameter sits at the low end of the acceptable height range, and it prints with sharper curvature than budget FDM handles cleanly. The cylindrical base lifts the sphere's center of curvature instead, producing a rounder, gentler cap that is both more forgiving to print and more comfortable under a young fingertip. Every dot is rendered as sixteen-sided geometry, sufficient that no FDM printer could resolve additional smoothness, and no more, keeping file size and slicing time low. Fig.~\ref{fig:mockup} shows both the top-view page layout and this cross-section profile together, alongside the material and print settings used for the reference build.
 
 \begin{figure*}[t]
 \centering
@@ -562,7 +562,7 @@ Third, no dependency that can be discontinued out from under a family. A single 
 
 Several limitations are stated plainly here, without softening, because an honest account of what remains undone is as much a contribution of this paper as the engineering that has been completed.
 
-No testing with blind or low-vision readers has occurred yet. Every claim in this paper about tactile legibility, dot comfort, and illustration clarity rests on published standards and survey data, not on direct observation of this project's own output in real hands. This is judged the single most important open item ahead of any claim of readiness. The Italian organizations this project intends to work with have not yet been contacted. Outreach to the Biblioteca Italiana per i Ciechi Regina Margherita, the Istituto dei Ciechi di Milano, UICI Lombardia, and Lega del Filo d'Oro remains to be initiated.
+No testing with blind or low-vision readers has occurred yet. Every claim in this paper about tactile legibility, dot comfort, and illustration clarity rests on published standards (notably ISO 17049:2013 \cite{iso17049}) and engineering verification of printed geometry, not on direct observation of this project's own output in real hands, and not on uncited reader surveys. This is judged the single most important open item ahead of any claim of readiness. The Italian organizations this project intends to work with have not yet been contacted. Outreach to the Biblioteca Italiana per i Ciechi Regina Margherita, the Istituto dei Ciechi di Milano, UICI Lombardia, and Lega del Filo d'Oro remains to be initiated.
 
 A locally installable command-line package does not yet exist. The browser application is fully functional on its own, but a package for batch generation, automation, and integration into existing school or library workflows remains future work. Double-sided, interpoint, printing is also deferred. Genuine interpoint braille, in which dots on the front and back of a page are offset so they do not interfere with one another, is a solved problem on paper embossers but a meaningfully harder one in extruded three-dimensional geometry, and has not yet been attempted. Automated print-farm integration, for example through OctoPrint, is deferred in favor of the simpler, more universally compatible download-and-open-in-any-slicer path.
 
