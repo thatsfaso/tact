@@ -67,6 +67,18 @@
 }
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // "compact" = narrow OR short. A phone held sideways is wider than the md
+  // breakpoint but only ~390px tall, so width alone would hand it the desktop
+  // layout, which centres everything in a non-scrolling screen and clips it.
+  // Scrolling and vertical spacing key off this; purely width-dependent
+  // choices (stacked columns, short language labels) stay on max-md.
+  // Defined as a custom variant, NOT as a `raw` screen: adding a raw screen
+  // makes Tailwind silently drop every max-* variant (max-md stopped working).
+  tailwind.config = { plugins: [function ({ addVariant }) {
+    addVariant('compact', '@media (max-width: 767px), (max-height: 640px)');
+  }] };
+</script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -154,6 +166,7 @@
   .btn {
     position: relative;
     display: inline-flex; align-items: center; justify-content: center;
+    white-space: nowrap; /* a label split over three lines reads as broken on phones */
     gap: 10px;
     padding: 14px 22px;
     border-radius: 999px;
@@ -1544,7 +1557,7 @@ function ShapeRenderer({ illustration }) {
 // ─── Header ───────────────────────────────────────────────────────────────────
 function Header({ lang, setLang, sound, setSound, t, onHelp }) {
   return (
-    <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6" style={{ zIndex: 5 }}>
+    <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6 compact:px-4 compact:py-3 compact:bg-[rgba(250,250,247,0.92)] compact:backdrop-blur-md" style={{ zIndex: 6 }}>
       <div className="flex items-center gap-3">
         <div className="grid grid-cols-2 gap-[3px]" style={{ width: 18 }}>
           <div className="bd"></div><div className="bd off"></div>
@@ -1552,7 +1565,7 @@ function Header({ lang, setLang, sound, setSound, t, onHelp }) {
           <div className="bd off"></div><div className="bd"></div>
         </div>
         <div className="serif text-[22px] leading-none" style={{ letterSpacing: "-0.01em" }}>Tact</div>
-        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1" style={{ color: "var(--muted-soft)" }}>prototype</div>
+        <div className="mono text-[10px] uppercase tracking-[0.22em] ml-1 max-md:hidden" style={{ color: "var(--muted-soft)" }}>prototype</div>
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -1576,10 +1589,12 @@ function Header({ lang, setLang, sound, setSound, t, onHelp }) {
         <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)" }}>
           {["en", "it"].map((l) => (
             <button key={l} onClick={() => { setLang(l); window.SFX && window.SFX.play("toggle"); }}
-              className="focus-ring mono text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full transition-colors"
+              className="focus-ring mono text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full transition-colors max-md:px-2.5"
               style={{ background: lang === l ? "var(--ink)" : "transparent", color: lang === l ? "var(--paper)" : "var(--ink)" }}
-              aria-pressed={lang === l}>
-              {l === "en" ? "English" : "Italiano"}
+              aria-pressed={lang === l} aria-label={l === "en" ? "English" : "Italiano"}>
+              {/* Full names do not fit beside the other controls on a phone. */}
+              <span className="max-md:hidden">{l === "en" ? "English" : "Italiano"}</span>
+              <span className="md:hidden" aria-hidden="true">{l.toUpperCase()}</span>
             </button>
           ))}
         </div>
@@ -1730,7 +1745,7 @@ function LoadingScreen({ msg, progress, t }) {
   }, [t]);
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10" style={{ zIndex: 5 }}>
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 compact:justify-start compact:overflow-y-auto compact:gap-6 compact:pt-20 compact:pb-8 compact:[&>*:first-child]:mt-auto compact:[&>*:last-child]:mb-auto" style={{ zIndex: 5 }}>
       <BlobLoader size={240} />
       <div className="flex flex-col items-center gap-4 rise" style={{ maxWidth: 400, width: '100%', padding: '0 32px' }}>
         <div className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
@@ -1831,13 +1846,16 @@ function StoryResult({ pages, lang, t, onAgain }) {
 
   return (
     <section role="region" aria-label={t.resultRegion}
-      className="absolute inset-0 flex flex-col items-center justify-center px-6" style={{ zIndex: 5 }}>
+      className="absolute inset-0 flex flex-col items-center justify-center px-6 compact:justify-start compact:overflow-y-auto max-md:px-5 compact:pt-20 compact:pb-10" style={{ zIndex: 5 }}>
       <div className="sr-only" role="status" aria-live="polite">{liveText}</div>
-      <div className="w-full max-w-[1100px] grid grid-cols-12 gap-8 items-center">
+      {/* Phones: one column, page above and story below, and the screen scrolls.
+          A single column rather than col-span-12, because twelve columns carry
+          eleven gaps, 308px of empty gutter, wider than a 320px phone. */}
+      <div className="w-full max-w-[1100px] grid grid-cols-12 gap-8 items-center max-md:grid-cols-1 compact:my-auto compact:items-start max-md:gap-7">
 
         {/* Left — physical page preview, true-to-scale (mm) mirror of the print.
             Decorative for assistive tech: everything it shows is spoken above. */}
-        <div className="col-span-7 rise" aria-hidden="true">
+        <div className="col-span-7 rise max-md:col-span-1" aria-hidden="true">
           <div className="relative mx-auto"
             style={{ width: "100%", maxWidth: 520, aspectRatio: `${L.PAGE_W} / ${L.PAGE_H}`, borderRadius: `${(L.CORNER_R / L.PAGE_W) * 100}%`,
               background: "linear-gradient(180deg, #fdfcf7, #f3efe5)",
@@ -1848,10 +1866,15 @@ function StoryResult({ pages, lang, t, onAgain }) {
               mixBlendMode: "multiply" }} />
             <div className="mono absolute text-[9px] tracking-[0.2em] uppercase"
               style={{ color: "rgba(10,10,12,0.35)", zIndex: 2,
-                // Proportional to the page, not a fixed pixel offset, so the
-                // label keeps the same 10 mm margin the Braille text uses no
-                // matter what size the preview is drawn at.
-                top: `${(L.TZ_X / L.PAGE_H) * 100 * 0.55}%`,
+                // The page scales with the screen but this 9px label does not,
+                // so on a smaller page (phone, phone sideways, tablet) it used to
+                // sit on the first braille line. Take whichever is higher: the
+                // original proportional spot, or just above the top edge of the
+                // first row of dots. On the full desktop page the two coincide,
+                // so the desktop position is unchanged; on smaller pages the
+                // label rises into the margin. (12.9px = the label's glyph height
+                // plus a small gap; top % is of the page height, square page.)
+                top: `min(${(L.TZ_X / L.PAGE_H) * 100 * 0.55}%, calc(${((L.PAGE_H - L.LINE_Y0 - Math.max(...L.DOFF.filter(Boolean).map(o => o[1])) - L.DOT_R) / L.PAGE_H) * 100}% - 12.9px))`,
                 right: `${(L.TZ_X / L.PAGE_W) * 100}%` }}>
               {t.page} {page + 1} {t.of} {pages.length}
             </div>
@@ -1880,7 +1903,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
         </div>
 
         {/* Right — text + actions */}
-        <div className="col-span-5 flex flex-col gap-6 rise-slow">
+        <div className="col-span-5 flex flex-col gap-6 rise-slow max-md:col-span-1 max-md:gap-5">
           {p.demo && (
             <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full inline-block"
               style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)', alignSelf: 'flex-start' }}>
@@ -1888,7 +1911,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
             </div>
           )}
           <h2 ref={headingRef} tabIndex={-1} className="mono text-[11px] tracking-[0.22em] uppercase focus-ring" style={{ color: "var(--muted)", outlineOffset: 4 }}>{t.yourStory}</h2>
-          <p className="serif text-[32px] leading-[1.18]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</p>
+          <p className="serif text-[32px] leading-[1.18] max-md:text-[24px] max-md:leading-[1.25]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</p>
 
           <div className="flex items-center gap-3 mt-2">
             <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.max(0, x-1)); }}
@@ -1909,7 +1932,8 @@ function StoryResult({ pages, lang, t, onAgain }) {
               aria-label={t.nextPage}>›</button>
           </div>
 
-          <div className="flex flex-wrap gap-3 mt-4">
+          {/* Phones: one full-width button per row, a larger touch target. */}
+          <div className="flex flex-wrap gap-3 mt-4 max-md:flex-col">
             <button className="btn" onClick={() => {
               window.SFX && window.SFX.play("download");
               // Text-only (even) pages carry no illustration; pass no SVG so the
@@ -1938,7 +1962,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
             <button className="btn btn-ghost" onClick={onAgain}>{t.again}</button>
           </div>
 
-          <div className="mono text-[10px] uppercase tracking-[0.22em] flex gap-4 mt-2" style={{ color: "var(--muted-soft)" }}>
+          <div className="mono text-[10px] uppercase tracking-[0.22em] flex flex-wrap gap-x-4 gap-y-1 mt-2" style={{ color: "var(--muted-soft)" }}>
             <span>● {lang === "it" ? "Italiano · Grado 1" : "English · Grade 1 UEB"}</span>
             <span>● 220 × 220 mm</span>
             <span>● TPU / PETG</span>
@@ -2341,8 +2365,10 @@ function App() {
       {helpOpen && <HelpPanel t={t} onClose={() => setHelpOpen(false)} />}
 
       {(phase === "idle" || phase === "listening") && (
-        <main className="absolute inset-0 flex flex-col items-center justify-center px-6">
-          <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center">
+        <main className="absolute inset-0 flex flex-col items-center justify-center px-6 compact:justify-start compact:overflow-y-auto max-md:px-5 compact:pt-20 compact:pb-8">
+          {/* On a phone the page scrolls; my-auto centres the column when it fits
+              and lets it start at the top when it does not, instead of clipping. */}
+          <div className="flex flex-col items-center gap-7 max-w-[680px] w-full text-center compact:my-auto compact:gap-6">
 
             {!window.TACT.cloudEnabled && !window.TACT.webgpuSupported && (
               <div className="mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full"
@@ -2354,7 +2380,7 @@ function App() {
             <div className="mono text-[11px] tracking-[0.24em] uppercase rise" style={{ color: "var(--muted)" }}>
               {t.eyebrow}
             </div>
-            <h1 className="serif rise" style={{ fontSize: "clamp(44px, 6vw, 76px)", lineHeight: 1.05, letterSpacing: "-0.02em", maxWidth: 720, whiteSpace: "nowrap" }}>
+            <h1 className="serif rise" style={{ fontSize: "clamp(28px, max(6vw, min(10.5vw, 44px)), 76px)", lineHeight: 1.05, letterSpacing: "-0.02em", maxWidth: 720, whiteSpace: "nowrap" }}>
               {t.headline}
             </h1>
             <p className="rise-slow text-[16px] leading-[1.55] max-w-[520px]" style={{ color: "var(--muted)" }}>
@@ -2375,9 +2401,9 @@ function App() {
                 onSubmit={(e) => { e.preventDefault(); if (text.trim()) submit(text.trim()); }}>
                 <input ref={inputRef} type="text" value={text} onChange={(e) => setText(e.target.value)}
                   aria-label={t.inputLabel}
-                  placeholder={t.placeholder} className="flex-1 bg-transparent outline-none px-4 py-2 text-[15px]"
+                  placeholder={t.placeholder} className="flex-1 min-w-0 bg-transparent outline-none px-4 py-2 text-[15px] max-md:px-3"
                   style={{ color: "var(--ink)" }} />
-                <button type="submit" disabled={!text.trim()} className="btn"
+                <button type="submit" disabled={!text.trim()} className="btn shrink-0"
                   style={{ padding: "10px 18px", opacity: text.trim() ? 1 : 0.4, cursor: text.trim() ? "pointer" : "default" }}>
                   {t.submit}
                 </button>
@@ -2389,7 +2415,7 @@ function App() {
             </div>
           </div>
 
-          <div className="mono text-[10px] tracking-[0.22em] uppercase absolute bottom-6 left-1/2 -translate-x-1/2" style={{ color: "var(--muted-soft)" }}>
+          <div className="mono text-[10px] tracking-[0.22em] uppercase absolute bottom-6 left-1/2 -translate-x-1/2 compact:static compact:translate-x-0 compact:mt-10 compact:text-center compact:tracking-[0.14em] compact:leading-relaxed" style={{ color: "var(--muted-soft)" }}>
             {t.footer}
           </div>
         </main>
