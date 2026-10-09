@@ -2140,10 +2140,8 @@ function wordsFit(words, widths) {
 }
 
 // Paginate a story respecting the per-page profile: odd pages hold less (the
-// illustration eats the bottom-right corner), even pages hold the full width.
-// Fill each page to capacity so no page is left with empty rows, then, if the
-// last page came out sparse, rebalance just the final two so the story does not
-// end on a near-empty card.
+// illustration band takes the bottom of the page), even pages hold all 13 rows.
+// Fill each page to capacity so no page before the last is left with empty rows.
 function paginateStory(text) {
   const words = text.split(/\s+/).filter(w => w.length > 0);
   if (!words.length) return [text];

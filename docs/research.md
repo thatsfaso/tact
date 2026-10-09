@@ -40,11 +40,10 @@ Compiled from the initial design research conversation. These findings inform ev
 - Liblouis table: `en-ueb-g1.ctb`
 
 ### 3D Printing Dimension Corrections
-- FDM printers consistently under-produce dot height by ~30%
-- Designing for 0.5mm yields ~0.38mm measured (±0.03mm)
-- Designing for 1.3mm diameter yields ~1.0mm measured (±0.07mm)
-- All geometry specs must over-design by ~30% to compensate
-- Optimal range from blind student survey: 0.6–0.9mm dot height
+- Budget FDM under-produces small raised features, so geometry is over-designed by roughly 20–30%
+- TACT reference print (budget FDM, PLA, caliper on one page): 0.85mm designed dot height → ~0.60mm printed (−29%); 1.6mm diameter → ~1.3mm (−19%)
+- Both printed values fall inside the ISO 17049:2013 tolerance band
+- This is one reference build, not a multi-printer calibration; testing with blind readers is still open
 
 ---
 

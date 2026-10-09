@@ -53,7 +53,7 @@ Dot diameter (printed): ~1.3mm   (shrink ~19%)
 Dot height (printed):   ~0.60mm  (shrink ~29%)
 ```
 
-Both values fall within the ISO 17049:2013 valid range and within the optimal 0.6–0.9mm tactile range confirmed by blind reader surveys.
+These are measurements from a single reference print (budget FDM, PLA, digital caliper on one page), not a multi-printer distribution. Both values fall within the ISO 17049:2013 tolerance band. The over-design is an engineering correction observed on that print; readability has not yet been tested with blind readers.
 
 ### Profile: hemisphere with cylindrical base
 

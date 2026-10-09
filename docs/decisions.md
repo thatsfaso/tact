@@ -62,7 +62,7 @@ This file records every significant design decision made, why it was made, and w
 
 ### D011 — FDM dot height over-design: +30%
 **Decision:** All Braille dot geometry specs are designed 30% taller than ISO standard to compensate for FDM shrinkage.
-**Rationale:** FDM prints consistently under-produce height by ~30% (0.5mm design → 0.38mm measured). Blind reader surveys show optimal tactile range is 0.6-0.9mm. Over-designing to 0.85mm produces ~0.6mm actual — within optimal range for beginning readers.
+**Rationale:** Budget FDM under-produces small raised features. On a single reference print (budget FDM, PLA, measured with a digital caliper on one page) a 0.85mm designed dot came out at ~0.60mm (−29%) and a 1.6mm diameter at ~1.3mm (−19%), both inside the ISO 17049:2013 tolerance band. The over-design is an engineering correction observed on that print, not a multi-printer calibration and not a claim about reader preference surveys. Testing with blind readers is still open.
 
 ### D012 — Operator model: sighted helper + blind reader
 **Decision:** The system assumes a sighted parent, teacher, or org member operates the 3D printer. The software UI is fully accessible (screen-reader compatible, voice-first), but the printer is a shared appliance.
@@ -111,12 +111,12 @@ This file records every significant design decision made, why it was made, and w
 **Decision:** The browser app translates Braille with a small pure-JS Grade-1 map, not Liblouis.
 **Rationale:** The Liblouis WASM build (`liblouis-build@3.2.0-rc`) is unusable in-browser: the English UEB tables fail to compile (`numericnocontchar`), several tables abort the WASM heap, and a null result crashed the worker so the app hung forever on "Translating to Braille…". This project is **Grade 1 only** (D004/D005) — a deterministic character→cell mapping — so a JS translator is exact, instant, dependency-free, works offline/`file://`, and drops a 1.6MB download. Liblouis (D003) remains the reference for the future Python CLI or if a known-good WASM build appears.
 
-### D019 — Page layout: square 150×150 with corner illustration (supersedes D009 layout options)
+### D019 — Page layout: square 150×150 with corner illustration (supersedes D009 layout options; superseded by D022)
 **Decision:** One shipped layout: a **square 150×150mm page** with an **L-shaped Braille region** (7 full rows + 6 narrow rows) wrapping a **bottom-right corner illustration**. Geometry is defined once in `window.TACT_LAYOUT` and shared by a true-to-scale SVG preview and the STL generator.
 **Rationale:** Square matches the design intent and the 220×220 bed; the corner layout packs ~37 words/page while keeping a clear tactile illustration. A single mm source of truth makes the preview an exact mirror of the print (no drift). The earlier three-option A/B/C model and a brief portrait/picture-book detour were dropped as over-complex; alternatives stay as possible future `layout` modes.
 **Rejected:** Portrait 150×200 (never a requirement — was a leftover print size that leaked into the preview and broke the composition); fixed-pixel preview (didn't scale responsively with the window).
 
-### D020 — Balanced pagination + story length targeting
+### D020 — Balanced pagination + story length targeting (balancing later withdrawn, see D022)
 **Decision:** Split a story into the fewest pages whose *even* word split fits every page (`paginateByLines`), and target ~65–75 words in the AI prompt.
 **Rationale:** Greedy fill left ugly orphan pages (50 words → `[37,13]`). Even distribution (`[25,25]`) reads as intentional and never near-empty; a fuller word target keeps multi-page stories filling their pages. Guarantees no clipping.
 
@@ -124,12 +124,16 @@ This file records every significant design decision made, why it was made, and w
 **Decision:** Ship ~89 hand-crafted line-art SVGs covering the most-cited fairy/bedtime subjects (creatures, animals, people, objects, nature). Illustration is chosen from story text by **whole-word** IT+EN keyword matching (not substring).
 **Rationale:** Hand-crafted shapes read far better under the fingers than parametric primitives (the cat is the quality bar). Whole-word matching fixes false positives (e.g. "mare"/sea no longer matches "re"/king) and covers plurals/diminutives, so most stories get a fitting illustration instead of the default star. **Note:** the entire library is now hand-crafted and the early parametric generator has been removed from the repository.
 
+### D022 — Full-width braille lines, illustration as a bottom band (supersedes D019; withdraws D020 balancing)
+**Decision:** Every braille line runs the full 21-cell width. Illustrated pages hold 9 rows above a 130×38mm band at origin (10, 12), with the shape drawn aspect-preserving and centred; text-only pages hold 13 rows. Pagination is greedy: each page is filled before the next, and the leftover lands on the final card, which carries the picture. Illustration relief is 1.0mm, 0.15mm above the 0.85mm dots.
+**Rationale:** Chris Bischke, Ph.D., TVI, DT/V (University of Utah and Utah State University) read a printed page and reported that the 12-cell lines beside the corner picture are uncomfortable to read: braille lines should run the full width of the page. The revision costs about 14% of the cells on an illustrated page (189 vs 219), accepted because every line being readable matters more than density for a child learning by touch. Balanced pagination was withdrawn because it moved empty rows into middle pages, which have no picture to fill them, turning one unfinished card into two.
+
 ---
 
 ## Resolved (were pending)
 
 - **P001 — Shape library format:** DONE. `docs/shape-library-format.md` + `shapes/index.json` (~89 shapes).
-- **P002 — Page format specification:** DONE. `docs/page-format-spec.md` v2.0 (square corner layout, see D019).
+- **P002 — Page format specification:** DONE. `docs/page-format-spec.md` v3.0 (square band layout, see D022).
 - **P003 — STL geometry specification:** DONE. `docs/stl-geometry-spec.md`; implemented in `index.html`.
 
 ---

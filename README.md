@@ -45,7 +45,7 @@ The full architecture, module by module:
 <img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, in-browser LLM, parallel braille translation and tactile graphics, page layout, STL generation, 3D printer output" width="720"/>
 </div>
 
-The result: a flexible page, roughly postcard-sized, with domed braille dots on top and a raised silhouette in the corner — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
+The result: a flexible page, roughly postcard-sized, with domed braille dots on top and a raised silhouette in a band along the bottom — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
 
 <div align="center">
 <img src="assets/tact_page_mockup.svg" alt="Tact page mockup: top view of the 150x150mm page and a cross-section comparing domed braille dots to the flat-topped tactile illustration relief" width="720"/>
@@ -94,19 +94,25 @@ No sign-up, and no single point of failure: the hosted model is an accelerator, 
 
 ## Braille standards
 
-Every dimension follows **ISO 17049:2013** (the Marburg Medium standard), over-built by roughly 30% in height to compensate for the shrinkage FDM printers consistently introduce:
+Every dimension follows **ISO 17049:2013**, over-built by roughly 20 to 30% to compensate for the way budget FDM printers under-produce small raised features:
 
-| Parameter | Standard target | Notes |
-|---|---|---|
-| Dot diameter | 1.3 – 1.6 mm | domed profile, never flat |
-| Dot height (printed) | 0.7 – 0.9 mm | over-designed from the 0.5mm paper spec |
-| Dot spacing (within a cell) | 2.5 mm center-to-center | |
-| Cell spacing | 6.0 mm center-to-center | |
-| Line spacing | 10.0 mm center-to-center | |
+| Parameter | Designed | Printed (reference build) | Notes |
+|---|---|---|---|
+| Dot diameter | 1.6 mm | 1.3 mm | domed profile, never flat |
+| Dot height | 0.85 mm | 0.60 mm | cylinder base plus dome cap |
+| Illustration relief | 1.0 mm | | 0.15 mm above the dots, so picture and text differ by height alone |
+| Dot spacing (within a cell) | 2.5 mm center-to-center | | |
+| Cell spacing | 6.0 mm center-to-center | 5.9 mm | |
+| Line spacing | 10.0 mm center-to-center | | |
+| Base plate | 0.5 mm | 0.48 mm | |
+
+Printed values come from a single reference print (budget FDM, PLA, measured with a digital caliper on one page), not a multi-printer distribution. Both dot values fall inside the ISO 17049:2013 tolerance band. Testing with blind readers has not happened yet.
 
 <div align="center">
-<img src="assets/tact_page_layout_geometry.svg" alt="Dimensioned diagram of the square corner layout: 150x150mm page, 7 full braille rows of 21 cells, 6 narrow rows of 12 cells, 54x54mm illustration zone at origin (86, 12)" width="720"/>
+<img src="assets/tact_page_layout_geometry.svg" alt="Dimensioned diagram of the earlier square corner layout: 150x150mm page, 7 full braille rows of 21 cells, 6 narrow rows of 12 cells, 54x54mm illustration zone at origin (86, 12)" width="720"/>
 </div>
+
+<p align="center"><sub>Dimensioned geometry of the earlier corner layout, kept for reference. The shipped layout keeps the same page, margins and cell spacing, with nine full-width rows above a 130 × 38 mm illustration band at origin (10, 12).</sub></p>
 
 Italian output is **Grade 1 only** — Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
 
