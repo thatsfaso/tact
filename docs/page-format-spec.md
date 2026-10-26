@@ -79,7 +79,7 @@ Odd pages are illustrated and even pages are text-only. The last page also carri
 
 **Paragraphs.** A story is one paragraph: page 1 opens it in cell 3, and every later page is a runover that starts in cell 1. The .brf export uses the same rule on 40-cell lines.
 
-The **page number** is drawn as decorative overlay text in the preview only (top-left, since the top-right corner belongs to the picture); it is not part of the printed Braille in the current build.
+The **page number** is drawn as decorative overlay text in the preview only (bottom-left, in the bottom margin); it is not part of the printed Braille in the current build.
 
 ### Not implemented (future)
 

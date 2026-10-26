@@ -551,8 +551,9 @@ export default {
     // same `busy` the providers use, so the page falls back exactly as it
     // would for any other shortage. The `env.X &&` guards mean a deploy
     // without the bindings still works, just unshielded.
-    // Per address: 20 requests a minute. A story costs at most three (first
-    // ask, one retry, one length refinement), so a family or a small
+    // Per address: 20 requests a minute. A story usually costs two (the page
+    // asks two lengths at once) and at most eight (plus up to three rounds of
+    // two length corrections), so a family or a small
     // classroom behind one router never meets this, while one abusive machine
     // is capped at pocket change per day. All addresses together: 240 a
     // minute, bounding the worst hour a distributed abuser can bill while

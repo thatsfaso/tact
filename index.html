@@ -726,7 +726,11 @@ window.TACT = (function () {
       body: JSON.stringify({ prompt: prompt, lang: lang, targetWords: targetWords || 0 }),
       signal: ctrl.signal
     }).then(function (r) {
-      if (!r.ok) throw new Error('cloud-http-' + r.status);
+      if (!r.ok) {
+        var e = new Error('cloud-http-' + r.status);
+        e.busy = (r.status === 429);
+        throw e;
+      }
       return r.json();
     }).then(function (data) {
       var text = _cleanStoryText(data && data.story);
@@ -786,11 +790,22 @@ window.TACT = (function () {
   // momentarily rate limiting — than a real outage, and the whole chain
   // answers in under a second, so one more try costs the reader nothing they
   // will notice and saves them from the model downloader entirely.
+  //
+  // "Busy" is different: the service is rate limiting (too many stories from one
+  // connection in a minute), and a retry 0.9 s later meets the same limit.
+  // Giving up then turned a reader's one-line idea into a one-line page, which
+  // is the opposite of a story. So on busy, wait long enough for the minute to
+  // free a slot, twice, before falling back.
+  function _wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function _cloudWithOneRetry(prompt, lang, targetWords) {
-    return _generateStoryCloud(prompt, lang, targetWords).catch(function (err) {
-      console.warn('[TACT] cloud attempt failed (' + err.message + '); retrying once');
-      return new Promise(function (r) { setTimeout(r, 900); })
-        .then(function () { return _generateStoryCloud(prompt, lang, targetWords); });
+    var ask = function () { return _generateStoryCloud(prompt, lang, targetWords); };
+    return ask().catch(function (err) {
+      console.warn('[TACT] cloud attempt failed (' + err.message + '); retrying');
+      if (!err.busy) return _wait(900).then(ask);
+      return _wait(6000).then(ask).catch(function (err2) {
+        if (!err2.busy) throw err2;
+        return _wait(12000).then(ask);
+      });
     });
   }
 
@@ -1048,11 +1063,23 @@ window.TACT = (function () {
         var i=p*4, lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
         on[p]=(d[i+3]>32&&lum<160)?1:0;
       }
-      // Mask for the preview: ink where the relief is, transparent elsewhere.
-      var out=ctx.createImageData(pw,ph);
-      for(var q=0;q<pw*ph;q++){ out.data[q*4+3]=on[q]?255:0; }
-      ctx.clearRect(0,0,pw,ph); ctx.putImageData(out,0,0);
-      cb({ blocks: mergeBlocks(on,pw,ph), mask: canvas.toDataURL('image/png') });
+      // Mask for the preview: the same drawing and threshold at about 0.07 mm
+      // instead of 0.4 mm. At 0.4 mm a phone's dense screen magnified the
+      // bitmap about three times and showed every step, which the print does
+      // not have: a 0.4 mm nozzle cannot draw a step smaller than itself. Six
+      // times finer keeps it sharp on a 3x screen even at desktop page size.
+      var K=6, hw=pw*K, hh=ph*K, hi=document.createElement('canvas');
+      hi.width=hw; hi.height=hh;
+      var hctx=hi.getContext('2d');
+      hctx.fillStyle='#ffffff'; hctx.fillRect(0,0,hw,hh);
+      hctx.drawImage(probe,x0,y0,cw,ch,dx*K,dy*K,dw*K,dh*K);
+      var hd=hctx.getImageData(0,0,hw,hh), hp=hd.data;
+      for(var q=0;q<hw*hh;q++){
+        var j=q*4, l=hp[j]*0.299+hp[j+1]*0.587+hp[j+2]*0.114;
+        hp[j]=hp[j+1]=hp[j+2]=0; hp[j+3]=(l<160)?255:0;
+      }
+      hctx.putImageData(hd,0,0);
+      cb({ blocks: mergeBlocks(on,pw,ph), mask: hi.toDataURL('image/png') });
     };
     img.onerror=function(){ URL.revokeObjectURL(blobUrl); cb({ blocks: [], mask: null }); };
     img.src=blobUrl;
@@ -2009,16 +2036,13 @@ function StoryResult({ pages, lang, t, onAgain }) {
               mixBlendMode: "multiply" }} />
             <div className="mono absolute text-[9px] tracking-[0.2em] uppercase"
               style={{ color: "rgba(10,10,12,0.35)", zIndex: 2,
-                // The page scales with the screen but this 9px label does not,
-                // so on a smaller page (phone, phone sideways, tablet) it used to
-                // sit on the first braille line. Take whichever is higher: the
-                // original proportional spot, or just above the top edge of the
-                // first row of dots. On the full desktop page the two coincide,
-                // so the desktop position is unchanged; on smaller pages the
-                // label rises into the margin. (12.9px = the label's glyph height
-                // plus a small gap; top % is of the page height, square page.)
-                top: `min(${(L.TZ_X / L.PAGE_H) * 100 * 0.55}%, calc(${((L.PAGE_H - L.LINE_Y0 - Math.max(...L.DOFF.filter(Boolean).map(o => o[1])) - L.DOT_R) / L.PAGE_H) * 100}% - 12.9px))`,
-                // Top-left: the top-right corner belongs to the picture.
+                // Bottom-left, in the bottom margin. The top margin is only
+                // 9.2 mm above the first dots and the top-right corner holds
+                // the picture, so up there the label crowded the first line on
+                // a phone. The lowest dots end 14.2 mm from the bottom edge;
+                // 4 mm up from the edge the 9px label clears them at any page
+                // size from a 320px phone to the desktop.
+                bottom: `${(4 / L.PAGE_H) * 100}%`,
                 left: `${(L.TZ_X / L.PAGE_W) * 100}%` }}>
               {t.page} {page + 1} {t.of} {pages.length}
             </div>
@@ -2274,33 +2298,58 @@ function paginateStory(text) {
   return pages.map(g => g.join(' '));
 }
 
-// How well a story lands on the printed pages: how many cards it needs and how
-// full the emptiest one is. A story that spills a couple of lines onto a third
-// card leaves a child holding a nearly blank sheet of plastic, so the page
-// measures the result and can ask for a better-sized story rather than hope.
+// How well a story lands on the printed pages: how many cards it needs, how
+// full the emptiest one is, and how many braille rows it uses in total. Each
+// page is measured with the profile it will actually be drawn with (the last
+// card carries the picture when its text fits), so a page that looks full is
+// never scored as half empty.
 function measureFit(text) {
   const pages = paginateStory(text);
+  let rows = 0;
   const fills = pages.map((t, i) => {
-    const w = widthsForPage(i + 1);
-    return layoutBrailleLinesVar(textToBrailleCells(t), w, indentForPage(i + 1)).length / w.length;
+    const w = widthsForRendering(i + 1, pages.length, t);
+    const n = layoutBrailleLinesVar(textToBrailleCells(t), w, indentForPage(i + 1)).length;
+    rows += n;
+    return n / w.length;
   });
-  return { pages: pages.length, minFill: Math.min.apply(null, fills) };
+  return { pages: pages.length, minFill: Math.min.apply(null, fills), rows };
 }
 
-// Good enough to print: two cards, both essentially full.
+// Good enough to print: two cards, the second at least 11 of its 13 rows.
 function fitIsGood(fit) {
-  return fit.pages === 2 && fit.minFill >= 0.85;
+  return fit.pages === 2 && fit.minFill >= 0.84;
 }
 
-// Words that would fill exactly two cards, calibrated on THIS story's own
-// density (Italian words are longer than English ones, and every capital costs
-// an extra Braille cell, so a global constant is never right for long).
-function idealWordCount(text) {
-  const cells = textToBrailleCells(text).length;
+// Higher is better. Two cards beat one or three; among two-card stories the
+// fuller second card wins.
+function fitScore(fit) {
+  if (fit.pages === 2) return 1 + fit.minFill;
+  return fit.minFill * 0.5;
+}
+
+// Two full cards are 26 rows; aim for 25 so the second card ends near its foot
+// without spilling onto a third.
+const TARGET_ROWS = LINE_WIDTHS.length + LINE_WIDTHS_FULL.length - 1;
+
+// First request: the number of words to ASK for so that two cards come back
+// full. Measured on real stories from the live service (October 2026): a word
+// takes about 0.345 braille rows in English and 0.37 in Italian (capitals,
+// accents and word wrapping included), so two full cards are about 72 English
+// or 67 Italian words. The model writes about 90-95% of what it is asked in
+// English and about 82% in Italian, hence the different requests.
+function firstWordTarget(lang) {
+  return lang === "it" ? 80 : 74;
+}
+
+// Correction: how many words this story would need to fill the target rows,
+// calibrated on its own density, then divided by how far the model fell short
+// of (or overshot) the last request, so the next request lands where needed.
+function wordTargetFrom(text, asked) {
   const words = text.split(/\s+/).filter(Boolean).length || 1;
-  const budget = (LINE_WIDTHS.reduce((a, b) => a + b, 0) +
-                  LINE_WIDTHS_FULL.reduce((a, b) => a + b, 0)) * 0.92;
-  return Math.round(budget / (cells / words));
+  const fit = measureFit(text);
+  const needed = words * TARGET_ROWS / Math.max(1, fit.rows);
+  const bias = asked ? Math.max(0.6, Math.min(1.4, words / asked)) : 1;
+  return Math.max(45, Math.min(110, Math.round(needed / bias)));
 }
 
 // Turn a story into page objects. Odd pages (1,3,5…) carry an illustration; even
@@ -2428,8 +2477,16 @@ function App() {
       // is available the visitor's own words still become a real Braille page,
       // so there is never a dead end.
       let storyText = null;
+      let askedWords = 0;
+      const firstAsk = firstWordTarget(lang), secondAsk = Math.round(firstAsk * 1.12);
+      let extra = Promise.resolve(null);
       setLoadingMsg(t.generating);
       try {
+        // Two lengths from the start: the model lands anywhere within about
+        // 15% of what it is asked, so a second, longer request in parallel
+        // usually means no correction round is needed at all. The second one
+        // is cloud-only and optional; only the first can fall back further.
+        extra = window.TACT.refineStoryCloudOnly(q, lang, secondAsk).catch(() => null);
         storyText = await window.TACT.generateStory(q, lang, (pct, statusText, modelLabel, fromCache) => {
           if (pct < 1) {
             setLoadingMsg((fromCache ? t.modelCached : t.modelDownloading) + (modelLabel ? " · " + modelLabel : ""));
@@ -2438,28 +2495,47 @@ function App() {
             setLoadingMsg(t.generating);
             setLoadingProgress(null);
           }
-        });
+        }, firstAsk);
+        askedWords = firstAsk;
       } catch (llmErr) {
-        console.warn('[TACT] no AI path available, using the prompt text directly:', llmErr.message);
+        console.warn('[TACT] first story request failed:', llmErr.message);
+      }
+      // Either request is enough: if the first one failed but the parallel one
+      // came back, that story is used instead of the reader's bare idea.
+      const alt = await extra;
+      if (alt && (!storyText || fitScore(measureFit(alt)) > fitScore(measureFit(storyText)))) {
+        storyText = alt; askedWords = secondAsk;
+      }
+      if (!storyText) {
+        console.warn('[TACT] no AI path available, using the prompt text directly');
         isDemo = true; // mark that the AI writing step didn't run
       }
 
       // The model cannot count words accurately enough to land inside the narrow
-      // window that fills exactly two cards. So measure what came back, and if it
-      // does not sit well on the pages, ask once more for the length this very
-      // story's density says is right. Keep whichever of the two prints better.
-      if (storyText) {
-        const firstFit = measureFit(storyText);
-        if (!fitIsGood(firstFit)) {
+      // window that fills exactly two cards. So measure what came back and, if
+      // the second card is not nearly full, ask again for the length this
+      // story's own density says is right. Up to three rounds of two requests
+      // (eight at most, inside the service's 20 a minute; most stories need
+      // only the first two); keep whichever prints best.
+      if (storyText && !isDemo) {
+        let bestFit = measureFit(storyText);
+        // Aim each correction from the LATEST answer, kept or not: it is the
+        // freshest measure of how far this model is missing the request.
+        let lastText = storyText, lastAsk = askedWords;
+        for (let attempt = 0; attempt < 3 && !fitIsGood(bestFit); attempt++) {
           try {
-            const retry = await window.TACT.refineStoryCloudOnly(q, lang, idealWordCount(storyText));
-            const retryFit = measureFit(retry);
-            const better = (retryFit.pages === 2 && firstFit.pages !== 2) ||
-                           (retryFit.pages === firstFit.pages && retryFit.minFill > firstFit.minFill) ||
-                           (retryFit.pages === 2 && firstFit.pages === 2 && retryFit.minFill > firstFit.minFill);
-            if (better) storyText = retry;
+            // Two lengths at once, the computed one and 8% shorter: the model
+            // lands anywhere within about 15% of a request, and a story that
+            // overshoots by one row spills onto a third card.
+            const ask = wordTargetFrom(lastText, lastAsk);
+            const asks = [ask, Math.max(45, Math.round(ask * 0.92))];
+            const got = await Promise.allSettled(asks.map(a => window.TACT.refineStoryCloudOnly(q, lang, a)));
+            const ok = got.map((g, i) => g.status === "fulfilled" ? { text: g.value, ask: asks[i], fit: measureFit(g.value) } : null).filter(Boolean);
+            if (!ok.length) break;
+            ok.forEach(c => { if (fitScore(c.fit) > fitScore(bestFit)) { storyText = c.text; bestFit = c.fit; } });
+            lastText = ok[0].text; lastAsk = ok[0].ask;
           } catch (e) {
-            /* keep the first story: a slightly loose page beats no story */
+            break; /* keep the best so far: a slightly loose page beats no story */
           }
         }
       }
