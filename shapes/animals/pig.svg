@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: pig | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 18,70 Q 26,60 38,62 L 44,48 L 56,58 Q 86,44 120,50 Q 156,56 162,86 Q 166,108 152,118 L 154,166 L 140,166 L 137,124 Q 114,130 92,126 L 88,166 L 74,166 L 72,120 Q 52,112 46,94 Q 32,94 22,88 Q 12,78 18,70 Z"/>
-  <ellipse cx="23" cy="78" rx="6" ry="9" stroke-width="4"/>
-  <circle cx="42" cy="70" r="4" fill="#000000"/>
-  <path d="M 158,98 Q 176,94 176,106 Q 176,116 164,112"/>
-</g>
+<!-- TACT shape: pig | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<ellipse cx="96" cy="104" rx="58" ry="36" fill="#000000"/>
+<circle cx="150" cy="96" r="26" fill="#000000"/>
+<rect x="166" y="84" width="24" height="26" rx="8" fill="#000000"/>
+<path d="M 138,74 L 146,50 L 160,72 Z" fill="#000000"/>
+<rect x="53" y="126" width="16" height="32" rx="5" fill="#000000"/>
+<rect x="85" y="126" width="16" height="32" rx="5" fill="#000000"/>
+<rect x="117" y="126" width="16" height="32" rx="5" fill="#000000"/>
+<rect x="147" y="126" width="16" height="32" rx="5" fill="#000000"/>
+<path d="M 40,96 Q 22,92 26,78 Q 32,68 22,62" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,6 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: heart | category: objects | license: CC0 | source: parametric -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,162 Q 44,128 28,92 Q 18,62 40,46 Q 62,30 84,48 Q 92,56 100,68 Q 108,56 116,48 Q 138,30 160,46 Q 182,62 172,92 Q 156,128 100,162 Z"/>
-</g>
+<!-- TACT shape: heart | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 100,176 L 30,104 Q 4,76 24,46 Q 48,18 78,34 Q 92,42 100,58 Q 108,42 122,34 Q 152,18 176,46 Q 196,76 170,104 Z" fill="#000000"/>
 </svg>

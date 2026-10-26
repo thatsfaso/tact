@@ -1,13 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: snail | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="118" cy="100" r="40"/>
-  <circle cx="118" cy="100" r="24" stroke-width="4"/>
-  <circle cx="118" cy="100" r="10" stroke-width="4"/>
-  <path d="M 44,92 Q 30,94 26,106 Q 22,120 34,128 Q 44,134 52,132 L 78,138 L 154,138 Q 170,136 168,126"/>
-  <path d="M 40,88 L 30,68"/>
-  <circle cx="29" cy="65" r="4" fill="#000000"/>
-  <path d="M 52,86 L 50,64"/>
-  <circle cx="50" cy="61" r="4" fill="#000000"/>
-</g>
+<!-- TACT shape: snail | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="112" cy="90" r="46" fill="#000000"/>
+<circle cx="112" cy="90" r="30" fill="#ffffff"/>
+<circle cx="112" cy="90" r="14" fill="#000000"/>
+<path d="M 24,146 Q 34,126 64,128 L 166,128 Q 186,130 190,146 Z" fill="#000000"/>
+<ellipse cx="40" cy="124" rx="15" ry="22" fill="#000000" transform="rotate(-20 40 124)"/>
+<path d="M 34,108 L 24,80" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50,106 L 58,78" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="24" cy="76" r="9" fill="#000000"/>
+<circle cx="58" cy="74" r="9" fill="#000000"/>
 </svg>

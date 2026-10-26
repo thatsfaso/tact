@@ -1,15 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: ladybug | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 42,108 Q 42,60 100,58 Q 158,60 158,108 Q 158,148 100,150 Q 42,148 42,108 Z"/>
-  <path d="M 100,58 L 100,150" stroke-width="4"/>
-  <path d="M 80,60 Q 78,42 100,42 Q 122,42 120,60"/>
-  <path d="M 90,42 Q 84,30 74,28" stroke-width="4"/>
-  <path d="M 110,42 Q 116,30 126,28" stroke-width="4"/>
-  <circle cx="70" cy="88" r="7" fill="#000000"/>
-  <circle cx="84" cy="122" r="7" fill="#000000"/>
-  <circle cx="130" cy="88" r="7" fill="#000000"/>
-  <circle cx="118" cy="122" r="7" fill="#000000"/>
-  <path d="M 44,120 L 28,132 M 52,134 L 40,148 M 156,120 L 172,132 M 148,134 L 160,148" stroke-width="4"/>
-</g>
+<!-- TACT shape: ladybug | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="114" r="56" fill="#000000"/>
+<circle cx="100" cy="54" r="22" fill="#000000"/>
+<circle cx="74" cy="98" r="12" fill="#ffffff"/>
+<circle cx="126" cy="98" r="12" fill="#ffffff"/>
+<circle cx="76" cy="136" r="12" fill="#ffffff"/>
+<circle cx="124" cy="136" r="12" fill="#ffffff"/>
+<path d="M 92,36 L 80,16" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 108,36 L 120,16" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50,96 L 24,88" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 150,96 L 176,88" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50,124 L 24,116" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 150,124 L 176,116" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50,152 L 24,144" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 150,152 L 176,144" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

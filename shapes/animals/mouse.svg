@@ -1,11 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: mouse | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 20,116 Q 26,104 42,100 Q 56,84 80,82 Q 112,80 128,98 Q 140,110 138,124 Q 134,142 108,144 L 52,144 Q 32,142 26,130 Q 18,124 20,116 Z"/>
-  <circle cx="68" cy="74" r="14"/>
-  <circle cx="36" cy="110" r="4" fill="#000000"/>
-  <path d="M 138,128 Q 168,132 176,112 Q 180,100 170,96"/>
-  <path d="M 22,120 L 6,116" stroke-width="3"/>
-  <path d="M 22,124 L 8,128" stroke-width="3"/>
-</g>
+<!-- TACT shape: mouse | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<ellipse cx="94" cy="116" rx="52" ry="32" fill="#000000"/>
+<path d="M 132,96 L 188,124 L 132,142 Z" fill="#000000"/>
+<circle cx="126" cy="80" r="20" fill="#000000"/>
+<path d="M 46,124 Q 8,132 18,92 Q 24,72 12,60" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,17 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: knight | category: people | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 82,58 Q 78,32 100,30 Q 122,32 118,58 Z"/>
-  <path d="M 100,30 Q 96,18 104,8 Q 118,16 112,30" stroke-width="4"/>
-  <path d="M 84,48 L 116,48" stroke-width="4"/>
-  <circle cx="93" cy="42" r="3" fill="#000000"/>
-  <circle cx="107" cy="42" r="3" fill="#000000"/>
-  <path d="M 84,62 L 116,62 Q 126,66 130,84 L 138,160 L 62,160 L 70,84 Q 74,66 84,62 Z"/>
-  <path d="M 76,88 L 58,108" stroke-width="4"/>
-  <circle cx="52" cy="122" r="18"/>
-  <path d="M 52,110 L 52,134 M 40,122 L 64,122" stroke-width="4"/>
-  <path d="M 124,88 L 144,104" stroke-width="4"/>
-  <path d="M 148,102 L 168,58" stroke-width="4"/>
-  <path d="M 142,90 L 160,98" stroke-width="4"/>
-</g>
+<!-- TACT shape: knight | category: people | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="78" y="10" width="44" height="50" rx="16" fill="#000000"/>
+<rect x="84" y="28" width="32" height="10" rx="2" fill="#ffffff"/>
+<rect x="44" y="62" width="112" height="18" rx="9" fill="#000000"/>
+<rect x="78" y="62" width="44" height="68" rx="12" fill="#000000"/>
+<rect x="44" y="66" width="16" height="58" rx="8" fill="#000000"/>
+<rect x="75" y="124" width="16" height="56" rx="7" fill="#000000"/>
+<rect x="109" y="124" width="16" height="56" rx="7" fill="#000000"/>
+<ellipse cx="158" cy="112" rx="26" ry="36" fill="#000000"/>
+<path d="M 18,24 L 18,150" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 6,118 L 30,118" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

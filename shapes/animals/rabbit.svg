@@ -1,12 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: rabbit | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 74,58 Q 60,54 56,34 Q 53,16 64,14 Q 76,13 80,32 Q 83,46 82,56"/>
-  <path d="M 106,58 Q 120,54 124,34 Q 127,16 116,14 Q 104,13 100,32 Q 97,46 98,56"/>
-  <path d="M 74,58 Q 90,50 106,58 Q 122,66 120,84 Q 118,100 104,106 Q 126,118 132,144 Q 138,168 122,178 L 58,178 Q 42,168 48,144 Q 54,118 76,106 Q 62,100 60,84 Q 58,66 74,58 Z"/>
-  <circle cx="78" cy="76" r="4" fill="#000000"/>
-  <circle cx="102" cy="76" r="4" fill="#000000"/>
-  <path d="M 84,92 Q 90,97 96,92"/>
-  <circle cx="132" cy="162" r="10"/>
-</g>
+<!-- TACT shape: rabbit | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<ellipse cx="94" cy="134" rx="48" ry="36" fill="#000000"/>
+<circle cx="138" cy="94" r="25" fill="#000000"/>
+<ellipse cx="118" cy="46" rx="11" ry="32" fill="#000000" transform="rotate(-12 118 46)"/>
+<ellipse cx="154" cy="48" rx="11" ry="32" fill="#000000" transform="rotate(12 154 48)"/>
+<circle cx="46" cy="126" r="13" fill="#000000"/>
+<ellipse cx="112" cy="168" rx="32" ry="9" fill="#000000"/>
 </svg>

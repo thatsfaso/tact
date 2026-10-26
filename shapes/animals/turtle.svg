@@ -1,14 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: turtle | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 36,108 Q 40,62 100,58 Q 160,62 164,108 Q 152,116 100,118 Q 48,116 36,108 Z"/>
-  <path d="M 74,64 L 78,112" stroke-width="4"/>
-  <path d="M 126,64 L 122,112" stroke-width="4"/>
-  <path d="M 48,84 Q 100,74 152,84" stroke-width="4"/>
-  <path d="M 38,102 Q 22,102 20,90 Q 19,78 32,77 Q 44,77 44,90"/>
-  <circle cx="27" cy="85" r="3.5" fill="#000000"/>
-  <path d="M 56,116 L 52,142 L 72,142 L 70,118"/>
-  <path d="M 130,118 L 128,142 L 148,142 L 144,116"/>
-  <path d="M 162,106 Q 176,110 180,100" stroke-width="4"/>
-</g>
+<!-- TACT shape: turtle | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 38,124 Q 46,54 110,54 Q 170,54 178,124 Z" fill="#000000"/>
+<circle cx="84" cy="98" r="12" fill="#ffffff"/>
+<circle cx="134" cy="98" r="12" fill="#ffffff"/>
+<ellipse cx="186" cy="114" rx="13" ry="12" fill="#000000"/>
+<rect x="51" y="120" width="22" height="28" rx="8" fill="#000000"/>
+<rect x="141" y="120" width="22" height="28" rx="8" fill="#000000"/>
+<path d="M 40,118 L 18,126 L 40,132 Z" fill="#000000"/>
 </svg>

@@ -1,11 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: treasure_chest | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 36,92 Q 36,52 100,52 Q 164,52 164,92 Z"/>
-  <rect x="36" y="92" width="128" height="68" rx="4"/>
-  <line x1="36" y1="118" x2="164" y2="118"/>
-  <rect x="88" y="104" width="24" height="28" rx="3"/>
-  <circle cx="100" cy="116" r="4" fill="#000000"/>
-  <path d="M 60,92 L 60,52 M 140,92 L 140,52"/>
-</g>
+<!-- TACT shape: treasure_chest | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="22" y="98" width="156" height="80" rx="8" fill="#000000"/>
+<path d="M 22,102 L 22,74 Q 100,30 178,74 L 178,102 Z" fill="#000000"/>
+<path d="M 22,100 L 178,100" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="88" y="118" width="24" height="28" rx="4" fill="#ffffff"/>
 </svg>

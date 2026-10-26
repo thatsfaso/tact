@@ -1,15 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: monkey | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="100" cy="58" r="26"/>
-  <circle cx="70" cy="58" r="9"/>
-  <circle cx="130" cy="58" r="9"/>
-  <circle cx="91" cy="52" r="4" fill="#000000"/>
-  <circle cx="109" cy="52" r="4" fill="#000000"/>
-  <path d="M 92,68 Q 100,74 108,68" stroke-width="4"/>
-  <path d="M 80,80 Q 60,98 58,126 Q 56,152 74,162 L 126,162 Q 144,152 142,126 Q 140,98 120,80"/>
-  <path d="M 66,106 Q 50,118 54,138" stroke-width="4"/>
-  <path d="M 134,106 Q 150,118 146,138" stroke-width="4"/>
-  <path d="M 126,162 Q 160,158 164,130 Q 166,112 152,112 Q 142,114 146,126" stroke-width="4"/>
-</g>
+<!-- TACT shape: monkey | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="58" r="30" fill="#000000"/>
+<circle cx="64" cy="60" r="13" fill="#000000"/>
+<circle cx="136" cy="60" r="13" fill="#000000"/>
+<ellipse cx="100" cy="66" rx="18" ry="16" fill="#ffffff"/>
+<ellipse cx="100" cy="126" rx="34" ry="38" fill="#000000"/>
+<ellipse cx="66" cy="128" rx="12" ry="30" fill="#000000" transform="rotate(15 66 128)"/>
+<ellipse cx="134" cy="128" rx="12" ry="30" fill="#000000" transform="rotate(-15 134 128)"/>
+<path d="M 126,154 Q 178,166 178,114 Q 178,90 160,90" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

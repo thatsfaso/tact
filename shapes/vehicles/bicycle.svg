@@ -1,17 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: bicycle | category: vehicles | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="52" cy="132" r="40"/>
-  <circle cx="152" cy="132" r="40"/>
-  <circle cx="52" cy="132" r="4" fill="#000000" stroke-width="4"/>
-  <circle cx="152" cy="132" r="4" fill="#000000" stroke-width="4"/>
-  <path d="M 52,132 L 86,74 L 104,138 Z"/>
-  <path d="M 86,74 L 140,80 L 104,138"/>
-  <path d="M 140,80 L 152,132"/>
-  <path d="M 140,80 L 135,62"/>
-  <path d="M 122,58 Q 134,52 146,58" stroke-width="4"/>
-  <path d="M 74,68 L 94,68" stroke-width="4"/>
-  <circle cx="104" cy="138" r="9" stroke-width="4"/>
-  <path d="M 104,138 L 117,149 M 112,152 L 124,146" stroke-width="4"/>
-</g>
+<!-- TACT shape: bicycle | category: vehicles | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="48" cy="128" r="40" fill="#000000"/>
+<circle cx="48" cy="128" r="26" fill="#ffffff"/>
+<circle cx="152" cy="128" r="40" fill="#000000"/>
+<circle cx="152" cy="128" r="26" fill="#ffffff"/>
+<path d="M 48,128 L 84,74 L 136,80 L 152,128" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 84,74 L 104,132 L 136,80" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 70,62 L 98,62" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 136,80 L 130,56 L 148,50" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

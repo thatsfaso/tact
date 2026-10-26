@@ -1,10 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: apple | category: objects | license: CC0 | source: parametric -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,52 Q 150,44 166,86 Q 180,124 160,154 Q 140,178 100,180 Q 60,178 40,154 Q 20,124 34,86 Q 50,44 100,52 Z"/>
-  <path d="M 84,52 Q 100,44 116,52"/>
-  <path d="M 100,44 Q 102,28 112,20"/>
-  <path d="M 112,20 Q 134,22 128,38 Q 120,48 110,36"/>
-  <path d="M 58,80 Q 52,100 56,126"/>
-</g>
+<!-- TACT shape: apple | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 100,58 Q 60,36 36,72 Q 20,112 50,150 Q 72,178 100,166 Q 128,178 150,150 Q 180,112 164,72 Q 140,36 100,58 Z" fill="#000000"/>
+<path d="M 100,56 Q 102,36 112,22" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="134" cy="34" rx="19" ry="9" fill="#000000" transform="rotate(-25 134 34)"/>
 </svg>

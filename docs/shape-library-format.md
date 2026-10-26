@@ -1,6 +1,6 @@
 # Shape Library Format
 
-**Status: v1.0 — locked for implementation.**
+**Status: v2.0 — tactile silhouettes (filled, flat view), see "Tactile rules".**
 
 The shape library is TACT's most community-extensible component. This document defines every constraint a shape file must satisfy, the `index.json` contract, how the art director consumes it, and how contributors add new shapes.
 
@@ -48,32 +48,23 @@ Every shape file must satisfy all of the following. Files that fail are rejected
 - **viewBox:** always `"0 0 200 200"` — no exceptions. This gives a 200×200 unit canvas. 1 unit = 1mm when rendered at 200mm × 200mm (the illustration zone max size). Scaling down to 40mm×40mm means 1 unit = 0.2mm.
 - **Width/height attributes:** omit entirely — let the consumer control size via CSS/SVG transforms.
 
-### Stroke
+### Tactile rules (v2, all shapes)
 
-- **stroke-width:** minimum `4` units in the 200×200 viewBox. At 40mm print size that maps to 0.8mm — within the 2mm minimum at 100mm print size. Use `6–8` units for primary outlines.
-- **stroke:** always `#000000` or `currentColor`. Never coloured strokes.
-- **stroke-linecap:** `round` — mandatory. Flat line caps create sharp corners that read poorly under fingertips.
-- **stroke-linejoin:** `round` — mandatory for the same reason.
-- **stroke-dasharray:** forbidden. Dashed lines have gaps that collapse in 3D printing.
+Every shape is printed cropped to its own drawing, with its longest side at about 37 mm in the top-right corner of the page, so **1 unit is roughly 0.2 mm**. The rules below are written for that size. They come from the first print read by a blind reader, who could not tell what the old outline drawing showed, and from Theurel et al. (2013), where blind children recognised filled, textured pictures far more reliably than raised-line drawings.
 
-### Fill
+- **Filled surfaces, not outlines.** The body of the thing is a solid black region (`fill="#000000"`). The silhouette carries the identity: ears, tail, legs, wheels, crown points.
+- **Flat view.** Animals and vehicles from the side, people, buildings and objects from the front. No perspective, no three-quarter views, no foreshortening.
+- **Strokes at least 12 units** (about 2.5 mm). Use strokes only for parts that are naturally thin: legs of a bird, a string, a staff, rays.
+- **Gaps and holes at least 14 units** (about 3 mm), and white grooves 16 units. Anything closer merges under a fingertip and under the nozzle.
+- **Holes and grooves are drawn in white** (`fill="#ffffff"` or a white stroke) on top of the black body: an eye, a window, a door, spots, a seam. White is read as "no relief".
+- **Few details.** No faces on small heads, no fingers, no text. If a detail is under the size limits, leave it out rather than shrink it.
+- **No dashes, gradients, opacity or text.**
 
-- **fill:** always `none` on all path/shape elements. No filled regions — the extruded stroke is the tactile element.
-- Exception: if a shape has a solid opaque region that is intentional (e.g. a filled circle for a sun), set `fill="#000000"` explicitly and set `stroke="none"`. This will be extruded as a solid raised region. Document this in the shape's `index.json` entry.
-
-### Geometry constraints
-
-- **Minimum gap between distinct elements:** 15 units (3mm at 100mm print size). Elements closer than this will merge when printed on budget FDM hardware.
-- **Minimum path segment length:** 5 units. Sub-pixel paths disappear in FDM.
-- **No perspective:** all shapes must be flat orthographic projections. No 3-point perspective, no foreshortening.
-- **No shading, gradients, or opacity effects.** Every element must be 100% opaque black on transparent.
-- **No text or glyph elements.** Text in SVG is not reliably convertible to paths; use `<path>` only.
-- **Closed paths preferred.** Open paths (a line that does not close back to its start) can produce non-manifold geometry in the STL generator. Close all shapes where possible.
-- **Path direction:** clockwise for outer contours, counter-clockwise for holes. Follows SVG fill-rule `nonzero`.
+The relief is built at 0.4 mm per pixel (the width of a standard nozzle), so curves print smooth. The on-screen preview shows that same bitmap, not the vector drawing, so what a parent sees is what the fingers will meet.
 
 ### Complexity limit
 
-- Maximum 12 distinct path/shape elements per file. More than 12 individual elements creates a tactile illustration that is unreadable.
+- Keep it to about 16 distinct elements per file (a snowflake with its branches is the upper bound). More pieces than that stop reading as one thing under a fingertip.
 - Maximum total path node count: 400. Excessive nodes cause large STL files and slow slicing.
 
 ### File metadata
@@ -126,7 +117,7 @@ Every SVG must include this comment block as the second line (after `<svg ...>`)
 | `description` | string | yes | 1–2 sentences. Describe the visual appearance precisely — what is visible, what orientation, what detail is present or absent. The art director reads this. |
 | `natural_width_mm` | number | yes | The intended print width at scale 1.0, in mm. Used by the renderer to compute scale factors. |
 | `natural_height_mm` | number | yes | The intended print height at scale 1.0, in mm. |
-| `has_fill` | boolean | yes | `true` if the shape uses filled regions (solid extrusion). `false` if outline-only (stroke extrusion). |
+| `has_fill` | boolean | yes | `true` for every shape since v2 (filled silhouettes). `false` only marked the old outline drawings. |
 | `source_url` | string | yes | URL to the original CC0 source file. |
 | `license` | string | yes | Always `"CC0"`. |
 
@@ -289,8 +280,8 @@ SVGs from OpenClipart and SVG Silh are not tactile-ready. The cleanup script (`t
 
 1. **Load** the source SVG with `svgpathtools` or `lxml`
 2. **Normalize viewBox** to `0 0 200 200` (scale all path coordinates proportionally)
-3. **Remove fills:** set `fill="none"` on all elements
-4. **Thicken strokes:** set `stroke-width="6"` on all path/shape elements
+3. **Fill the body:** the main silhouette gets `fill="#000000"`; inner details either go or become white holes ≥ 14 units
+4. **Thicken strokes:** any remaining stroke is ≥ 12 units, round caps and joins
 5. **Set linecap + linejoin:** `round` on all elements
 6. **Remove:** gradients, filters, masks, clip-paths, `<text>`, `<image>`, `<use>` elements, CSS classes, inline `style` attributes (except stroke/fill)
 7. **Remove tiny paths:** delete any path whose bounding box is smaller than 5×5 units
@@ -314,12 +305,12 @@ Before opening a GitHub PR to add a shape, verify all of the following:
 - [ ] Filename is `{name}.svg` matching exactly the `index.json` `name` field
 - [ ] viewBox is exactly `"0 0 200 200"`
 - [ ] No `width` or `height` attributes on the `<svg>` element
-- [ ] All strokes ≥ 4 units wide
-- [ ] stroke-linecap and stroke-linejoin are `round` on all elements
-- [ ] No filled regions (unless `has_fill: true` documented in index.json)
+- [ ] The body is a filled silhouette in a flat view (side or front), not an outline
+- [ ] All strokes ≥ 12 units wide, round caps and joins
+- [ ] Gaps and holes ≥ 14 units, white grooves ≥ 16 units
 - [ ] No text, image, use, gradient, filter, mask, or clip-path elements
 - [ ] All paths are closed where possible
-- [ ] No two elements closer than 15 units
+- [ ] Checked in the result preview, which shows the printed relief bitmap: nothing thin, nothing merged
 - [ ] Total path node count ≤ 400
 - [ ] Comment metadata line present as second line of SVG
 - [ ] `index.json` entry added with all required fields

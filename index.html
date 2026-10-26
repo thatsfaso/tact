@@ -843,33 +843,46 @@ window.TACT = (function () {
   var CHAMFER=0.4; // bottom-edge chamfer (mm) — absorbs first-layer spread
   var DOT_R=0.8, DOT_TOTAL_H=0.85, CYL_H=0.35;
   // Text layout — MIRRORS the React LINE_WIDTHS profile so the print matches the
-  // preview. Every braille line runs the FULL page width; the picture sits as a
-  // band across the bottom, never beside the text. This replaced an L-shape that
-  // wrapped 12-cell lines around a corner picture: a teacher of blind readers
-  // reported that those short half-lines are uncomfortable to read, and the
-  // convention is that braille lines run full width. The cost is about 14% fewer
-  // cells on an illustrated page (nine full lines rather than the old thirteen),
-  // accepted because readability outweighs density for the child.
-  // Lines lay top-down from LINE_Y0, left-aligned at TZ_X.
+  // preview. Lines lay top-down from LINE_Y0, left-aligned at TZ_X.
+  //
+  // The picture sits in the TOP-RIGHT corner, the way a printed picture book
+  // sets a small illustration into its text. History, so this is not undone by
+  // accident:
+  //  1. An L-shape wrapped six 12-cell lines (57% width) beside a bottom-right
+  //     picture. A braille teacher advised avoiding short lines.
+  //  2. Every line went full width with the picture in a band along the bottom.
+  //     A blind reader who printed it found an "ocean" of blank plastic around a
+  //     small picture, and, printing the page standing up, met no braille until
+  //     a third of the print was done.
+  //  3. Now: only the first four lines are shortened, to 15 cells (71%), the
+  //     rest run full width, and nothing is left blank at the bottom. Printed
+  //     standing up, braille is the first thing to come off the nozzle. The left
+  //     margin never moves, so the reading finger always returns to the same
+  //     place and the cell-3 paragraph indent stays meaningful.
   var TZ_X=10, CELL_W=6.0, LINE_H=10.0, LINE_Y0=135;
-  // Two page profiles, both full-width on every line. ILLUSTRATED pages (odd) give
-  // the bottom band to the picture, so they hold nine lines. TEXT pages (even) drop
-  // the picture and use all thirteen lines, holding more of the story.
-  var LINE_WIDTHS=[21,21,21,21,21,21,21,21,21];               // 9 full (illustrated, picture band below)
-  var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,21]; // 13 full (text-only)
+  // ILLUSTRATED pages: 4 short lines beside the picture + 9 full = 249 cells.
+  // TEXT pages: 13 full lines = 273 cells.
+  var LINE_WIDTHS=[15,15,15,15,21,21,21,21,21,21,21,21,21];
+  var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,21];
+  // Paragraphs open in cell 3 and run over to cell 1 (standard braille format).
+  var PARA_INDENT=2;
   // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
   var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
-  // Illustration zone: a full-width band across the bottom. The shape is drawn
-  // aspect-preserving and centred inside it (see rasterizeIll), so the wide band
-  // never stretches it; the empty sides simply carry no relief.
+  // Illustration zone, top-right, inside the 10 mm margin. Its bottom (y=104)
+  // clears the dots of line 5 (top edge y=100.8) by 3.2 mm; the 15th cell of a
+  // short line ends at x=97.3, 5.9 mm left of the picture.
   // ILL_ABOVE: illustration relief rises 1.0mm, 0.15mm above the 0.85mm dots,
   // so a fingertip tells picture from text by height alone, as the paper specifies.
-  var ILL_X=10, ILL_Y=12, ILL_W=130, ILL_H=38, ILL_ABOVE=1.0, ILL_PIX=2;
+  // ILL_PIX: relief resolution, the width of a standard 0.4 mm nozzle.
+  var ILL_X=103.2, ILL_Y=104, ILL_W=36.8, ILL_H=36, ILL_ABOVE=1.0, ILL_PIX=0.4;
 
   // Wrap cells into lines whose max width varies per line (widths profile).
-  function layoutLines(cells, widths) {
+  // indent: blank cells that open the first line (a paragraph start). They are
+  // not break points, so a long first word never strands them on a line alone.
+  function layoutLines(cells, widths, indent) {
     widths = widths || LINE_WIDTHS;
     var lines=[],line=[],ls=-1;
+    for(var k=0;k<(indent||0);k++) line.push([]);
     var cap=function(){ var i=lines.length; return widths[i<widths.length?i:widths.length-1]; };
     for(var i=0;i<cells.length;i++){
       var c=cells[i];
@@ -978,47 +991,106 @@ window.TACT = (function () {
     }
   }
 
-  // Rasterize an SVG string onto a canvas and return flat [x,y,...] pillar coords (mm).
-  // 1 pixel = ILL_PIX mm. Canvas y is flipped to match STL y-up convention.
-  // The shape is drawn aspect-preserving (contain) and centred in the zone, so a
-  // tall/narrow corner zone never stretches the illustration.
-  function rasterizeIll(svgText,cb){
+  // Turn an SVG into the relief that is actually printed: a bitmap at ILL_PIX mm
+  // per pixel, drawn aspect-preserving (contain) and centred in the zone, then
+  // merged into as few rectangular blocks as possible.
+  //
+  // ILL_PIX used to be 2 mm, which turned a 38 mm picture into a 19 x 19 grid:
+  // outlines broke into gaps, eyes merged with mouths, and edges felt like
+  // stairs. A blind reader who printed a page could not tell what the picture
+  // was. 0.4 mm is the width of a standard nozzle, so the printer itself is now
+  // the limit and the outline feels continuous.
+  //
+  // cb receives { blocks: [x0,y0,x1,y1, ...] in page mm (y up), mask: data URL }
+  // where mask is the same bitmap, so the on-screen preview shows exactly what
+  // the fingers will meet rather than the smoother vector drawing.
+  function svgSize(svgText){
+    var vb=/viewBox\s*=\s*"([^"]+)"/.exec(svgText);
+    if(vb){ var n=vb[1].trim().split(/[\s,]+/).map(Number); if(n[2]>0&&n[3]>0) return [n[2],n[3]]; }
+    return [200,200];
+  }
+  function reliefFromSvg(svgText,cb){
     var pw=Math.round(ILL_W/ILL_PIX),ph=Math.round(ILL_H/ILL_PIX);
     var canvas=document.createElement('canvas');
     canvas.width=pw;canvas.height=ph;
     var ctx=canvas.getContext('2d');
     ctx.fillStyle='#ffffff';ctx.fillRect(0,0,pw,ph);
-    var blobUrl=URL.createObjectURL(new Blob([svgText],{type:'image/svg+xml'}));
+    // Give the <svg> explicit pixel dimensions: with only a viewBox, some
+    // browsers report a 0 or 300x150 intrinsic size and the shape is misplaced.
+    // Rendered at 4x so the crop below has detail to spare.
+    var sz=svgSize(svgText), SS=4;
+    // Only the <svg> tag itself: a rect inside also has width/height.
+    var sized=svgText.replace(/<svg\b[^>]*>/,function(tag){
+      return tag.replace(/\s(width|height)="[^"]*"/g,'')
+        .replace(/<svg\b/,'<svg width="'+sz[0]*SS+'" height="'+sz[1]*SS+'"');
+    });
+    var blobUrl=URL.createObjectURL(new Blob([sized],{type:'image/svg+xml'}));
     var img=new Image();
     img.onload=function(){
-      var iw=img.width||1, ih=img.height||1;
-      var s=Math.min(pw/iw, ph/ih);
-      var dw=iw*s, dh=ih*s, dx=(pw-dw)/2, dy=(ph-dh)/2;
-      ctx.drawImage(img,dx,dy,dw,dh);
-      URL.revokeObjectURL(blobUrl);
-      var d=ctx.getImageData(0,0,pw,ph).data,pil=[];
-      for(var py=0;py<ph;py++){
-        for(var px=0;px<pw;px++){
-          var i=(py*pw+px)*4;
-          var lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
-          if(d[i+3]>32&&lum<160){
-            pil.push(ILL_X+px*ILL_PIX, ILL_Y+(ph-1-py)*ILL_PIX);
-          }
-        }
+      // Crop to the drawing itself before fitting it to the zone. Shape files
+      // keep generous empty margins inside their viewBox, and on a 37 mm corner
+      // every millimetre of margin is a millimetre the fingers lose.
+      var iw=sz[0]*SS, ih=sz[1]*SS, probe=document.createElement('canvas');
+      probe.width=iw; probe.height=ih;
+      var pctx=probe.getContext('2d'); pctx.drawImage(img,0,0,iw,ih);
+      var pd=pctx.getImageData(0,0,iw,ih).data, x0=iw, y0=ih, x1=-1, y1=-1;
+      for(var yy=0;yy<ih;yy++) for(var xx=0;xx<iw;xx++){
+        if(pd[(yy*iw+xx)*4+3]>32){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(yy<y0)y0=yy; if(yy>y1)y1=yy; }
       }
-      cb(pil);
+      if(x1<0){ x0=0; y0=0; x1=iw-1; y1=ih-1; }
+      var cw=x1-x0+1, ch=y1-y0+1;
+      var s=Math.min(pw/cw, ph/ch);
+      var dw=cw*s, dh=ch*s, dx=(pw-dw)/2, dy=(ph-dh)/2;
+      ctx.drawImage(probe,x0,y0,cw,ch,dx,dy,dw,dh);
+      URL.revokeObjectURL(blobUrl);
+      var d=ctx.getImageData(0,0,pw,ph).data, on=new Uint8Array(pw*ph);
+      for(var p=0;p<pw*ph;p++){
+        var i=p*4, lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+        on[p]=(d[i+3]>32&&lum<160)?1:0;
+      }
+      // Mask for the preview: ink where the relief is, transparent elsewhere.
+      var out=ctx.createImageData(pw,ph);
+      for(var q=0;q<pw*ph;q++){ out.data[q*4+3]=on[q]?255:0; }
+      ctx.clearRect(0,0,pw,ph); ctx.putImageData(out,0,0);
+      cb({ blocks: mergeBlocks(on,pw,ph), mask: canvas.toDataURL('image/png') });
     };
-    img.onerror=function(){cb([]);};
+    img.onerror=function(){ URL.revokeObjectURL(blobUrl); cb({ blocks: [], mask: null }); };
     img.src=blobUrl;
   }
+  // Runs of ink along each row become one block; identical runs in consecutive
+  // rows are stacked into one taller block. A 37 mm picture is a few hundred
+  // blocks instead of thousands of single-pixel pillars.
+  function mergeBlocks(on,pw,ph){
+    var blocks=[], open={};               // "x0,x1" -> [x0,x1,topRow,bottomRow]
+    for(var py=0;py<=ph;py++){
+      var runs={};
+      if(py<ph){
+        for(var px=0;px<pw;){
+          if(!on[py*pw+px]){ px++; continue; }
+          var x0=px; while(px<pw&&on[py*pw+px]) px++;
+          runs[x0+','+px]=[x0,px];
+        }
+      }
+      for(var k in open){
+        if(runs[k]){ open[k][3]=py; delete runs[k]; }
+        else { var o=open[k]; delete open[k];
+          blocks.push(ILL_X+o[0]*ILL_PIX, ILL_Y+(ph-1-o[3])*ILL_PIX,
+                      ILL_X+o[1]*ILL_PIX, ILL_Y+(ph-o[2])*ILL_PIX); }
+      }
+      for(var r in runs){ open[r]=[runs[r][0],runs[r][1],py,py]; }
+    }
+    return blocks;
+  }
 
-  // full: text-only page (even) uses the full-width profile and draws no picture.
-  // Otherwise the illustrated profile is used and illPillars are raised as a bottom band.
-  function generateSTL(brailleCells,pageNum,slug,illPillars,full){
+  // full: text-only page uses the full-width profile and draws no picture.
+  // Otherwise the illustrated profile is used and illBlocks (from reliefFromSvg)
+  // are raised in the top-right corner. Page 1 opens the story's paragraph, so
+  // its first line starts in cell 3; later pages continue it from cell 1.
+  function generateSTL(brailleCells,pageNum,slug,illBlocks,full){
     var widths = full ? LINE_WIDTHS_FULL : LINE_WIDTHS;
     var tris=[];
     roundedSlab(tris,0,0,PAGE_W,PAGE_H,0,BASE_H,CORNER_R,8);
-    var lines=layoutLines(brailleCells,widths);
+    var lines=layoutLines(brailleCells,widths,pageNum===1?PARA_INDENT:0);
     lines.slice(0,widths.length).forEach(function(line,li){
       var cy=LINE_Y0-li*LINE_H;
       line.forEach(function(cell,ci){
@@ -1027,11 +1099,11 @@ window.TACT = (function () {
         cell.forEach(function(d){ var o=DOFF[d]; if(o)dot(tris,cx+o[0],cy+o[1]); });
       });
     });
-    // Illustration pillars (SVG rasterized at ILL_PIX mm/px)
-    if(illPillars&&illPillars.length){
-      for(var i=0;i<illPillars.length;i+=2){
-        box(tris,illPillars[i],illPillars[i+1],BASE_H,
-            illPillars[i]+ILL_PIX,illPillars[i+1]+ILL_PIX,BASE_H+ILL_ABOVE);
+    // Illustration relief: merged blocks at ILL_PIX resolution, flat-topped.
+    if(illBlocks&&illBlocks.length){
+      for(var i=0;i<illBlocks.length;i+=4){
+        box(tris,illBlocks[i],illBlocks[i+1],BASE_H,
+            illBlocks[i+2],illBlocks[i+3],BASE_H+ILL_ABOVE);
       }
     }
     // Binary STL
@@ -1051,15 +1123,17 @@ window.TACT = (function () {
 
   window.TACT.generateSTL=generateSTL;
 
+  window.TACT.reliefFromSvg=reliefFromSvg;
+
   // Even pages (pageNum 2,4,...) are text-only: full-width profile, no picture.
-  // Odd pages carry the illustration from svgUrl as a bottom band.
+  // Odd pages carry the illustration from svgUrl in the top-right corner.
   window.TACT.downloadSTL=function(brailleCells,pageNum,slug,svgUrl,fullPage){
     // The page decides the profile (the last card may carry a picture even when
     // its number is even), so trust the flag and fall back to parity only if the
     // caller did not say.
     var full = (fullPage === undefined) ? (pageNum % 2 === 0) : !!fullPage;
-    function finish(pil){
-      var buf=generateSTL(brailleCells,pageNum,slug,pil,full);
+    function finish(blocks){
+      var buf=generateSTL(brailleCells,pageNum,slug,blocks,full);
       var blob=new Blob([buf],{type:'application/octet-stream'});
       var url=URL.createObjectURL(blob);
       var a=document.createElement('a');
@@ -1071,7 +1145,7 @@ window.TACT = (function () {
     if(svgUrl && !full){
       fetch(svgUrl)
         .then(function(r){return r.ok?r.text():Promise.reject();})
-        .then(function(txt){rasterizeIll(txt,finish);})
+        .then(function(txt){reliefFromSvg(txt,function(r){finish(r.blocks);});})
         .catch(function(){finish([]);});
     } else {
       finish([]);
@@ -1083,8 +1157,9 @@ window.TACT = (function () {
   window.TACT_LAYOUT = {
     PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H, CORNER_R: CORNER_R,
     TZ_X: TZ_X, CELL_W: CELL_W, LINE_H: LINE_H, LINE_Y0: LINE_Y0,
-    LINE_WIDTHS: LINE_WIDTHS, LINE_WIDTHS_FULL: LINE_WIDTHS_FULL, DOFF: DOFF, DOT_R: DOT_R,
-    ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H
+    LINE_WIDTHS: LINE_WIDTHS, LINE_WIDTHS_FULL: LINE_WIDTHS_FULL, PARA_INDENT: PARA_INDENT,
+    DOFF: DOFF, DOT_R: DOT_R,
+    ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H, ILL_PIX: ILL_PIX
   };
 })();
 </script>
@@ -1273,40 +1348,43 @@ function layoutBrailleLines(cells, cellsPerLine = 22) {
 }
 
 // ─── Page layout ──────────────────────────────────────────────────────────────
-// Every braille line runs the full page width. Illustrated pages give the bottom
-// of the page to a picture band and so hold fewer lines; text-only pages use the
-// whole page. These numbers are mirrored by the STL generator
-// (window.TACT_LAYOUT) so the print matches the preview exactly.
+// Illustrated pages set the picture into the top-right corner: four shortened
+// lines beside it, then full-width lines to the foot of the page. Text-only
+// pages use the whole width on every line. These numbers come from the STL
+// generator (window.TACT_LAYOUT) so the print matches the preview exactly.
 // Page geometry (mm) — single source of truth, shared with the STL generator
 // (window.TACT_LAYOUT) so the on-screen preview is a true-to-scale mirror of the
 // printed page.
 const LAYOUT = window.TACT_LAYOUT;
-const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;              // illustrated pages (odd): 9 full lines + band
+const LINE_WIDTHS = LAYOUT.LINE_WIDTHS;              // illustrated pages (odd): 4 short + 9 full lines
 const LINE_WIDTHS_FULL = LAYOUT.LINE_WIDTHS_FULL;   // text-only pages (even): full width
-const FULL_LINE_CELLS = LINE_WIDTHS[0];
+const FULL_LINE_CELLS = LINE_WIDTHS_FULL[0];
+// A story is one paragraph. It opens in cell 3 on page 1; every later page is a
+// runover and starts in cell 1 (standard braille formatting).
+const indentForPage = (pageNumber) => pageNumber === 1 ? LAYOUT.PARA_INDENT : 0;
 // Page profile by 1-based page number: odd pages carry the illustration, even
 // pages are text-only. Kept in one place so pagination, preview and STL agree.
 const isTextOnlyPage = (pageNumber) => pageNumber % 2 === 0;
 const widthsForPage = (pageNumber) => isTextOnlyPage(pageNumber) ? LINE_WIDTHS_FULL : LINE_WIDTHS;
 
 // A story rarely ends exactly at the foot of a page, so the last card tends to
-// carry only part of a page of Braille. Rather than print a card that is mostly
-// blank plastic, give that card the illustration: the picture sits in the corner
-// the text does not reach, and the page reads as composed instead of unfinished.
-// Only when the remaining text still fits the narrower illustrated layout — if it
-// fills the full width, the page is already full and needs no picture.
+// carry only part of a page of Braille. Give that card the illustration too, so
+// it does not read as a scrap of an unfinished page. Only when the remaining text
+// still fits the illustrated layout; if it needs the full width, it gets none.
 function pageIsIllustrated(pageNumber, totalPages, text) {
   if (!isTextOnlyPage(pageNumber)) return true;          // odd pages always
   if (pageNumber !== totalPages) return false;           // middle pages: text only
-  return layoutBrailleLinesVar(textToBrailleCells(text), LINE_WIDTHS).length <= LINE_WIDTHS.length;
+  return layoutBrailleLinesVar(textToBrailleCells(text), LINE_WIDTHS, indentForPage(pageNumber)).length <= LINE_WIDTHS.length;
 }
 const widthsForRendering = (pageNumber, totalPages, text) =>
   pageIsIllustrated(pageNumber, totalPages, text) ? LINE_WIDTHS : LINE_WIDTHS_FULL;
 
 // Like layoutBrailleLines but each line's max width comes from LINE_WIDTHS.
-function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS) {
+// indent: blank cells opening the first line (paragraph start, cell 3). They are
+// not break points, so a long first word can never leave them alone on a line.
+function layoutBrailleLinesVar(cells, widths = LINE_WIDTHS, indent = 0) {
   const lines = [];
-  let line = [], lastSpace = -1;
+  let line = Array.from({ length: indent }, () => []), lastSpace = -1;
   const cap = () => widths[Math.min(lines.length, widths.length - 1)];
   for (const c of cells) {
     if (c === "BR") { lines.push(line); line = []; lastSpace = -1; continue; }
@@ -1339,8 +1417,7 @@ function cellToBrailleAscii(cell) {
 }
 function storyToBRF(text) {
   const cells = textToBrailleCells(text);
-  const indented = [[], []].concat(cells);            // paragraph opens in cell 3
-  const lines = layoutBrailleLinesVar(indented, [40]); // 40-cell braille page width
+  const lines = layoutBrailleLinesVar(cells, [40], LAYOUT.PARA_INDENT); // 40-cell page, paragraph opens in cell 3
   return lines
     .map((line) => line.map(cellToBrailleAscii).join("").replace(/\s+$/, ""))
     .join("\r\n") + "\r\n";
@@ -1426,7 +1503,7 @@ const COPY = {
         ]},
         { name: "Reading the page", items: [
           { q: "How is the page read?",
-            a: "The braille fills the page in full-width lines. When there is an illustration it sits as a band across the bottom, with a small gap separating it from the text. You read left to right and top to bottom, the same as any text. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
+            a: "When there is an illustration it sits in the top-right corner, like in a picture book: the first four lines are a little shorter to make room for it, and every line after that runs the full width. The story opens with a paragraph indent. You read left to right and top to bottom, the same as any text, and every line starts at the same left edge. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
           { q: "What is Grade 1 braille?",
             a: "It is braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
         ]},
@@ -1500,7 +1577,7 @@ const COPY = {
         ]},
         { name: "Leggere la pagina", items: [
           { q: "Come si legge la pagina?",
-            a: "Il braille riempie la pagina con righe a tutta larghezza. Quando c'è un'illustrazione si trova in una fascia lungo il fondo, separata dal testo da un piccolo stacco. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
+            a: "Quando c'è un'illustrazione si trova nell'angolo in alto a destra, come in un libro illustrato: le prime quattro righe sono un po' più corte per farle posto, e tutte le altre arrivano fino in fondo alla riga. La storia comincia con un rientro di paragrafo. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi, e ogni riga parte dallo stesso margine sinistro. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
           { q: "Cos'è il braille di Grado 1?",
             a: "È il braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
         ]},
@@ -1521,6 +1598,36 @@ const COPY = {
   },
 };
 
+// ─── Relief renderer ──────────────────────────────────────────────────────────
+// Shows the picture exactly as it will be printed: the same bitmap the STL is
+// built from (window.TACT.reliefFromSvg), not the smoother vector drawing. If a
+// line is too thin or two details merge, the parent sees it here before
+// spending an hour printing. Falls back to the vector drawing if the shape file
+// cannot be fetched (e.g. opened from file://).
+function ReliefRenderer({ illustration }) {
+  const shape = illustration?.elements?.[0]?.shape || 'star';
+  const [mask, setMask] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    setMask(null); setFailed(false);
+    const relPath = SHAPE_PATHS[shape] || 'objects/star';
+    fetch('shapes/' + relPath + '.svg')
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(txt => window.TACT.reliefFromSvg(txt, r => {
+        if (!alive) return;
+        if (r.mask) setMask(r.mask); else setFailed(true);
+      }))
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, [shape]);
+
+  if (failed) return <ShapeRenderer illustration={illustration} />;
+  if (!mask) return null;
+  return <img src={mask} alt="" style={{ width: '100%', height: '100%', opacity: 0.88, display: 'block' }} />;
+}
+
 // ─── Shape renderer (fetches SVG from shapes/ dir, falls back to inline) ──────
 function ShapeRenderer({ illustration }) {
   const shape = illustration?.elements?.[0]?.shape || 'star';
@@ -1535,11 +1642,10 @@ function ShapeRenderer({ illustration }) {
       .then(txt => {
         // The shape files carry only a viewBox, so force the <svg> to fill its
         // container while preserving aspect ratio and centring. Without this the
-        // shape renders small and left-aligned in the wide bottom band.
-        const normalized = txt
-          .replace(/\swidth="[^"]*"/, '')
-          .replace(/\sheight="[^"]*"/, '')
-          .replace(/<svg\b/, '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"');
+        // shape renders small and left-aligned in its zone.
+        const normalized = txt.replace(/<svg\b[^>]*>/, tag => tag
+          .replace(/\s(width|height|preserveAspectRatio)="[^"]*"/g, '')
+          .replace(/<svg\b/, '<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"'));
         setSvgMarkup(normalized);
       })
       .catch(() => {});
@@ -1826,7 +1932,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
   // Use Liblouis cells when available, JS fallback otherwise
   const cells = useMemo(() => p.brailleCells || textToBrailleCells(p.text), [p]);
 
-  // Odd pages carry the illustration (bottom band); even pages are text-only (full
+  // Odd pages carry the illustration (top-right corner); even pages are text-only (full
   // width). Derive from the page number so preview, STL and pagination agree.
   const textOnly = !pageIsIllustrated(page + 1, pages.length, p.text);
   const pageWidths = widthsForRendering(page + 1, pages.length, p.text);
@@ -1837,7 +1943,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
   // dark, unraised are faint. Coordinates are converted to SVG space (y-down).
   const dots = useMemo(() => {
     const L = LAYOUT, out = [];
-    const lines = layoutBrailleLinesVar(cells, pageWidths);
+    const lines = layoutBrailleLinesVar(cells, pageWidths, indentForPage(page + 1));
     lines.slice(0, pageWidths.length).forEach((line, li) => {
       const baseY = L.LINE_Y0 - li * L.LINE_H;
       line.forEach((cell, ci) => {
@@ -1850,7 +1956,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
       });
     });
     return out;
-  }, [cells, pageWidths]);
+  }, [cells, pageWidths, page]);
 
   // Illustration zone as a percentage of the page (mm → %), matching the STL.
   const L = LAYOUT;
@@ -1912,7 +2018,8 @@ function StoryResult({ pages, lang, t, onAgain }) {
                 // label rises into the margin. (12.9px = the label's glyph height
                 // plus a small gap; top % is of the page height, square page.)
                 top: `min(${(L.TZ_X / L.PAGE_H) * 100 * 0.55}%, calc(${((L.PAGE_H - L.LINE_Y0 - Math.max(...L.DOFF.filter(Boolean).map(o => o[1])) - L.DOT_R) / L.PAGE_H) * 100}% - 12.9px))`,
-                right: `${(L.TZ_X / L.PAGE_W) * 100}%` }}>
+                // Top-left: the top-right corner belongs to the picture.
+                left: `${(L.TZ_X / L.PAGE_W) * 100}%` }}>
               {t.page} {page + 1} {t.of} {pages.length}
             </div>
 
@@ -1925,15 +2032,12 @@ function StoryResult({ pages, lang, t, onAgain }) {
               ))}
             </svg>
 
-            {/* Illustration in its true mm zone: a full-width band across the
-                bottom, marked off by a dashed line above it. Only on illustrated
-                (odd) pages; text-only pages use the whole page for braille. */}
+            {/* Illustration in its true mm zone, top-right, drawn as the printed
+                relief itself. Only on illustrated pages; text-only pages use the
+                whole page for braille. */}
             {!textOnly && p.illustration && (
-              <div style={{ position: "absolute", ...illBox,
-                  borderTop: "1px dashed rgba(10,10,12,0.22)",
-                  padding: "3%",
-                  display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <ShapeRenderer illustration={p.illustration} />
+              <div style={{ position: "absolute", ...illBox }}>
+                <ReliefRenderer illustration={p.illustration} />
               </div>
             )}
           </div>
@@ -2131,16 +2235,16 @@ function shapeLabel(shape, lang) {
 }
 
 // How many Braille rows a run of words needs under a given width profile.
-function lineCount(words, widths) {
-  return layoutBrailleLinesVar(textToBrailleCells(words.join(' ')), widths).length;
+function lineCount(words, widths, indent = 0) {
+  return layoutBrailleLinesVar(textToBrailleCells(words.join(' ')), widths, indent).length;
 }
 // Does this run of words fit within the profile's row count?
-function wordsFit(words, widths) {
-  return lineCount(words, widths) <= widths.length;
+function wordsFit(words, widths, indent = 0) {
+  return lineCount(words, widths, indent) <= widths.length;
 }
 
 // Paginate a story respecting the per-page profile: odd pages hold less (the
-// illustration band takes the bottom of the page), even pages hold all 13 rows.
+// picture shortens the first four rows), even pages hold all 13 full rows.
 // Fill each page to capacity so no page before the last is left with empty rows.
 function paginateStory(text) {
   const words = text.split(/\s+/).filter(w => w.length > 0);
@@ -2153,7 +2257,7 @@ function paginateStory(text) {
     const widths = widthsForPage(pageNum);
     let cur = [];
     while (i < words.length) {
-      if (cur.length && !wordsFit(cur.concat(words[i]), widths)) break;
+      if (cur.length && !wordsFit(cur.concat(words[i]), widths, indentForPage(pageNum))) break;
       cur.push(words[i]); i++;
     }
     if (!cur.length) { cur.push(words[i]); i++; } // safety: never stall on one long word
@@ -2178,7 +2282,7 @@ function measureFit(text) {
   const pages = paginateStory(text);
   const fills = pages.map((t, i) => {
     const w = widthsForPage(i + 1);
-    return layoutBrailleLinesVar(textToBrailleCells(t), w).length / w.length;
+    return layoutBrailleLinesVar(textToBrailleCells(t), w, indentForPage(i + 1)).length / w.length;
   });
   return { pages: pages.length, minFill: Math.min.apply(null, fills) };
 }

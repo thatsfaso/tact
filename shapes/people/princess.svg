@@ -1,15 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: princess | category: people | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 88,24 L 92,12 L 100,20 L 108,12 L 112,24" stroke-width="4"/>
-  <circle cx="100" cy="44" r="18"/>
-  <circle cx="93" cy="41" r="3.5" fill="#000000"/>
-  <circle cx="107" cy="41" r="3.5" fill="#000000"/>
-  <path d="M 92,51 Q 100,57 108,51" stroke-width="4"/>
-  <path d="M 82,38 Q 70,56 74,84 M 118,38 Q 130,56 126,84" stroke-width="4"/>
-  <path d="M 86,64 L 114,64 Q 122,68 126,84 L 142,158 L 58,158 L 74,84 Q 78,68 86,64 Z"/>
-  <path d="M 78,92 L 64,114" stroke-width="4"/>
-  <path d="M 122,92 L 136,114" stroke-width="4"/>
-  <path d="M 88,110 Q 100,118 112,110" stroke-width="4"/>
-</g>
+<!-- TACT shape: princess | category: people | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="40" r="22" fill="#000000"/>
+<path d="M 84,20 L 90,4 L 100,14 L 110,4 L 116,20 Z" fill="#000000"/>
+<path d="M 84,64 L 116,64 L 108,104 L 152,182 L 48,182 L 92,104 Z" fill="#000000"/>
+<ellipse cx="80" cy="96" rx="9" ry="24" fill="#000000" transform="rotate(25 80 96)"/>
+<ellipse cx="120" cy="96" rx="9" ry="24" fill="#000000" transform="rotate(-25 120 96)"/>
 </svg>

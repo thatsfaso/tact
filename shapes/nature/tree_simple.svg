@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: tree_simple | category: nature | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 66,116 Q 42,116 40,94 Q 38,76 54,70 Q 50,48 72,44 Q 78,26 100,28 Q 122,26 128,44 Q 150,48 146,70 Q 162,76 160,94 Q 158,116 134,116 Z"/>
-  <path d="M 88,116 L 84,168 L 116,168 L 112,116"/>
-  <path d="M 100,132 L 100,152 M 100,140 Q 88,136 84,128" stroke-width="4"/>
-  <path d="M 64,176 L 136,176" stroke-width="4"/>
-</g>
+<!-- TACT shape: tree_simple | category: nature | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="70" r="46" fill="#000000"/>
+<circle cx="64" cy="98" r="32" fill="#000000"/>
+<circle cx="136" cy="98" r="32" fill="#000000"/>
+<rect x="88" y="110" width="24" height="72" rx="4" fill="#000000"/>
+<rect x="60" y="176" width="80" height="12" rx="6" fill="#000000"/>
 </svg>

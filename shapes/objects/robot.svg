@@ -1,19 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: robot | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,40 L 100,30" stroke-width="5"/>
-  <circle cx="100" cy="25" r="6"/>
-  <rect x="66" y="40" width="68" height="46" rx="10"/>
-  <circle cx="86" cy="62" r="6" fill="#000000"/>
-  <circle cx="114" cy="62" r="6" fill="#000000"/>
-  <path d="M 90,74 L 110,74" stroke-width="5"/>
-  <rect x="58" y="92" width="84" height="60" rx="12"/>
-  <rect x="86" y="108" width="28" height="24" rx="4" stroke-width="5"/>
-  <path d="M 58,112 L 42,112 L 42,134" stroke-width="9"/>
-  <path d="M 142,112 L 158,112 L 158,134" stroke-width="9"/>
-  <path d="M 80,152 L 80,170" stroke-width="9"/>
-  <path d="M 120,152 L 120,170" stroke-width="9"/>
-  <path d="M 72,172 L 90,172" stroke-width="7"/>
-  <path d="M 110,172 L 128,172" stroke-width="7"/>
-</g>
+<!-- TACT shape: robot | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="62" y="34" width="76" height="52" rx="10" fill="#000000"/>
+<path d="M 100,34 L 100,16" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="100" cy="12" r="10" fill="#000000"/>
+<circle cx="82" cy="60" r="10" fill="#ffffff"/>
+<circle cx="118" cy="60" r="10" fill="#ffffff"/>
+<rect x="88" y="82" width="24" height="18" rx="0" fill="#000000"/>
+<rect x="52" y="96" width="96" height="66" rx="12" fill="#000000"/>
+<rect x="84" y="112" width="32" height="28" rx="4" fill="#ffffff"/>
+<rect x="14" y="100" width="20" height="52" rx="8" fill="#000000"/>
+<rect x="166" y="100" width="20" height="52" rx="8" fill="#000000"/>
+<rect x="64" y="160" width="24" height="32" rx="6" fill="#000000"/>
+<rect x="112" y="160" width="24" height="32" rx="6" fill="#000000"/>
 </svg>

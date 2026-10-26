@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: person_waving | category: people | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="100" cy="44" r="20"/>
-  <circle cx="93" cy="41" r="3.5" fill="#000000"/>
-  <circle cx="107" cy="41" r="3.5" fill="#000000"/>
-  <path d="M 92,52 Q 100,58 108,52" stroke-width="4"/>
-  <path d="M 84,68 Q 72,68 66,80 L 54,102 Q 50,110 58,114 Q 64,117 68,110 L 78,94 L 78,126 L 66,166 Q 64,176 74,178 Q 82,180 84,172 L 96,136 L 104,136 L 116,172 Q 118,180 126,178 Q 136,176 134,166 L 122,126 L 122,94 L 138,64 Q 142,56 150,60 Q 158,64 154,72 L 136,104 Q 130,112 122,108 Q 118,106 118,100 Q 118,80 116,68 Z"/>
-</g>
+<!-- TACT shape: person_waving | category: people | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="38" r="24" fill="#000000"/>
+<rect x="44" y="62" width="112" height="18" rx="9" fill="#000000"/>
+<rect x="78" y="62" width="44" height="68" rx="12" fill="#000000"/>
+<rect x="44" y="66" width="16" height="58" rx="8" fill="#000000"/>
+<path d="M 148,70 L 174,26" fill="none" stroke="#000000" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="178" cy="18" r="11" fill="#000000"/>
+<rect x="75" y="124" width="16" height="56" rx="7" fill="#000000"/>
+<rect x="109" y="124" width="16" height="56" rx="7" fill="#000000"/>
 </svg>

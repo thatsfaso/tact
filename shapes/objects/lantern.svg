@@ -1,11 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: lantern | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,16 Q 78,16 74,34 L 126,34 Q 122,16 100,16 Z" stroke-width="4"/>
-  <path d="M 70,34 L 130,34 L 130,44 L 70,44 Z" stroke-width="4"/>
-  <path d="M 74,44 Q 60,74 60,104 Q 60,134 74,158 L 126,158 Q 140,134 140,104 Q 140,74 126,44 Z"/>
-  <path d="M 66,158 L 134,158 L 134,170 L 66,170 Z" stroke-width="4"/>
-  <path d="M 84,46 L 84,156 M 116,46 L 116,156" stroke-width="4"/>
-  <path d="M 100,120 Q 90,110 94,98 Q 97,90 100,84 Q 103,90 106,98 Q 110,110 100,120 Z" stroke-width="4"/>
-</g>
+<!-- TACT shape: lantern | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 52,66 L 100,30 L 148,66 Z" fill="#000000"/>
+<rect x="90" y="16" width="20" height="20" rx="6" fill="#000000"/>
+<rect x="60" y="62" width="80" height="98" rx="10" fill="#000000"/>
+<rect x="78" y="80" width="44" height="62" rx="6" fill="#ffffff"/>
+<rect x="52" y="156" width="96" height="16" rx="5" fill="#000000"/>
 </svg>

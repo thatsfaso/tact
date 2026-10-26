@@ -1,24 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: snowflake | category: nature | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,100 L 100,34"/>
-  <path d="M 100,62 L 90,50" stroke-width="4"/>
-  <path d="M 100,62 L 110,50" stroke-width="4"/>
-  <path d="M 100,100 L 157,67"/>
-  <path d="M 133,81 L 138,66" stroke-width="4"/>
-  <path d="M 133,81 L 149,84" stroke-width="4"/>
-  <path d="M 100,100 L 157,133"/>
-  <path d="M 133,119 L 149,116" stroke-width="4"/>
-  <path d="M 133,119 L 138,134" stroke-width="4"/>
-  <path d="M 100,100 L 100,166"/>
-  <path d="M 100,138 L 110,150" stroke-width="4"/>
-  <path d="M 100,138 L 90,150" stroke-width="4"/>
-  <path d="M 100,100 L 43,133"/>
-  <path d="M 67,119 L 62,134" stroke-width="4"/>
-  <path d="M 67,119 L 51,116" stroke-width="4"/>
-  <path d="M 100,100 L 43,67"/>
-  <path d="M 67,81 L 51,84" stroke-width="4"/>
-  <path d="M 67,81 L 62,66" stroke-width="4"/>
-  <circle cx="100" cy="100" r="7" stroke-width="4"/>
-</g>
+<!-- TACT shape: snowflake | category: nature | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="100" r="14" fill="#000000"/>
+<path d="M 100,100 L 100.0,182.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100.0,150.0 L 119.9,166.7" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100.0,150.0 L 80.1,166.7" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,100 L 29.0,141.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 56.7,125.0 L 52.2,150.6" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 56.7,125.0 L 32.3,116.1" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,100 L 29.0,59.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 56.7,75.0 L 32.3,83.9" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 56.7,75.0 L 52.2,49.4" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,100 L 100.0,18.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100.0,50.0 L 80.1,33.3" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100.0,50.0 L 119.9,33.3" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,100 L 171.0,59.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 143.3,75.0 L 147.8,49.4" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 143.3,75.0 L 167.7,83.9" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,100 L 171.0,141.0" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 143.3,125.0 L 167.7,116.1" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 143.3,125.0 L 147.8,150.6" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

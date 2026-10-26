@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: dog_standing | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 20,72 Q 16,58 30,54 L 42,50 Q 48,32 64,31 Q 80,30 87,43 L 93,51 Q 126,45 152,55 Q 172,63 170,86 Q 169,100 158,108 L 160,170 L 146,170 L 142,116 Q 118,124 96,118 L 92,170 L 78,170 L 76,112 Q 60,104 56,86 L 38,82 Q 24,80 20,72 Z"/>
-  <path d="M 62,35 Q 78,39 78,58 Q 78,74 67,75 Q 57,75 56,60"/>
-  <circle cx="43" cy="48" r="4" fill="#000000"/>
-  <circle cx="23" cy="64" r="5" fill="#000000"/>
-  <path d="M 166,74 Q 180,60 174,44 Q 170,34 160,40"/>
-</g>
+<!-- TACT shape: dog_standing | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="42" y="80" width="104" height="40" rx="18" fill="#000000"/>
+<circle cx="154" cy="66" r="22" fill="#000000"/>
+<rect x="162" y="62" width="32" height="18" rx="8" fill="#000000"/>
+<path d="M 144,52 L 130,86 L 146,88 Z" fill="#000000"/>
+<rect x="47" y="108" width="16" height="52" rx="6" fill="#000000"/>
+<rect x="79" y="108" width="16" height="52" rx="6" fill="#000000"/>
+<rect x="113" y="108" width="16" height="52" rx="6" fill="#000000"/>
+<rect x="145" y="108" width="16" height="52" rx="6" fill="#000000"/>
+<path d="M 46,88 Q 22,72 26,44" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -1,10 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: castle_tower | category: buildings | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 58,172 L 58,44 L 76,44 L 76,58 L 92,58 L 92,44 L 108,44 L 108,58 L 124,58 L 124,44 L 142,44 L 142,172 Z"/>
-  <path d="M 88,172 L 88,132 Q 88,118 100,118 Q 112,118 112,132 L 112,172"/>
-  <path d="M 92,84 L 108,84 L 108,100 L 92,100 Z" stroke-width="4"/>
-  <path d="M 100,44 L 100,14 L 128,22 L 100,30" stroke-width="4"/>
-  <path d="M 40,172 L 160,172"/>
-</g>
+<!-- TACT shape: castle_tower | category: buildings | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="60" y="58" width="80" height="124" rx="0" fill="#000000"/>
+<rect x="50" y="36" width="24" height="28" rx="0" fill="#000000"/>
+<rect x="88" y="36" width="24" height="28" rx="0" fill="#000000"/>
+<rect x="126" y="36" width="24" height="28" rx="0" fill="#000000"/>
+<path d="M 84,182 L 84,148 Q 100,126 116,148 L 116,182 Z" fill="#ffffff"/>
+<rect x="88" y="80" width="24" height="30" rx="8" fill="#ffffff"/>
 </svg>

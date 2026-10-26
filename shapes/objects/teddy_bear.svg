@@ -1,17 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: teddy_bear | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="68" cy="42" r="14"/>
-  <circle cx="132" cy="42" r="14"/>
-  <circle cx="100" cy="64" r="32"/>
-  <circle cx="90" cy="58" r="4" fill="#000000"/>
-  <circle cx="110" cy="58" r="4" fill="#000000"/>
-  <circle cx="100" cy="72" r="4" fill="#000000"/>
-  <path d="M 92,80 Q 100,86 108,80" stroke-width="4"/>
-  <path d="M 80,92 Q 62,100 60,124 Q 58,148 76,158 L 124,158 Q 142,148 140,124 Q 138,100 120,92"/>
-  <path d="M 64,104 Q 42,108 40,126 Q 40,140 54,138" stroke-width="4"/>
-  <path d="M 136,104 Q 158,108 160,126 Q 160,140 146,138" stroke-width="4"/>
-  <ellipse cx="74" cy="166" rx="14" ry="10" stroke-width="4"/>
-  <ellipse cx="126" cy="166" rx="14" ry="10" stroke-width="4"/>
-</g>
+<!-- TACT shape: teddy_bear | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<circle cx="100" cy="62" r="34" fill="#000000"/>
+<circle cx="66" cy="32" r="17" fill="#000000"/>
+<circle cx="134" cy="32" r="17" fill="#000000"/>
+<ellipse cx="100" cy="138" rx="42" ry="44" fill="#000000"/>
+<ellipse cx="54" cy="120" rx="14" ry="26" fill="#000000" transform="rotate(30 54 120)"/>
+<ellipse cx="146" cy="120" rx="14" ry="26" fill="#000000" transform="rotate(-30 146 120)"/>
+<ellipse cx="72" cy="178" rx="20" ry="14" fill="#000000"/>
+<ellipse cx="128" cy="178" rx="20" ry="14" fill="#000000"/>
+<ellipse cx="100" cy="142" rx="18" ry="20" fill="#ffffff"/>
 </svg>

@@ -1,11 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: bridge | category: buildings | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 14,86 L 186,86"/>
-  <path d="M 14,110 L 186,110"/>
-  <path d="M 30,86 L 30,110 M 65,86 L 65,110 M 100,86 L 100,110 M 135,86 L 135,110 M 170,86 L 170,110" stroke-width="4"/>
-  <path d="M 30,110 L 30,152 M 170,110 L 170,152"/>
-  <path d="M 52,152 Q 56,116 100,116 Q 144,116 148,152"/>
-  <path d="M 20,168 Q 40,160 60,168 Q 80,176 100,168 Q 120,160 140,168 Q 160,176 180,168" stroke-width="4"/>
-</g>
+<!-- TACT shape: bridge | category: buildings | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 8,72 L 192,72 L 192,150 L 162,150 Q 152,100 100,100 Q 48,100 38,150 L 8,150 Z" fill="#000000"/>
+<path d="M 10,176 Q 40,164 70,176 Q 100,188 130,176 Q 160,164 190,176" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

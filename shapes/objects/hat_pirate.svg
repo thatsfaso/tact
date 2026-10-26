@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: hat_pirate | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 22,124 Q 34,64 100,60 Q 166,64 178,124 Q 158,108 130,104 Q 112,102 100,102 Q 88,102 70,104 Q 42,108 22,124 Z"/>
-  <path d="M 22,124 Q 60,140 100,140 Q 140,140 178,124" />
-  <circle cx="100" cy="82" r="7" stroke-width="4"/>
-  <path d="M 88,96 Q 84,88 88,80 M 112,96 Q 116,88 112,80" stroke-width="4"/>
-  <path d="M 92,96 L 108,96" stroke-width="4"/>
-</g>
+<!-- TACT shape: hat_pirate | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 8,132 Q 38,40 100,34 Q 162,40 192,132 Q 100,100 8,132 Z" fill="#000000"/>
+<circle cx="100" cy="80" r="15" fill="#ffffff"/>
 </svg>

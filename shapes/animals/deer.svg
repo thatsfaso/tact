@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: deer | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 22,66 Q 18,56 30,52 L 40,40 L 50,50 Q 60,48 64,58 L 96,88 Q 126,82 148,92 Q 168,100 166,118 Q 165,130 154,136 L 156,170 L 142,170 L 139,142 Q 116,150 96,144 L 92,170 L 78,170 L 76,136 Q 62,128 60,110 L 44,78 Q 30,76 22,66 Z"/>
-  <path d="M 42,38 L 36,10"/>
-  <path d="M 38,24 L 26,14"/>
-  <path d="M 38,20 L 48,8"/>
-  <path d="M 52,44 L 66,20"/>
-  <path d="M 60,30 L 72,26"/>
-  <circle cx="34" cy="56" r="4" fill="#000000"/>
-  <path d="M 164,112 Q 176,114 174,126" stroke-width="4"/>
-</g>
+<!-- TACT shape: deer | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<ellipse cx="96" cy="100" rx="56" ry="24" fill="#000000"/>
+<path d="M 128,92 L 148,50 L 166,56 L 150,104 Z" fill="#000000"/>
+<ellipse cx="170" cy="50" rx="20" ry="12" fill="#000000" transform="rotate(20 170 50)"/>
+<path d="M 156,40 L 146,12 M 150,26 L 132,18" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 168,38 L 176,10 M 174,22 L 192,16" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="48" y="110" width="12" height="56" rx="5" fill="#000000"/>
+<rect x="76" y="110" width="12" height="56" rx="5" fill="#000000"/>
+<rect x="112" y="110" width="12" height="56" rx="5" fill="#000000"/>
+<rect x="140" y="110" width="12" height="56" rx="5" fill="#000000"/>
+<circle cx="42" cy="88" r="8" fill="#000000"/>
 </svg>

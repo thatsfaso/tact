@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: wave | category: nature | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 16,144 Q 20,84 64,56 Q 108,28 148,48 Q 178,64 180,96 Q 168,76 144,76 Q 122,76 116,94 Q 134,88 146,102 Q 158,118 148,136 Q 120,124 92,132 Q 56,140 16,144 Z"/>
-  <path d="M 40,110 Q 52,84 78,70" stroke-width="4"/>
-  <path d="M 20,160 Q 40,152 60,160 Q 80,168 100,160 Q 120,152 140,160 Q 160,168 180,160" stroke-width="4"/>
-</g>
+<!-- TACT shape: wave | category: nature | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 10,80 Q 40,50 70,80 Q 100,110 130,80 Q 160,50 190,80" fill="none" stroke="#000000" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 10,134 Q 40,104 70,134 Q 100,164 130,134 Q 160,104 190,134" fill="none" stroke="#000000" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

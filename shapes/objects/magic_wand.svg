@@ -1,9 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: magic_wand | category: objects | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="58" y1="168" x2="118" y2="86"/>
-  <path d="M 130,30 L 142,58 L 172,62 L 150,82 L 156,112 L 130,96 L 104,112 L 110,82 L 88,62 L 118,58 Z"/>
-  <path d="M 60,96 l 2.5,7 l 7,2.5 l -7,2.5 l -2.5,7 l -2.5,-7 l -7,-2.5 l 7,-2.5 Z" stroke-width="4"/>
-  <path d="M 168,128 l 2.5,7 l 7,2.5 l -7,2.5 l -2.5,7 l -2.5,-7 l -7,-2.5 l 7,-2.5 Z" stroke-width="4"/>
-</g>
+<!-- TACT shape: magic_wand | category: objects | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 34,176 L 118,92" fill="none" stroke="#000000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 142.0,18.0 L 153.2,46.6 L 183.8,48.4 L 160.1,67.9 L 167.9,97.6 L 142.0,81.0 L 116.1,97.6 L 123.9,67.9 L 100.2,48.4 L 130.8,46.6 Z" fill="#000000"/>
 </svg>

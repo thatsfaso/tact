@@ -1,14 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: train_simple | category: vehicles | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 24,140 L 24,76 Q 24,64 36,64 L 60,64 L 60,44 L 96,44 L 96,64 L 108,64 Q 120,64 122,78 L 126,96 L 156,96 Q 172,98 172,112 L 172,140 Z"/>
-  <path d="M 34,76 L 52,76 L 52,96 L 34,96 Z" stroke-width="4"/>
-  <path d="M 70,44 L 70,30 L 86,30 L 86,44" stroke-width="4"/>
-  <circle cx="44" cy="152" r="12"/>
-  <circle cx="82" cy="152" r="12"/>
-  <circle cx="120" cy="152" r="12"/>
-  <circle cx="154" cy="152" r="12"/>
-  <path d="M 136,108 L 160,108 L 160,126 L 136,126 Z" stroke-width="4"/>
-  <path d="M 14,170 L 186,170" stroke-width="4"/>
-</g>
+<!-- TACT shape: train_simple | category: vehicles | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<rect x="26" y="82" width="124" height="62" rx="6" fill="#000000"/>
+<rect x="108" y="40" width="56" height="104" rx="6" fill="#000000"/>
+<rect x="122" y="54" width="28" height="28" rx="4" fill="#ffffff"/>
+<rect x="46" y="48" width="26" height="40" rx="4" fill="#000000"/>
+<rect x="10" y="98" width="22" height="40" rx="4" fill="#000000"/>
+<circle cx="48" cy="156" r="18" fill="#000000"/>
+<circle cx="100" cy="156" r="18" fill="#000000"/>
+<circle cx="152" cy="156" r="18" fill="#000000"/>
 </svg>

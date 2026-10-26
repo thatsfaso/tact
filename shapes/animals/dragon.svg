@@ -1,15 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: dragon | category: animals | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 60,96 Q 60,76 84,74 L 140,74 Q 162,76 164,96 L 164,118 Q 164,126 156,128 L 156,152 L 140,152 L 140,130 L 104,130 L 104,152 L 88,152 L 88,128 Q 64,126 60,106 Z"/>
-  <path d="M 64,84 Q 44,78 32,86 Q 24,94 32,102 Q 42,110 62,108" />
-  <circle cx="44" cy="92" r="3.5" fill="#000000"/>
-  <path d="M 30,98 L 22,98" stroke-width="4"/>
-  <path d="M 48,82 L 42,66 L 56,78 Z" fill="#000000" stroke-width="3"/>
-  <path d="M 62,80 L 62,62 L 72,76 Z" fill="#000000" stroke-width="3"/>
-  <path d="M 84,74 L 91,58 L 99,74 M 104,74 L 111,58 L 119,74" stroke-width="5"/>
-  <path d="M 124,86 Q 124,58 146,48 Q 164,40 176,46 Q 162,54 158,68 Q 154,82 155,92 Q 138,94 124,86 Z" stroke-width="5"/>
-  <path d="M 164,104 Q 186,110 192,126" stroke-width="5"/>
-  <path d="M 196,134 L 184,128 L 190,140 Z" fill="#000000" stroke-width="3"/>
-</g>
+<!-- TACT shape: dragon | category: animals | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<ellipse cx="96" cy="116" rx="48" ry="28" fill="#000000"/>
+<path d="M 132,104 Q 150,80 156,62" fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="168" cy="56" rx="22" ry="14" fill="#000000"/>
+<path d="M 156,46 L 148,26 L 166,42 Z" fill="#000000"/>
+<path d="M 82,98 L 90,26 L 110,56 L 128,36 L 126,98 Z" fill="#000000"/>
+<path d="M 54,110 Q 22,100 12,68 Q 30,120 62,130 Z" fill="#000000"/>
+<path d="M 12,68 L 4,52 L 24,64 Z" fill="#000000"/>
+<rect x="67" y="130" width="16" height="36" rx="6" fill="#000000"/>
+<rect x="113" y="130" width="16" height="36" rx="6" fill="#000000"/>
 </svg>

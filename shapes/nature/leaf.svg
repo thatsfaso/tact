@@ -1,9 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<!-- TACT shape: leaf | category: nature | license: CC0 | source: handcrafted -->
-<g fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M 100,20 Q 152,56 152,110 Q 152,158 100,176 Q 48,158 48,110 Q 48,56 100,20 Z"/>
-  <path d="M 100,32 L 100,176" stroke-width="4"/>
-  <path d="M 100,70 Q 122,76 134,92 M 100,70 Q 78,76 66,92" stroke-width="4"/>
-  <path d="M 100,110 Q 122,116 132,130 M 100,110 Q 78,116 68,130" stroke-width="4"/>
-</g>
+<!-- TACT shape: leaf | category: nature | license: CC0 | source: handcrafted, tactile silhouette (filled, flat view, strokes >= 2.5 mm, gaps >= 3 mm at print size) -->
+<path d="M 100,18 Q 172,70 142,150 Q 122,176 100,180 Q 78,176 58,150 Q 28,70 100,18 Z" fill="#000000"/>
+<path d="M 100,40 L 100,166" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 100,178 L 100,196" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
