@@ -2335,10 +2335,11 @@ const TARGET_ROWS = LINE_WIDTHS.length + LINE_WIDTHS_FULL.length - 1;
 // full. Measured on real stories from the live service (October 2026): a word
 // takes about 0.345 braille rows in English and 0.37 in Italian (capitals,
 // accents and word wrapping included), so two full cards are about 72 English
-// or 67 Italian words. The model writes about 90-95% of what it is asked in
-// English and about 82% in Italian, hence the different requests.
+// or 67 Italian words. Since the service lets the sentence count follow the
+// requested length, the model writes close to what it is asked in both
+// languages; the second, parallel request asks about 10% more.
 function firstWordTarget(lang) {
-  return lang === "it" ? 80 : 74;
+  return lang === "it" ? 66 : 70;
 }
 
 // Correction: how many words this story would need to fill the target rows,
@@ -2478,7 +2479,7 @@ function App() {
       // so there is never a dead end.
       let storyText = null;
       let askedWords = 0;
-      const firstAsk = firstWordTarget(lang), secondAsk = Math.round(firstAsk * 1.12);
+      const firstAsk = firstWordTarget(lang), secondAsk = Math.round(firstAsk * 1.1);
       let extra = Promise.resolve(null);
       setLoadingMsg(t.generating);
       try {

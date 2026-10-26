@@ -320,8 +320,21 @@ function buildSystemPrompt(language, targetWords, tune) {
   // Any tune value may be a single string or one entry per language.
   const perLang = (v, fallback) => (v == null) ? fallback
     : (typeof v === 'string') ? v : (v[language] || fallback);
-  const sentences = perLang(t.sentences, SENTENCES[language] || 'SIX or SEVEN');
-  const sentMax = perLang(t.sentMax, SENT_MAX[language] || 'seven');
+  let sentences = perLang(t.sentences, SENTENCES[language] || 'SIX or SEVEN');
+  let sentMax = perLang(t.sentMax, SENT_MAX[language] || 'seven');
+  // When the page names the length it needs, the sentence count must agree
+  // with it. Models obey the sentence count far more than the word count, so
+  // a fixed "never more than six" quietly capped every story near 65-75 words,
+  // however many the page asked for; after the October 2026 layout (picture
+  // in the corner) two cards need about 72 English or 67 Italian words, and a
+  // correction may ask for more. About twelve words a sentence keeps the
+  // per-sentence rule below satisfied.
+  if (Number(targetWords) > 0) {
+    const N = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE'];
+    const lo = Math.max(4, Math.min(10, Math.round(Number(targetWords) / 12)));
+    sentences = N[lo] + ' or ' + N[lo + 1];
+    sentMax = N[lo + 1].toLowerCase();
+  }
   const minW = t.minWords || 8;
   // A tune may carry one example per language, or a single shared one.
   const ex = t.example || DEFAULT_EXAMPLE;
