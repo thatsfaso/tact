@@ -141,6 +141,12 @@ def dot_positions(
 
 ## Tactile Graphic Geometry
 
+**As implemented in the browser (`reliefFromSvg` in `index.html`).** The SVG is drawn onto a canvas, cropped to the drawing itself, fitted aspect-preserving into the 36.8 × 36 mm top-right zone (origin 103.2, 104), and thresholded at **0.4 mm per pixel**, the width of a standard nozzle. Runs of ink in each row become one block, and identical runs in consecutive rows are stacked into one taller block; each block is extruded flat-topped from Z 0.5 to 1.5 mm. Shapes are filled silhouettes (see `docs/shape-library-format.md`, "Tactile rules"), so the bitmap carries surfaces, not thin outlines. The on-screen preview shows this same bitmap.
+
+The relief used to be built at 2 mm per pixel, which turned a 38 mm picture into a 19 × 19 grid of square columns: outlines broke into gaps and edges felt like stairs. A blind reader who printed such a page could not tell what the picture was.
+
+The Python pipeline below is the original plan for a command-line build and is kept for reference.
+
 Tactile graphics are SVG paths extruded perpendicular to the page surface.
 
 ### Extrusion parameters

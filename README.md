@@ -33,7 +33,7 @@ flowchart LR
     A["🎙️ Voice or text\n'a fox who guarded a castle'"] --> B["Story writing\n(in-browser language model)"]
     B --> C["Grade 1 braille\ntranslation — IT / EN"]
     B --> D["Illustration matching\n93 tactile shapes"]
-    C --> E["Page layout\nsquare, bottom band"]
+    C --> E["Page layout\nsquare, picture top-right"]
     D --> E
     E --> F["Binary STL export"]
     F --> G["🖨️ FDM 3D printer\nTPU / PETG"]
@@ -45,7 +45,7 @@ The full architecture, module by module:
 <img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, in-browser LLM, parallel braille translation and tactile graphics, page layout, STL generation, 3D printer output" width="720"/>
 </div>
 
-The result: a flexible page, roughly postcard-sized, with domed braille dots on top and a raised silhouette in a band along the bottom — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
+The result: a flexible page, roughly postcard-sized, with domed braille dots and a raised silhouette set into the top-right corner — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
 
 <div align="center">
 <img src="assets/tact_page_mockup.svg" alt="Tact page mockup: top view of the 150x150mm page and a cross-section comparing domed braille dots to the flat-topped tactile illustration relief" width="720"/>
@@ -65,13 +65,18 @@ A few decisions this project made on purpose, because the obvious version of thi
 
 **Page filling fills greedily, and the last card carries the picture.** A blind child holding a page that's mostly blank knows exactly what that feels like, and it isn't a small thing. The obvious fix is to balance the split so every page is evenly full — Tact did that, then withdrew it, because measurement showed balancing removes the sparse final page by pushing the deficit backwards into pages that were previously full. Each page here is a separate physical card, not a leaf in a bound book, so that trade converts one visibly unfinished card into two, and an intermediate card has no illustration to occupy the space the text doesn't reach. Instead every page but the last is filled to the brim, the last page is the one that receives the illustration whenever its text still fits beside it, and the story length itself is tuned — measured per language and per model — so a two-page story really does read as two full pages.
 
-**The braille runs full width; the picture sits in a band, because a braille reader said so.** The first illustrated layout wrapped short 12-cell lines down the side of a corner picture to fit more on the page. A teacher of students with visual impairments read a printed page and reported that those half-width lines are uncomfortable to read: braille lines should run the full width. The layout was revised so every line runs full width and the picture became a band across the bottom. It costs about 14% of the cells on an illustrated page, accepted because readability matters more than density for a child learning to read by touch.
+**The page layout was shaped by the people who read braille.** The first layout wrapped six half-width lines beside a picture in the bottom-right corner. A teacher of students with visual impairments, reviewing the site, advised avoiding short lines of braille, so the picture moved to a band across the bottom and every line ran full width. Then a blind reader printed a page and read it. Three things went wrong:
+- the small picture sat in an "ocean" of blank plastic;
+- printing the page standing up, which gives the roundest dots, no braille appeared until a third of the print was done;
+- the picture could not be recognised.
+
+The picture now sits in the top-right corner, the way a picture book sets an illustration into its text. Only the first four lines are slightly shorter (15 of 21 cells), the rest run full width, and the left margin never moves. The page holds more braille than either earlier layout, and braille is the first thing the printer lays down.
 
 <div align="center">
-<img src="assets/tact_layout_old_vs_new.png" alt="Two illustrated pages side by side. Left, labelled Old version: full-width braille lines on top, then short half-width lines beside a picture in the bottom-right corner. Right, labelled Updated version: every braille line runs the full page width, with the picture as a band across the bottom." width="720"/>
+<img src="assets/tact_layout_band_vs_corner.png" alt="Two illustrated pages side by side. Left, labelled Old version: nine full-width braille lines with a small picture centred in a wide band across the bottom. Right, labelled Updated version: the picture sits in the top-right corner, the first four braille lines are slightly shorter beside it and the first one starts indented, and nine full-width lines fill the rest of the page." width="720"/>
 </div>
 
-**The tactile shape library is hand-drawn, not clip art.** Ninety-three line-art illustrations — animals, fairy-tale figures, everyday objects, weather and sky — built specifically to survive being scaled down, extruded to under a millimetre, and read by fingertips rather than eyes. Illustrations are matched to a story by whole-word keyword search across Italian and English, covering plurals and diminutives, so "a *lupo*" and "a *wolf*" both correctly summon the same wolf.
+**The tactile shape library is hand-drawn, not clip art.** Ninety-three filled silhouettes — animals, fairy-tale figures, everyday objects, weather and sky — each in a flat side or front view, with strokes of at least 2.5 mm and gaps of at least 3 mm at print size. Filled shapes, not outlines, because blind children recognise filled pictures far more reliably than raised lines. The relief is built at 0.4 mm, the width of the nozzle, and the on-screen preview shows that exact relief, so what a parent sees is what the fingers will meet. Illustrations are matched to a story by whole-word keyword search across Italian and English, covering plurals and diminutives, so "a *lupo*" and "a *wolf*" both correctly summon the same wolf.
 
 **Everything is free, permanently, by construction — not as a pricing tier.** No step in the pipeline has a paid-only path: speech recognition, story writing, braille translation, illustration, and the 3D file itself are all computed locally or via technology with no usage cost. The only recurring expense is the plastic.
 
@@ -112,7 +117,7 @@ Printed values come from a single reference print (budget FDM, PLA, measured wit
 <img src="assets/tact_page_layout_geometry.svg" alt="Dimensioned diagram of the earlier square corner layout: 150x150mm page, 7 full braille rows of 21 cells, 6 narrow rows of 12 cells, 54x54mm illustration zone at origin (86, 12)" width="720"/>
 </div>
 
-<p align="center"><sub>Dimensioned geometry of the earlier corner layout, kept for reference. The shipped layout keeps the same page, margins and cell spacing, with nine full-width rows above a 130 × 38 mm illustration band at origin (10, 12).</sub></p>
+<p align="center"><sub>Dimensioned geometry of the first corner layout, kept for reference. The shipped layout keeps the same page, margins and cell spacing: four 15-cell rows beside a 36.8 × 36 mm picture at origin (103.2, 104) in the top-right corner, then nine full-width rows.</sub></p>
 
 Italian output is **Grade 1 only** — Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
 
@@ -141,7 +146,7 @@ Built around **budget FDM printers** (roughly €50–100 — an Ender 3 clone, 
 | Speech input | Browser speech recognition | native, free, no key |
 | Story generation | Several hosted models raced behind a key-holding proxy, then an in-browser model over WebGPU, then the reader's own words | a second or two on any device, and still works when the cloud does not |
 | braille | Hand-implemented Grade 1 tables, IT + EN | deterministic, offline, auditable |
-| Illustration | 93 hand-drawn SVGs, whole-word bilingual matching | tactile-legible, not decorative clip art |
+| Illustration | 93 hand-drawn filled silhouettes, whole-word bilingual matching | tactile-legible, not decorative clip art |
 | Page geometry | One shared coordinate system (mm) for preview and export | preview matches print, exactly |
 | 3D export | Hand-rolled binary STL writer | no dependency, full control over dot and pillar geometry |
 | Hosting | Static file, any web host or none at all | works from `file://`, zero infrastructure |
@@ -155,7 +160,7 @@ Built around **budget FDM printers** (roughly €50–100 — an Ender 3 clone, 
 - [x] In-browser story generation with adaptive model selection and a real (non-demo) offline fallback
 - [x] Grade 1 braille translation, Italian and English
 - [x] True-to-scale page preview and matching binary STL export
-- [x] 93-shape hand-drawn tactile illustration library
+- [x] 93-shape hand-drawn tactile illustration library (filled silhouettes)
 - [ ] Independent testing with blind and low-vision readers
 - [ ] Partnership conversations with Italian accessibility organizations
 - [ ] Optional command-line version for batch/offline use

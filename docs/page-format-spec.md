@@ -1,10 +1,10 @@
 # Page Format Specification
 
-**Status: v3.0 — matches the shipped browser implementation.**
+**Status: v4.0 — matches the shipped browser implementation.**
 
 This document defines the physical page dimensions, coordinate system, layout zones, and pagination rules for all TACT output.
 
-**Implementation note (v3.0):** TACT is browser-first. The layout is defined once, in millimetres, in `index.html` as `window.TACT_LAYOUT` (the single source of truth). Both the on-screen preview (a true-to-scale SVG) and the STL generator read from it, so the preview is an exact mirror of the printed page. The numbers below document that object.
+**Implementation note (v4.0):** TACT is browser-first. The layout is defined once, in millimetres, in `index.html` as `window.TACT_LAYOUT` (the single source of truth). Both the on-screen preview (a true-to-scale SVG) and the STL generator read from it, so the preview is an exact mirror of the printed page. The numbers below document that object.
 
 ---
 
@@ -20,11 +20,15 @@ This matches the STL generator's coordinate system, eliminating any Y-flip conve
 
 ---
 
-## Layout — Square page, full-width lines, illustration band (shipped)
+## Layout — Square page, picture in the top-right corner (shipped)
 
-The implemented layout is a **square page** where **every Braille line runs the full 21-cell width**. Illustrated pages put the picture in a **full-width band across the bottom**; text-only pages drop the picture and use all thirteen lines. Short lines are never produced.
+The implemented layout is a **square page** with the picture set into the **top-right corner**, the way a printed picture book places a small illustration in its text. Only the **first four lines are shortened**, to 15 of 21 cells (71%); every line below runs the full width. Text-only pages use all thirteen lines at full width. The left margin never moves, so the reading finger always returns to the same place.
 
-This replaced the earlier L-shaped corner layout (7 full rows + 6 narrow 12-cell rows beside a 54×54mm bottom-right picture) after field feedback from Chris Bischke, Ph.D., TVI, DT/V (University of Utah), who reported that the half-width lines are uncomfortable to read: braille lines should run the full width. The revision costs about 14% of the cells on an illustrated page, accepted on purpose (see the paper, Section "A Third Revision from Expert Field Feedback", and `docs/decisions.md` D022).
+How it got here:
+
+1. **L-shape (v2.0).** Six 12-cell lines (57% width) beside a 54×54mm bottom-right picture. Chris Bischke, Ph.D., TVI, DT/V (University of Utah), reviewing the site, advised placing pictures at the beginning or end of a story to avoid short lines of braille.
+2. **Bottom band (v3.0).** Every line full width, the picture in a 130×38mm band along the bottom. A blind reader who printed a page found a small picture in an "ocean" of blank plastic and, printing the page standing up, met no braille until a third of the print was done.
+3. **Top-right corner (v4.0).** Four slightly shorter lines instead of six half lines, no blank band at the bottom, braille is the first thing printed when the page stands up. An illustrated page holds 249 cells (band: 189, L-shape: 219).
 
 ```
 Page size:  150 mm × 150 mm (square)
@@ -35,26 +39,21 @@ Print bed:  fits 220×220mm bed with 35mm clearance each side
 ```
 ┌────────────────────────────────────────────────┐  y=150
 │  10mm margin                                    │
-│  ███████████████████████████  full row (21)     │  line 1 baseline y=135
+│    █████████████████   ┌──────────────┐         │  line 1 baseline y=135 (opens in cell 3)
+│  ███████████████████   │ ILLUSTRATION │         │
+│  ███████████████████   │ 36.8 × 36 mm │         │
+│  ███████████████████   │ origin       │         │  line 4: 15 cells, ends x=97.3
+│                        │ (103.2, 104) │         │
+│  ███████████████████████████  full row (21)     │  line 5 baseline y=95, dots top y=100.8
 │  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │
-│  ███████████████████████████  full row (21)     │  line 9 baseline y=55
-│ ┌────────────────────────────────────────────┐ │  band top y=50
-│ │         ILLUSTRATION BAND  130mm × 38mm    │ │
-│ │         origin (10, 12), shape centred,    │ │
-│ │         aspect preserved, never stretched  │ │
-│ └────────────────────────────────────────────┘ │  y=12
+│  ...                                            │
+│  ███████████████████████████  full row (21)     │  line 13 baseline y=15
 │  10mm margin                                    │
 └────────────────────────────────────────────────┘  y=0
    x=0                                        x=150
 ```
 
-Illustrated page shown. A text-only page has no band and carries 13 full rows (last baseline y=15).
+Illustrated page shown. A text-only page has no picture and carries 13 full rows.
 
 **Geometry (from `window.TACT_LAYOUT`):**
 
@@ -66,21 +65,25 @@ Illustrated page shown. A text-only page has no band and carries 13 full rows (l
 | `LINE_Y0` | 135 | baseline (bottom-left) of the first/top row |
 | `LINE_H` | 10 | line spacing (baseline to baseline) |
 | `CELL_W` | 6 | cell spacing |
-| `LINE_WIDTHS` | `[21×9]` | illustrated page: 9 full rows above the band |
+| `LINE_WIDTHS` | `[15×4, 21×9]` | illustrated page: 4 short rows beside the picture, 9 full rows |
 | `LINE_WIDTHS_FULL` | `[21×13]` | text-only page: 13 full rows |
-| `ILL_X, ILL_Y` | 10, 12 | illustration band origin (bottom-left) |
-| `ILL_W, ILL_H` | 130, 38 | illustration band size |
+| `PARA_INDENT` | 2 | blank cells opening page 1 (paragraph starts in cell 3) |
+| `ILL_X, ILL_Y` | 103.2, 104 | illustration zone origin (bottom-left) |
+| `ILL_W, ILL_H` | 36.8, 36 | illustration zone size |
 | `ILL_ABOVE` | 1.0 | illustration relief height above the base plate (STL only) |
+| `ILL_PIX` | 0.4 | relief resolution in mm per pixel |
 
-Row `i` has its baseline at `y = LINE_Y0 - i*LINE_H` and holds up to `LINE_WIDTHS[i]` cells, left-aligned at `TZ_X`. The lowest illustrated row (baseline y=55, lowest dot edge y=54.2) clears the top of the band (y=50) by 4.2mm.
+Row `i` has its baseline at `y = LINE_Y0 - i*LINE_H` and holds up to `LINE_WIDTHS[i]` cells, left-aligned at `TZ_X`. The 15th cell of a short row ends at x=97.3, 5.9mm left of the picture. The picture's bottom (y=104) clears the dots of row 5 (top edge y=100.8) by 3.2mm.
 
-Odd pages are illustrated and even pages are text-only. The last page also carries the picture when its text fits the 9-row profile, so a story never ends on a half-empty card without one.
+Odd pages are illustrated and even pages are text-only. The last page also carries the picture when its text fits the illustrated profile.
 
-The **page number** is drawn as decorative overlay text in the preview only (top-right); it is not part of the printed Braille in the current build.
+**Paragraphs.** A story is one paragraph: page 1 opens it in cell 3, and every later page is a runover that starts in cell 1. The .brf export uses the same rule on 40-cell lines.
+
+The **page number** is drawn as decorative overlay text in the preview only (top-left, since the top-right corner belongs to the picture); it is not part of the printed Braille in the current build.
 
 ### Not implemented (future)
 
-Earlier drafts of this spec defined three layout options (A picture-book, B text/illustration cards, C full-bed). The shipped build uses the single square band layout above. The alternatives remain possible future `layout` modes but are not in the current code.
+Earlier drafts of this spec defined three layout options (A picture-book, B text/illustration cards, C full-bed). The shipped build uses the single square corner layout above. The alternatives remain possible future `layout` modes but are not in the current code.
 
 ---
 
@@ -109,12 +112,13 @@ dot 3 (x+0.0, y+0.0)   dot 6 (x+2.5, y+0.0)
 
 Where `(x, y)` is the bottom-left corner of the cell. Dot 3 is at the origin.
 
-### Line and character limits (square band layout)
+### Line and character limits (square corner layout)
 
 ```
-Row width:          21 cells (x 10 → 136), on every row of every page
-Illustrated page:    9 rows = 189 cells (about 14% fewer than the old corner layout's 219)
-Text-only page:     13 rows = 273 cells
+Short rows:         4 rows × 15 cells (x 10 → 97.3), beside the picture
+Full rows:          21 cells (x 10 → 136)
+Illustrated page:   4 × 15 + 9 × 21 = 249 cells
+Text-only page:     13 × 21 = 273 cells
 ```
 
 ### Overflow & word wrapping
@@ -154,7 +158,7 @@ page_y = illustration_zone_origin_y + (canvas_height_mm - placement_y - element_
 
 (Y is flipped because the page coordinate system has Y increasing upward, but SVG/art-director has Y increasing downward.)
 
-**Minimum clearance from text zone:** 4.2mm between the lowest dot edge and the band top (already enforced by zone layout — no shapes may protrude above `illustration_zone_top`).
+**Minimum clearance from text:** 3.2mm below the picture to the dots of row 5, and 5.9mm beside it to the end of a short row (enforced by the zone layout).
 
 **Element clearance:** each placed element must maintain 3mm clearance from every other element and from zone edges. The renderer must clamp positions that violate this.
 
@@ -226,7 +230,7 @@ Corner radius: 2mm on all four corners (prevents sharp corners from cracking TPU
 
 **Braille dot to dot (different cells):** enforced by the 6.0mm cell spacing — adjacent cells have 4.4mm edge-to-edge gap (6.0mm center - 1.6mm diameter = 4.4mm). ISO compliant.
 
-**Braille to tactile graphic:** minimum 3mm edge-to-edge clearance between the last Braille line and the top of any raised illustration element. This is guaranteed by the layout: the lowest dot edge sits at y=54.2 and the band starts at y=50, a 4.2mm gap.
+**Braille to tactile graphic:** minimum 3mm edge-to-edge clearance between the last Braille line and the top of any raised illustration element. This is guaranteed by the layout: 3.2mm below the picture to row 5, 5.9mm beside it to the end of a short row.
 
 **Tactile graphic element to element:** minimum 3mm edge-to-edge, enforced by the PlacementSpec renderer (see `docs/shape-library-format.md`).
 
@@ -241,3 +245,4 @@ Corner radius: 2mm on all four corners (prevents sharp corners from cracking TPU
 | 1.0 | 2026-05-04 | Initial spec. Options A, B, C defined. Coordinate system, cell geometry, zone layout, pagination rules, base plate. |
 | 2.0 | 2026-07-01 | Matches shipped browser build: **square 150×150 page**, single L-shaped corner layout (7 full rows + 6 narrow rows beside a bottom-right illustration), `window.TACT_LAYOUT` as single source of truth, true-to-scale SVG preview, **balanced** pagination (no orphan last page). Options B/C deferred. |
 | 3.0 | 2026-09-11 | **Full-width lines, illustration band.** Every row runs 21 cells; the picture moves to a 130×38mm band at the bottom (origin 10, 12), drawn aspect-preserving. Illustrated pages hold 9 rows, text-only pages 13. Revised after expert field feedback on the short corner lines. Pagination is greedy again (balancing withdrawn). Illustration relief 1.0mm. |
+| 4.0 | 2026-10-26 | **Picture in the top-right corner.** Four 15-cell rows beside a 36.8×36mm picture, nine full rows below (249 cells). Paragraph opens in cell 3 on page 1. Relief at 0.4mm per pixel, cropped to the drawing. Revised after a blind reader printed and read a page. |

@@ -124,10 +124,20 @@ This file records every significant design decision made, why it was made, and w
 **Decision:** Ship ~89 hand-crafted line-art SVGs covering the most-cited fairy/bedtime subjects (creatures, animals, people, objects, nature). Illustration is chosen from story text by **whole-word** IT+EN keyword matching (not substring).
 **Rationale:** Hand-crafted shapes read far better under the fingers than parametric primitives (the cat is the quality bar). Whole-word matching fixes false positives (e.g. "mare"/sea no longer matches "re"/king) and covers plurals/diminutives, so most stories get a fitting illustration instead of the default star. **Note:** the entire library is now hand-crafted and the early parametric generator has been removed from the repository.
 
-### D022 — Full-width braille lines, illustration as a bottom band (supersedes D019; withdraws D020 balancing)
+### D022 — Full-width braille lines, illustration as a bottom band (supersedes D019; withdraws D020 balancing; superseded by D023)
 **Decision:** Every braille line runs the full 21-cell width. Illustrated pages hold 9 rows above a 130×38mm band at origin (10, 12), with the shape drawn aspect-preserving and centred; text-only pages hold 13 rows. Pagination is greedy: each page is filled before the next, and the leftover lands on the final card, which carries the picture. Illustration relief is 1.0mm, 0.15mm above the 0.85mm dots.
-**Rationale:** Chris Bischke, Ph.D., TVI, DT/V (University of Utah and Utah State University) read a printed page and reported that the 12-cell lines beside the corner picture are uncomfortable to read: braille lines should run the full width of the page. The revision costs about 14% of the cells on an illustrated page (189 vs 219), accepted because every line being readable matters more than density for a child learning by touch. Balanced pagination was withdrawn because it moved empty rows into middle pages, which have no picture to fill them, turning one unfinished card into two.
+**Rationale:** Chris Bischke, Ph.D., TVI, DT/V (University of Utah and Utah State University) reviewed the site (he did not print a page) and advised placing pictures at the very beginning or end of a story to avoid short lines of braille. The revision costs about 14% of the cells on an illustrated page (189 vs 219), accepted because every line being readable matters more than density for a child learning by touch. Balanced pagination was withdrawn because it moved empty rows into middle pages, which have no picture to fill them, turning one unfinished card into two.
 
+
+### D023 — Picture in the top-right corner, tactile silhouettes, 0.4 mm relief (supersedes D022 layout)
+**Decision:** The picture sits in the top-right corner (36.8×36mm). The first four lines are shortened to 15 cells, and the remaining nine run full width (249 cells per illustrated page). The relief is built at 0.4mm per pixel, cropped to the drawing. All 93 shapes are redrawn as filled silhouettes in a flat view: strokes ≥ 2.5mm, gaps and holes ≥ 3mm at print size. Page 1 opens the paragraph in cell 3.
+**Rationale:** A blind reader printed a page standing up, the orientation that gives the smoothest dots, and reported three problems:
+- the small picture sat in an "ocean" of blank plastic;
+- no braille appeared until a third of the print was done;
+- the picture could not be recognised.
+
+The 2mm relief made a 38mm picture into a 19×19 grid with broken outlines. Filled pictures are recognised by blind children far more reliably than raised-line drawings (Theurel et al. 2013). Four lines at 71% width are a much smaller cost than the old six at 57%, the left margin never moves, and the picture-book convention is familiar.
+**Rejected:** Centring a larger picture on top, which still leaves blank sides. A separate picture card, which needs a second layout and another print.
 ---
 
 ## Resolved (were pending)
