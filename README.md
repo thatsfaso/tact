@@ -59,7 +59,7 @@ A few decisions this project made on purpose, because the obvious version of thi
 
 **The story-writing model runs inside the visitor's browser tab: no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list, from a 3-billion-parameter model on capable hardware to progressively lighter ones, so nobody is locked out by their laptop, and on that path nothing leaves their machine. A faster hosted path now runs ahead of it and sends only the one-line idea, returning a story in a second or two; it races several independent providers so no single one can take it down, and removing it from the configuration returns the app to browser-only generation. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
 
-**Braille translation is a from-scratch deterministic mapping, not a bundled library.** Grade 1 braille, the uncontracted form this project standardizes on for beginning readers, is a fixed character-to-cell table with no linguistic ambiguity. Tact implements it directly for Italian and English rather than shipping a general-purpose translation engine, which means it is instant, works fully offline, and has no failure mode where a translation silently comes back wrong.
+**Braille translation is a from-scratch deterministic mapping, not a bundled library.** Grade 1 braille, the uncontracted form this project standardizes on for beginning readers, is a fixed character-to-cell table with no linguistic ambiguity. Tact implements it directly for Italian and English rather than shipping a general-purpose translation engine, which means it is instant, works fully offline, and has no failure mode where a translation silently comes back wrong. Contracted English (UEB Grade 2) is the one exception: its rules are far too subtle to hand-roll, so when someone picks it, Tact loads liblouis, the open translator used by braille software, compiled for the browser (about 470 KB, see [`vendor/liblouis/`](vendor/liblouis/)).
 
 **The on-screen preview and the physical print are generated from the same geometry, in millimetres, from one source of truth.** There is exactly one object describing where every braille dot and every illustration pixel sits on the page. The browser preview renders it as scalable vector shapes; the STL exporter walks the same coordinates into 3D domes and pillars. What a parent sees on screen before printing is what comes out of the nozzle, not an approximation of it.
 
@@ -70,7 +70,7 @@ A few decisions this project made on purpose, because the obvious version of thi
 - printing the page standing up, which gives the roundest dots, no braille appeared until a third of the print was done;
 - the picture could not be recognised.
 
-The picture now sits in the top-right corner, the way a picture book sets an illustration into its text. Only the first four lines are slightly shorter (15 of 21 cells), the rest run full width, and the left margin never moves. The page holds more braille than either earlier layout, and braille is the first thing the printer lays down.
+The picture now sits in the top-right corner, the way a picture book sets an illustration into its text. Only the first four lines are slightly shorter (15 of 21 cells), the rest run full width, and the left margin never moves. The page holds more braille than either earlier layout, and braille is the first thing the printer lays down. Every page also carries its number in braille at the end of the last line, where braille books put it, so the loose cards can be put back in order by touch.
 
 <div align="center">
 <img src="assets/tact_layout_band_vs_corner.png" alt="Two illustrated pages side by side. Left, labelled Old version: nine full-width braille lines with a small picture centred in a wide band across the bottom. Right, labelled Updated version: the picture sits in the top-right corner, the first four braille lines are slightly shorter beside it and the first one starts indented, and nine full-width lines fill the rest of the page." width="720"/>
@@ -111,7 +111,7 @@ Every dimension follows **ISO 17049:2013**, over-built by roughly 20 to 30% to c
 | Line spacing | 10.0 mm center-to-center | | |
 | Base plate | 0.5 mm | 0.48 mm | |
 
-Printed values come from a single reference print (budget FDM, PLA, measured with a digital caliper on one page), not a multi-printer distribution. Both dot values fall inside the ISO 17049:2013 tolerance band. Testing with blind readers has not happened yet.
+Printed values come from a single reference print (budget FDM, PLA, measured with a digital caliper on one page), not a multi-printer distribution. Both dot values fall inside the ISO 17049:2013 tolerance band. A blind reader has printed and read a page of the earlier layout, and that feedback shaped the current one (see above). The current layout has not been tested by blind readers yet.
 
 <div align="center">
 <img src="assets/tact_page_layout_geometry_corner.svg" alt="Dimensioned diagram of the shipped layout: 150x150mm page, four short braille rows of 15 cells beside a 36.8 by 36mm picture zone at origin (103.2, 104) in the top-right corner, and nine full rows of 21 cells below" width="720"/>
@@ -119,7 +119,7 @@ Printed values come from a single reference print (budget FDM, PLA, measured wit
 
 <p align="center"><sub>Dimensioned geometry of the shipped layout. The drawings of the earlier layouts are still in <a href="assets/">assets/</a> for reference.</sub></p>
 
-Italian output is **Grade 1 only**: Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
+Italian output is **Grade 1 only**: Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced, and can also be printed in **UEB Grade 2** (contracted) with a switch under the text box, for children who learn contractions from the start.
 
 ## Bilingual by design
 

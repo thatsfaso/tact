@@ -50,7 +50,7 @@
 <line x1="362" y1="300" x2="440" y2="330" stroke="#73726c" stroke-width="0.5" stroke-dasharray="2 2"/>
 <circle cx="362" cy="300" r="2" fill="#73726c"/>
 <text x="446" y="330" font-family="sans-serif" font-size="12" fill="#3D3D3A">Full rows: x 10 → 136</text>
-<text x="446" y="344" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">249 cells per illustrated page</text>
+<text x="446" y="344" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">last row: 16 cells + page number</text>
 
 <text x="90" y="400" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F1E1D">window.TACT_LAYOUT constants</text>
 
@@ -68,7 +68,7 @@
 <text x="380" y="426" font-family="monospace" font-size="12" fill="#3D3D3A">LINE_H, CELL_W</text>
 <text x="520" y="426" font-family="monospace" font-size="12" fill="#82817A">10, 6</text>
 <text x="380" y="446" font-family="monospace" font-size="12" fill="#3D3D3A">LINE_WIDTHS</text>
-<text x="520" y="446" font-family="monospace" font-size="12" fill="#82817A">[15×4, 21×9]</text>
+<text x="520" y="446" font-family="monospace" font-size="12" fill="#82817A">[15×4, 21×8, 16]</text>
 <text x="380" y="466" font-family="monospace" font-size="12" fill="#3D3D3A">ILL_X, ILL_Y</text>
 <text x="520" y="466" font-family="monospace" font-size="12" fill="#82817A">103.2, 104</text>
 <text x="380" y="486" font-family="monospace" font-size="12" fill="#3D3D3A">ILL_W, ILL_H</text>

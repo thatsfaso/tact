@@ -563,6 +563,7 @@ window.TACT = (function () {
   // Returns Promise<Array> — one entry per Braille cell.
   // Cell forms: dots[] = a cell, [] = space (and word-wrap point), "BR" = line break.
   function translateBraille(text, lang) {
+    if (grade2Active()) return Promise.resolve(grade2Cells(text));
     return new Promise(function (resolve) {
       var cells = [];
       var inNumber = false;
@@ -585,6 +586,78 @@ window.TACT = (function () {
       }
       resolve(cells);
     });
+  }
+
+  // ── Contracted braille (UEB Grade 2), English only ───────────────────────
+  // Grade 1 above stays the default and needs nothing. Many children, in the
+  // US especially, learn contractions from the start, so English can also be
+  // printed in Unified English Braille Grade 2. Contraction rules are far too
+  // subtle to hand-roll (a wrong contraction teaches a child wrong braille), so
+  // this uses liblouis itself: release 3.39, compiled to WebAssembly with only
+  // the UEB tables embedded (vendor/liblouis, see its README). It is loaded on
+  // demand, the first time someone picks Grade 2, and never otherwise.
+  var LOU_BASE = 'vendor/liblouis/';
+  var LOU_TABLE = '/tables/en-ueb-g2.ctb';
+  var LOU_MODE = 4 | 64;                  // dotsIO | ucBrl: Unicode braille out
+  var g2 = { ready: false, loading: null, translate: null };
+  var brailleMode = { lang: 'en', grade: 1 };
+
+  function loadGrade2() {
+    if (g2.ready) return Promise.resolve(true);
+    if (g2.loading) return g2.loading;
+    g2.loading = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = LOU_BASE + 'liblouis.js';
+      s.onerror = function () { reject(new Error('liblouis did not load')); };
+      s.onload = function () {
+        window.createLiblouis({ locateFile: function (f) { return LOU_BASE + f; } }).then(function (M) {
+          var CS = M._lou_charSize();       // bytes per widechar in this build
+          g2.translate = function (text) {
+            var units = [];
+            for (var i = 0; i < text.length; i++) units.push(text.charCodeAt(i));
+            var n = units.length, cap = n * 4 + 64;
+            var inBuf = M._malloc((n + 1) * CS), outBuf = M._malloc(cap * CS), lens = M._malloc(8);
+            var put = CS === 4 ? function (p, k, v) { M.HEAPU32[(p >> 2) + k] = v; }
+                               : function (p, k, v) { M.HEAPU16[(p >> 1) + k] = v; };
+            var get = CS === 4 ? function (p, k) { return M.HEAPU32[(p >> 2) + k]; }
+                               : function (p, k) { return M.HEAPU16[(p >> 1) + k]; };
+            units.forEach(function (u, k) { put(inBuf, k, u); });
+            M.HEAP32[lens >> 2] = n; M.HEAP32[(lens >> 2) + 1] = cap;
+            var ok = M.ccall('lou_translateString', 'number',
+              ['string', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
+              [LOU_TABLE, inBuf, lens, outBuf, lens + 4, 0, 0, LOU_MODE]);
+            var out = [];
+            if (ok) {
+              var m = M.HEAP32[(lens >> 2) + 1];
+              for (var j = 0; j < m; j++) out.push(get(outBuf, j));
+            }
+            M._free(inBuf); M._free(outBuf); M._free(lens);
+            if (!ok) throw new Error('liblouis translation failed');
+            return out;
+          };
+          // Fail here, not halfway through a story, if the tables are broken.
+          if (grade2Cells('the').length !== 1) throw new Error('UEB tables not usable');
+          g2.ready = true;
+          resolve(true);
+        }).catch(reject);
+      };
+      document.head.appendChild(s);
+    }).catch(function (e) { g2.loading = null; throw e; });
+    return g2.loading;
+  }
+
+  // Unicode braille (U+2800 + dot bits) back to Tact's cell form: dots[] per
+  // cell, [] for a blank cell, which is also where a line may break.
+  function grade2Cells(text) {
+    var codes = g2.translate(normalisePunctuation(text).replace(/\s+/g, ' '));
+    return codes.map(function (c) {
+      var bits = (c >= 0x2800 && c <= 0x28ff) ? c - 0x2800 : 0, dots = [];
+      for (var d = 0; d < 6; d++) if (bits & (1 << d)) dots.push(d + 1);
+      return dots;
+    });
+  }
+  function grade2Active() {
+    return brailleMode.lang === 'en' && brailleMode.grade === 2 && g2.ready;
   }
 
   // ── WebLLM (adaptive, runs entirely in-browser) ──────────────────────────
@@ -840,6 +913,10 @@ window.TACT = (function () {
     cloudEnabled: !!CLOUD_ENDPOINT,
     translateBraille: translateBraille,
     normalisePunctuation: normalisePunctuation,
+    loadGrade2: loadGrade2,
+    grade2Cells: grade2Cells,
+    grade2Active: grade2Active,
+    setBrailleMode: function (lang, grade) { brailleMode = { lang: lang, grade: grade }; },
     generateStory: generateStory,
     refineStoryCloudOnly: refineStoryCloudOnly,
     // ── Model controls (used now internally; future manual-selection UI hooks)
@@ -878,14 +955,32 @@ window.TACT = (function () {
   //     margin never moves, so the reading finger always returns to the same
   //     place and the cell-3 paragraph indent stays meaningful.
   var TZ_X=10, CELL_W=6.0, LINE_H=10.0, LINE_Y0=135;
-  // ILLUSTRATED pages: 4 short lines beside the picture + 9 full = 249 cells.
-  // TEXT pages: 13 full lines = 273 cells.
-  var LINE_WIDTHS=[15,15,15,15,21,21,21,21,21,21,21,21,21];
-  var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,21];
+  // ILLUSTRATED pages: 4 short lines beside the picture + 9 full = 244 cells.
+  // TEXT pages: 13 full lines = 268 cells.
+  // The last line stops at 16 cells: its right end carries the braille page
+  // number (see pageNumberCells), so pages that come off the printer as loose
+  // cards can be put back in order by touch alone.
+  var LINE_WIDTHS=[15,15,15,15,21,21,21,21,21,21,21,21,16];
+  var LINE_WIDTHS_FULL=[21,21,21,21,21,21,21,21,21,21,21,21,16];
   // Paragraphs open in cell 3 and run over to cell 1 (standard braille format).
   var PARA_INDENT=2;
   // Dot offsets within cell indexed by dot number (1-6), from cell bottom-left
   var DOFF=[null,[0,5],[0,2.5],[0,0],[2.5,5],[2.5,2.5],[2.5,0]];
+  // Braille page number: number sign then the digits (a to j, same in UEB and
+  // Italian braille), right-aligned on the last line, where braille books put
+  // it. Text on that line ends at cell 16, so one digit leaves three blank
+  // cells between the story and the number, as braille format asks.
+  var DIGIT_CELLS={'1':[1],'2':[1,2],'3':[1,4],'4':[1,4,5],'5':[1,5],'6':[1,2,4],'7':[1,2,4,5],'8':[1,2,5],'9':[2,4],'0':[2,4,5]};
+  function pageNumberCells(n){
+    var cells=[[3,4,5,6]];
+    String(n).split('').forEach(function(d){ cells.push(DIGIT_CELLS[d]); });
+    return cells;
+  }
+  // Where those cells go: [{line, cell, dots}], cells counted from 0.
+  function pageNumberPlacement(n, widths){
+    var pn=pageNumberCells(n), line=widths.length-1, last=LINE_WIDTHS_FULL[0]-1;
+    return pn.map(function(dots,k){ return { line: line, cell: last-(pn.length-1)+k, dots: dots }; });
+  }
   // Illustration zone, top-right, inside the 10 mm margin. Its bottom (y=104)
   // clears the dots of line 5 (top edge y=100.8) by 3.2 mm; the 15th cell of a
   // short line ends at x=97.3, 5.9 mm left of the picture.
@@ -1129,6 +1224,10 @@ window.TACT = (function () {
         cell.forEach(function(d){ var o=DOFF[d]; if(o)dot(tris,cx+o[0],cy+o[1]); });
       });
     });
+    pageNumberPlacement(pageNum,widths).forEach(function(p){
+      var cy=LINE_Y0-p.line*LINE_H, cx=TZ_X+p.cell*CELL_W;
+      p.dots.forEach(function(d){ var o=DOFF[d]; dot(tris,cx+o[0],cy+o[1]); });
+    });
     // Illustration relief: merged blocks at ILL_PIX resolution, flat-topped.
     if(illBlocks&&illBlocks.length){
       for(var i=0;i<illBlocks.length;i+=4){
@@ -1188,7 +1287,7 @@ window.TACT = (function () {
     PAGE_W: PAGE_W, PAGE_H: PAGE_H, BASE_H: BASE_H, CORNER_R: CORNER_R,
     TZ_X: TZ_X, CELL_W: CELL_W, LINE_H: LINE_H, LINE_Y0: LINE_Y0,
     LINE_WIDTHS: LINE_WIDTHS, LINE_WIDTHS_FULL: LINE_WIDTHS_FULL, PARA_INDENT: PARA_INDENT,
-    DOFF: DOFF, DOT_R: DOT_R,
+    DOFF: DOFF, DOT_R: DOT_R, pageNumberPlacement: pageNumberPlacement,
     ILL_X: ILL_X, ILL_Y: ILL_Y, ILL_W: ILL_W, ILL_H: ILL_H, ILL_PIX: ILL_PIX
   };
 })();
@@ -1342,6 +1441,8 @@ const CAP_INDICATOR = [6];
 const NUM_INDICATOR = [3,4,5,6];
 
 function textToBrailleCells(text) {
+  // Contracted English (Grade 2) comes from liblouis once it is loaded.
+  if (window.TACT && window.TACT.grade2Active && window.TACT.grade2Active()) return window.TACT.grade2Cells(text);
   const cells = [];
   let inNumber = false;
   const normalise = (window.TACT && window.TACT.normalisePunctuation) || String;
@@ -1490,6 +1591,12 @@ const COPY = {
     or:         "or type below",
     placeholder:"a pirate cat who sails to the moon",
     submit:     "Make my story",
+    gradeLabel: "Braille",
+    grade1:     "Uncontracted",
+    grade2:     "Contracted",
+    grade1Hint: "Grade 1: one cell per letter",
+    grade2Hint: "Grade 2 (UEB): with contractions",
+    grade2Failed: "Contracted braille could not load, so this story is in uncontracted braille.",
     weaving:    "Weaving your story…",
     generating: "Writing your story…",
     modelDownloading: "Downloading AI model…",
@@ -1536,9 +1643,9 @@ const COPY = {
         ]},
         { name: "Reading the page", items: [
           { q: "How is the page read?",
-            a: "When there is an illustration it sits in the top-right corner, like in a picture book: the first four lines are a little shorter to make room for it, and every line after that runs the full width. The story opens with a paragraph indent. You read left to right and top to bottom, the same as any text, and every line starts at the same left edge. Pages are meant to be read in order, and the page number is not printed in relief, so it helps to keep them in order as they come off the printer." },
-          { q: "What is Grade 1 braille?",
-            a: "It is braille spelled out letter by letter, with no contractions. It is the form people learn to read with, so it is the right one for children. Italian only has this form. English also has a Grade 2 with many contractions, but that comes later in a reader's life, so it is not used here." },
+            a: "When there is an illustration it sits in the top-right corner, like in a picture book: the first four lines are a little shorter to make room for it, and every line after that runs the full width. The story opens with a paragraph indent. You read left to right and top to bottom, the same as any text, and every line starts at the same left edge. Each page carries its number in braille at the right end of the last line, after a short gap, so the cards can be put back in order by touch." },
+          { q: "Uncontracted or contracted braille?",
+            a: "Uncontracted braille (Grade 1) spells every word letter by letter. Contracted braille (Grade 2) uses short forms for common words and letter groups, such as one cell for \"the\" or \"and\". Many children learn contractions from the start, others begin uncontracted, so for English you can choose under the text box. Contracted English follows Unified English Braille and is translated by liblouis, the same open translator used by braille software. Italian braille has only the uncontracted form." },
         ]},
         { name: "About", items: [
           { q: "Who made this?",
@@ -1567,6 +1674,12 @@ const COPY = {
     or:         "oppure scrivi qui sotto",
     placeholder:"un gatto pirata che naviga verso la luna",
     submit:     "Crea la storia",
+    gradeLabel: "Braille",
+    grade1:     "Integrale",
+    grade2:     "Contratto",
+    grade1Hint: "Grado 1: una cella per lettera",
+    grade2Hint: "Grado 2 (UEB): con contrazioni",
+    grade2Failed: "Il braille contratto non si è caricato, quindi questa storia è in braille integrale.",
     weaving:    "Sto creando la storia…",
     generating: "Sto scrivendo la storia…",
     modelDownloading: "Scarico il modello AI…",
@@ -1613,9 +1726,9 @@ const COPY = {
         ]},
         { name: "Leggere la pagina", items: [
           { q: "Come si legge la pagina?",
-            a: "Quando c'è un'illustrazione si trova nell'angolo in alto a destra, come in un libro illustrato: le prime quattro righe sono un po' più corte per farle posto, e tutte le altre arrivano fino in fondo alla riga. La storia comincia con un rientro di paragrafo. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi, e ogni riga parte dallo stesso margine sinistro. Le pagine vanno lette in ordine, e il numero di pagina non è stampato in rilievo, quindi conviene tenerle ordinate man mano che escono dalla stampante." },
-          { q: "Cos'è il braille di Grado 1?",
-            a: "È il braille lettera per lettera, senza abbreviazioni. È la forma con cui si impara a leggere, quindi è quella giusta per i bambini. L'italiano usa soltanto questa. L'inglese ha anche un Grado 2 pieno di contrazioni, che però si affronta più avanti, e per questo qui non viene usato." },
+            a: "Quando c'è un'illustrazione si trova nell'angolo in alto a destra, come in un libro illustrato: le prime quattro righe sono un po' più corte per farle posto, e tutte le altre arrivano fino in fondo alla riga. La storia comincia con un rientro di paragrafo. Si legge da sinistra a destra e dall'alto in basso, come un testo qualsiasi, e ogni riga parte dallo stesso margine sinistro. Ogni pagina ha il suo numero in braille alla fine dell'ultima riga, dopo un piccolo spazio, così le schede si rimettono in ordine anche solo con il tatto." },
+          { q: "Braille integrale o contratto?",
+            a: "Il braille integrale (Grado 1) scrive ogni parola lettera per lettera. Il braille contratto (Grado 2) usa forme brevi per parole e gruppi di lettere frequenti, per esempio una sola cella per \"the\" o \"and\". Esiste solo per l'inglese: molti bambini imparano le contrazioni fin dall'inizio, altri partono dall'integrale, quindi in inglese si può scegliere sotto la casella di testo. L'inglese contratto segue lo Unified English Braille ed è tradotto da liblouis, lo stesso traduttore aperto usato dai programmi braille. Il braille italiano ha solo la forma integrale." },
         ]},
         { name: "Il progetto", items: [
           { q: "Chi l'ha realizzato?",
@@ -2002,7 +2115,7 @@ function LoadingScreen({ msg, progress, t }) {
 
 // ─── Story result ─────────────────────────────────────────────────────────────
 // pages: Array<{ text, illustration, brailleCells: dots[][]|null, demo: bool }>
-function StoryResult({ pages, lang, t, onAgain }) {
+function StoryResult({ pages, lang, t, onAgain, note }) {
   const [page, setPage] = useState(0);
   const p = pages[page];
 
@@ -2031,6 +2144,14 @@ function StoryResult({ pages, lang, t, onAgain }) {
             on: Array.isArray(cell) && cell.includes(d) });
         }
       });
+    });
+    // The braille page number, bottom-right, exactly where the STL puts it.
+    L.pageNumberPlacement(page + 1, pageWidths).forEach(({ line, cell, dots: on }) => {
+      const baseY = L.LINE_Y0 - line * L.LINE_H, cellX = L.TZ_X + cell * L.CELL_W;
+      for (let d = 1; d <= 6; d++) {
+        const off = L.DOFF[d];
+        out.push({ x: cellX + off[0], y: L.PAGE_H - (baseY + off[1]), on: on.includes(d) });
+      }
     });
     return out;
   }, [cells, pageWidths, page]);
@@ -2127,6 +2248,12 @@ function StoryResult({ pages, lang, t, onAgain }) {
           )}
           {/* The page's main heading for screen readers (h1, so JAWS and NVDA
               can jump straight to it), styled as the small label it looks like. */}
+          {note && (
+            <div role="status" className="text-[13px] px-3 py-2 rounded-xl"
+              style={{ background: 'rgba(10,10,12,0.06)', color: 'var(--muted)', alignSelf: 'flex-start' }}>
+              {note}
+            </div>
+          )}
           <h1 ref={headingRef} tabIndex={-1} className="mono text-[11px] tracking-[0.22em] uppercase focus-ring" style={{ color: "var(--muted)", outlineOffset: 4, fontWeight: "inherit" }}>{t.yourStory}</h1>
           <p className="serif text-[32px] leading-[1.18] max-md:text-[24px] max-md:leading-[1.25]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</p>
 
@@ -2186,7 +2313,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
           </div>
 
           <div className="mono text-[10px] uppercase tracking-[0.22em] flex flex-wrap gap-x-4 gap-y-1 mt-2" style={{ color: "var(--muted-soft)" }}>
-            <span>● {lang === "it" ? "Italiano · Grado 1" : "English · Grade 1 UEB"}</span>
+            <span>● {lang === "it" ? "Italiano · Grado 1" : (window.TACT.grade2Active() ? "English · Grade 2 UEB" : "English · Grade 1 UEB")}</span>
             <span>● 220 × 220 mm</span>
             <span>● TPU / PETG</span>
           </div>
@@ -2442,6 +2569,17 @@ function App() {
     try { return new URLSearchParams(location.search).get("lang") === "it" ? "it" : "en"; }
     catch (e) { return "en"; }
   });
+  // English can be printed contracted (UEB Grade 2). Remembered per browser.
+  const [grade, setGrade] = useState(() => {
+    try { return localStorage.getItem("tact-grade") === "2" ? 2 : 1; } catch (e) { return 1; }
+  });
+  const [gradeNote, setGradeNote] = useState("");
+  useEffect(() => {
+    window.TACT.setBrailleMode(lang, grade);
+    try { localStorage.setItem("tact-grade", String(grade)); } catch (e) {}
+    // Fetch the translator as soon as it is chosen, not when the story is due.
+    if (lang === "en" && grade === 2) window.TACT.loadGrade2().catch(() => {});
+  }, [lang, grade]);
   // Screen readers (JAWS, NVDA, VoiceOver) pick their voice from the page
   // language. Without this, Italian was read with an English voice.
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -2616,6 +2754,18 @@ function App() {
         }
       }
 
+      // Contracted braille changes how much fits on a page, so the translator
+      // must be ready before the story is split into pages.
+      setGradeNote("");
+      if (lang === "en" && grade === 2) {
+        try { await window.TACT.loadGrade2(); window.TACT.setBrailleMode(lang, 2); }
+        catch (e) {
+          console.warn('[TACT] Grade 2 unavailable, using Grade 1:', e && e.message);
+          window.TACT.setBrailleMode(lang, 1);
+          setGradeNote(t.grade2Failed);
+        }
+      }
+
       rawPages = buildPages(storyText || q, lang);
 
       setLoadingMsg(t.brailleTranslating);
@@ -2705,6 +2855,20 @@ function App() {
                   {t.submit}
                 </button>
               </form>
+              {lang === "en" && (
+                <div role="group" aria-label={t.gradeLabel} className="flex items-center gap-1 p-1 rounded-full"
+                  style={{ background: "rgba(250,250,247,0.6)", boxShadow: "0 0 0 1px var(--hairline) inset" }}>
+                  {[1, 2].map(g => (
+                    <button key={g} type="button" aria-pressed={grade === g} title={g === 1 ? t.grade1Hint : t.grade2Hint}
+                      onClick={() => { setGrade(g); window.SFX && window.SFX.play("toggle"); }}
+                      className="focus-ring mono text-[10px] uppercase tracking-[0.18em] px-3 py-1.5 rounded-full"
+                      style={{ background: grade === g ? "var(--ink)" : "transparent", color: grade === g ? "#fafaf7" : "var(--muted)",
+                        border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>
+                      {g === 1 ? t.grade1 : t.grade2}<span className="sr-only">, {g === 1 ? t.grade1Hint : t.grade2Hint}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="w-full mt-2">
@@ -2719,7 +2883,7 @@ function App() {
       )}
 
       {phase === "loading" && <LoadingScreen msg={loadingMsg} progress={loadingProgress} t={t} />}
-      {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} />}
+      {phase === "result" && pages && <StoryResult pages={pages} lang={lang} t={t} onAgain={reset} note={gradeNote} />}
     </div>
   );
 }

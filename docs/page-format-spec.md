@@ -1,6 +1,6 @@
 # Page Format Specification
 
-**Status: v4.0 — matches the shipped browser implementation.**
+**Status: v4.1 — matches the shipped browser implementation.**
 
 This document defines the physical page dimensions, coordinate system, layout zones, and pagination rules for all TACT output.
 
@@ -28,7 +28,7 @@ How it got here:
 
 1. **L-shape (v2.0).** Six 12-cell lines (57% width) beside a 54×54mm bottom-right picture. Chris Bischke, Ph.D., TVI, DT/V (University of Utah), reviewing the site, advised placing pictures at the beginning or end of a story to avoid short lines of braille.
 2. **Bottom band (v3.0).** Every line full width, the picture in a 130×38mm band along the bottom. A blind reader who printed a page found a small picture in an "ocean" of blank plastic and, printing the page standing up, met no braille until a third of the print was done.
-3. **Top-right corner (v4.0).** Four slightly shorter lines instead of six half lines, no blank band at the bottom, braille is the first thing printed when the page stands up. An illustrated page holds 249 cells (band: 189, L-shape: 219).
+3. **Top-right corner (v4.0).** Four slightly shorter lines instead of six half lines, no blank band at the bottom, braille is the first thing printed when the page stands up. An illustrated page holds 244 text cells plus the braille page number (band: 189, L-shape: 219).
 
 ```
 Page size:  150 mm × 150 mm (square)
@@ -47,7 +47,7 @@ Print bed:  fits 220×220mm bed with 35mm clearance each side
 │  ███████████████████████████  full row (21)     │  line 5 baseline y=95, dots top y=100.8
 │  ███████████████████████████  full row (21)     │
 │  ...                                            │
-│  ███████████████████████████  full row (21)     │  line 13 baseline y=15
+│  ██████████████████      #a  last row (16) + no. │  line 13 baseline y=15
 │  10mm margin                                    │
 └────────────────────────────────────────────────┘  y=0
    x=0                                        x=150
@@ -79,7 +79,7 @@ Odd pages are illustrated and even pages are text-only. The last page also carri
 
 **Paragraphs.** A story is one paragraph: page 1 opens it in cell 3, and every later page is a runover that starts in cell 1. The .brf export uses the same rule on 40-cell lines.
 
-The **page number** is drawn as decorative overlay text in the preview only (bottom-left, in the bottom margin); it is not part of the printed Braille in the current build.
+The **page number** is printed in braille at the right end of the last line (see Page Number Zone). The preview also shows it as small print text in the bottom-left margin, for sighted helpers.
 
 ### Not implemented (future)
 
@@ -117,8 +117,9 @@ Where `(x, y)` is the bottom-left corner of the cell. Dot 3 is at the origin.
 ```
 Short rows:         4 rows × 15 cells (x 10 → 97.3), beside the picture
 Full rows:          21 cells (x 10 → 136)
-Illustrated page:   4 × 15 + 9 × 21 = 249 cells
-Text-only page:     13 × 21 = 273 cells
+Last row:           16 cells of text, then the page number
+Illustrated page:   4 × 15 + 8 × 21 + 16 = 244 cells
+Text-only page:     12 × 21 + 16 = 268 cells
 ```
 
 ### Overflow & word wrapping
@@ -166,22 +167,16 @@ page_y = illustration_zone_origin_y + (canvas_height_mm - placement_y - element_
 
 ## Page Number Zone
 
-Every page has a Braille page number in the bottom-right corner of the page number zone.
+Every page carries its number in braille at the right end of the last line (line 13), where braille books put it. Each story is printed as separate cards, so this is how a blind reader puts them back in order without help.
 
 ```
-Position: right-aligned within page number zone
-Content: Braille number indicator + digit(s) for the page number
-Font size: standard Braille cell geometry (identical to text zone)
+Line:      13 (baseline y = 15)
+Cells:     number sign (dots 3-4-5-6) + one cell per digit (a to j)
+Position:  right-aligned, last cell is cell 21 (x 130 to 136)
+Text:      line 13 holds at most 16 cells of story text
 ```
 
-For page numbers 1–9: 2 cells (number indicator + digit).
-For page numbers 10–99: 3 cells.
-
-The number indicator cell and digit cells are placed right-aligned:
-```
-rightmost_cell_x = text_zone_origin_x + text_zone_width - 6.0
-number_cells_origin_x = rightmost_cell_x - (n_cells - 1) * 6.0
-```
+Pages 1 to 9 use 2 cells (cells 20 and 21), which leaves 3 blank cells between the text and the number, the separation braille formatting asks for. Pages 10 to 99 use 3 cells and leave 2. The number signs and digits are the same in UEB and in Italian braille. The geometry lives in `pageNumberPlacement` in `index.html`, used by both the STL and the preview.
 
 ---
 
@@ -245,4 +240,5 @@ Corner radius: 2mm on all four corners (prevents sharp corners from cracking TPU
 | 1.0 | 2026-05-04 | Initial spec. Options A, B, C defined. Coordinate system, cell geometry, zone layout, pagination rules, base plate. |
 | 2.0 | 2026-07-01 | Matches shipped browser build: **square 150×150 page**, single L-shaped corner layout (7 full rows + 6 narrow rows beside a bottom-right illustration), `window.TACT_LAYOUT` as single source of truth, true-to-scale SVG preview, **balanced** pagination (no orphan last page). Options B/C deferred. |
 | 3.0 | 2026-09-11 | **Full-width lines, illustration band.** Every row runs 21 cells; the picture moves to a 130×38mm band at the bottom (origin 10, 12), drawn aspect-preserving. Illustrated pages hold 9 rows, text-only pages 13. Revised after expert field feedback on the short corner lines. Pagination is greedy again (balancing withdrawn). Illustration relief 1.0mm. |
+| 4.1 | 2026-10-27 | **Braille page number.** Printed at the right end of line 13, which now holds 16 cells of text (244 per illustrated page, 268 per text page). |
 | 4.0 | 2026-10-26 | **Picture in the top-right corner.** Four 15-cell rows beside a 36.8×36mm picture, nine full rows below (249 cells). Paragraph opens in cell 3 on page 1. Relief at 0.4mm per pixel, cropped to the drawing. Revised after a blind reader printed and read a page. |

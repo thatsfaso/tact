@@ -138,6 +138,16 @@ This file records every significant design decision made, why it was made, and w
 
 The 2mm relief made a 38mm picture into a 19×19 grid with broken outlines. Filled pictures are recognised by blind children far more reliably than raised-line drawings (Theurel et al. 2013). Four lines at 71% width are a much smaller cost than the old six at 57%, the left margin never moves, and the picture-book convention is familiar.
 **Rejected:** Centring a larger picture on top, which still leaves blank sides. A separate picture card, which needs a second layout and another print.
+
+### D024 - Braille page number on every page
+**Decision:** Every page prints its number in braille at the right end of the last line: the number sign and the digits, right-aligned at cell 21. The last line now holds 16 cells of text, so a one-digit number sits 3 blank cells after the story.
+**Rationale:** A story comes off the printer as separate cards. Until now the page number existed only on screen, so a blind reader depended on someone sighted to put the cards in order. Bottom right is where braille books put the page number, so readers already know where to find it.
+**Rejected:** A number in the bottom margin, which would sit only 2.7mm from the edge of the plate. A notch or cut corner per page, which does not say which page it is.
+
+### D025 - Optional contracted English (UEB Grade 2) through liblouis
+**Decision:** English can be printed in UEB Grade 2 with a switch under the text box; Grade 1 stays the default and Italian stays Grade 1 only. Grade 2 is translated by liblouis 3.39.0 compiled to WebAssembly, with only the nine UEB tables embedded (`vendor/liblouis/`). It loads only when someone picks it. If it fails to load, the story is printed in Grade 1 and the page says so.
+**Rationale:** Feedback from a braille reader asked for contracted braille: many children, in the US especially, learn contractions from the start. Contraction rules depend on syllables and word position, so a hand-written table would teach a child wrong braille. liblouis is the reference open source translator. Output was checked against native liblouis cell for cell.
+**Rejected:** Hand-coding the common contractions. Translating on the server, which would add a dependency for something the browser can do.
 ---
 
 ## Resolved (were pending)
