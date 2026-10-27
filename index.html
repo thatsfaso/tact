@@ -2423,13 +2423,37 @@ const SHAPE_KEYWORDS = {
   }
 };
 
-function pickShapeFromText(text, lang) {
+// Shapes whose words are mostly figures of speech or a detail of someone else
+// ("her heart beating", "eyes like stars", "a pirate cat"). They still win
+// when nothing else is named.
+const WEAK_SHAPES = new Set(['heart', 'star', 'hat_pirate']);
+
+const wordsOf = (text) => (text || '').toLowerCase().split(/[^a-zàèéìòù]+/).filter(Boolean);
+
+// Picks the picture for a page. The first matching shape in table order used to
+// win, so "two friends and a paper boat" got a heart because the story said
+// "her heart beating" and heart comes before boat in the table. Now every named
+// shape is scored: what the reader asked for (idea) counts most, then how often
+// the page and the whole story mention it; figure-of-speech shapes count less,
+// and an earlier mention breaks ties. Within the idea, the first thing named is
+// usually the main character ("a fox who guards a castle"), so it counts more.
+function pickShapeFromText(text, lang, idea = '', story = '') {
   const keywords = SHAPE_KEYWORDS[lang === 'it' ? 'it' : 'en'];
-  const wset = new Set(text.toLowerCase().split(/[^a-zàèéìòù]+/).filter(Boolean));
+  const page = wordsOf(text), ideaW = wordsOf(idea), all = wordsOf(story);
+  let best = null, bestScore = 0, bestPos = Infinity;
   for (const [shape, keys] of Object.entries(keywords)) {
-    if (keys.some(k => wset.has(k))) return shape;
+    const ks = new Set(keys);
+    const onPage = page.filter(w => ks.has(w)).length;
+    const ideaPos = ideaW.findIndex(w => ks.has(w));
+    const inStory = all.filter(w => ks.has(w)).length;
+    let score = (ideaPos < 0 ? 0 : Math.max(10, 20 - 2 * ideaPos)) + onPage * 2 + inStory;
+    if (!score) continue;
+    if (WEAK_SHAPES.has(shape)) score *= 0.3;
+    const pos = page.findIndex(w => ks.has(w));
+    const at = pos < 0 ? Infinity : pos;
+    if (score > bestScore || (score === bestScore && at < bestPos)) { best = shape; bestScore = score; bestPos = at; }
   }
-  return 'star';
+  return best || 'star';
 }
 
 // Human-readable name of a shape in the given language, for screen-reader
@@ -2546,15 +2570,16 @@ function wordTargetFrom(text, asked) {
 // pages are text-only (see isTextOnlyPage). Each illustrated page picks a shape
 // from its OWN text so a multi-page story can vary its pictures, falling back to
 // the story's main subject when a page names nothing in the shape library.
-function buildPages(storyText, lang) {
-  const mainShape = pickShapeFromText(storyText, lang);
+// idea: what the reader asked for, which decides the picture when it names one.
+function buildPages(storyText, lang, idea = '') {
+  const mainShape = pickShapeFromText(storyText, lang, idea, storyText);
   const texts = paginateStory(storyText);
   return texts.map((text, idx) => {
     const pageNumber = idx + 1;
     const illustrated = pageIsIllustrated(pageNumber, texts.length, text);
     let illustration = null;
     if (illustrated) {
-      let shape = pickShapeFromText(text, lang);
+      let shape = pickShapeFromText(text, lang, idea, storyText);
       if (shape === 'star') shape = mainShape; // no subject on this page → anchor
       illustration = {
         scene: text, layout_hint: "center",
@@ -2773,7 +2798,7 @@ function App() {
         }
       }
 
-      rawPages = buildPages(storyText || q, lang);
+      rawPages = buildPages(storyText || q, lang, q);
 
       setLoadingMsg(t.brailleTranslating);
       setLoadingProgress(null);
