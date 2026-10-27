@@ -2,7 +2,7 @@
 
 # Tact
 
-**A story a blind child asks for, turned into a page they can read with their own hands — printed at home, on a €70 3D printer, for the cost of the filament.**
+**A story a blind child asks for, turned into a page they can read with their own hands, printed at home, on a €70 3D printer, for the cost of the filament.**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-0a0a0c.svg?style=flat-square)](LICENSE)
 [![Runs in the browser](https://img.shields.io/badge/runs-100%25%20client--side-0a0a0c.svg?style=flat-square)](#how-it-works)
@@ -10,7 +10,7 @@
 [![Languages](https://img.shields.io/badge/languages-IT%20%7C%20EN-0a0a0c.svg?style=flat-square)](#bilingual-by-design)
 [![No account](https://img.shields.io/badge/account-none%20required-0a0a0c.svg?style=flat-square)](#try-it-now)
 
-<sub>📄 The full design and engineering report — every decision, every study, every rejected alternative — lives in <a href="paper/v2/tact.pdf"><b>paper/v2/tact.pdf</b></a>.</sub>
+<sub>📄 The full design and engineering report (every decision, every study, every rejected alternative) lives in <a href="paper/v2/tact.pdf"><b>paper/v2/tact.pdf</b></a>.</sub>
 
 </div>
 
@@ -18,7 +18,7 @@
 
 ## The gap this closes
 
-Braille literacy among blind children has fallen from roughly **50% in 1960 to under 10% today.** The reason is not technology — it is content. A braille book costs many times more than its print equivalent, takes weeks to produce, and only exists if someone already decided it was worth transcribing. A sighted five-year-old can ask for a story about *anything* and see it appear that evening. A blind five-year-old, in practice, cannot.
+Braille literacy among blind children has fallen from roughly **50% in 1960 to under 10% today.** The reason is not technology. It is content. A braille book costs many times more than its print equivalent, takes weeks to produce, and only exists if someone already decided it was worth transcribing. A sighted five-year-old can ask for a story about *anything* and see it appear that evening. A blind five-year-old, in practice, cannot.
 
 Tact exists to close exactly that gap: an idea, spoken out loud, becomes a physical braille page with a raised tactile picture, ready to print, the same day.
 
@@ -31,7 +31,7 @@ A parent, teacher, or the child themselves speaks a one-line idea. Everything do
 ```mermaid
 flowchart LR
     A["🎙️ Voice or text\n'a fox who guarded a castle'"] --> B["Story writing\n(in-browser language model)"]
-    B --> C["Grade 1 braille\ntranslation — IT / EN"]
+    B --> C["Grade 1 braille\ntranslation - IT / EN"]
     B --> D["Illustration matching\n93 tactile shapes"]
     C --> E["Page layout\nsquare, picture top-right"]
     D --> E
@@ -45,7 +45,7 @@ The full architecture, module by module:
 <img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, in-browser LLM, parallel braille translation and tactile graphics, page layout, STL generation, 3D printer output" width="720"/>
 </div>
 
-The result: a flexible page, roughly postcard-sized, with domed braille dots and a raised silhouette set into the top-right corner — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
+The result: a flexible page, roughly postcard-sized, with domed braille dots and a raised silhouette set into the top-right corner: read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
 
 <div align="center">
 <img src="assets/tact_page_mockup_corner.svg" alt="Tact page mockup: top view of the 150x150mm page with a filled cat silhouette in the top-right corner, four short braille rows beside it and nine full rows below, and a cross-section comparing domed braille dots to the flat-topped tactile picture relief" width="720"/>
@@ -57,13 +57,13 @@ The result: a flexible page, roughly postcard-sized, with domed braille dots and
 
 A few decisions this project made on purpose, because the obvious version of this tool would have failed the people it's for:
 
-**The story-writing model runs inside the visitor's browser tab — no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list — from a 3-billion-parameter model on capable hardware to progressively lighter ones — so nobody is locked out by their laptop, and on that path nothing leaves their machine. A faster hosted path now runs ahead of it and sends only the one-line idea, returning a story in a second or two; it races several independent providers so no single one can take it down, and removing it from the configuration returns the app to browser-only generation. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
+**The story-writing model runs inside the visitor's browser tab: no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list, from a 3-billion-parameter model on capable hardware to progressively lighter ones, so nobody is locked out by their laptop, and on that path nothing leaves their machine. A faster hosted path now runs ahead of it and sends only the one-line idea, returning a story in a second or two; it races several independent providers so no single one can take it down, and removing it from the configuration returns the app to browser-only generation. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
 
-**Braille translation is a from-scratch deterministic mapping, not a bundled library.** Grade 1 braille — the uncontracted form this project standardizes on for beginning readers — is a fixed character-to-cell table with no linguistic ambiguity. Tact implements it directly for Italian and English rather than shipping a general-purpose translation engine, which means it is instant, works fully offline, and has no failure mode where a translation silently comes back wrong.
+**Braille translation is a from-scratch deterministic mapping, not a bundled library.** Grade 1 braille, the uncontracted form this project standardizes on for beginning readers, is a fixed character-to-cell table with no linguistic ambiguity. Tact implements it directly for Italian and English rather than shipping a general-purpose translation engine, which means it is instant, works fully offline, and has no failure mode where a translation silently comes back wrong.
 
-**The on-screen preview and the physical print are generated from the same geometry, in millimetres, from one source of truth.** There is exactly one object describing where every braille dot and every illustration pixel sits on the page. The browser preview renders it as scalable vector shapes; the STL exporter walks the same coordinates into 3D domes and pillars. What a parent sees on screen before printing is what comes out of the nozzle — not an approximation of it.
+**The on-screen preview and the physical print are generated from the same geometry, in millimetres, from one source of truth.** There is exactly one object describing where every braille dot and every illustration pixel sits on the page. The browser preview renders it as scalable vector shapes; the STL exporter walks the same coordinates into 3D domes and pillars. What a parent sees on screen before printing is what comes out of the nozzle, not an approximation of it.
 
-**Page filling fills greedily, and the last card carries the picture.** A blind child holding a page that's mostly blank knows exactly what that feels like, and it isn't a small thing. The obvious fix is to balance the split so every page is evenly full — Tact did that, then withdrew it, because measurement showed balancing removes the sparse final page by pushing the deficit backwards into pages that were previously full. Each page here is a separate physical card, not a leaf in a bound book, so that trade converts one visibly unfinished card into two, and an intermediate card has no illustration to occupy the space the text doesn't reach. Instead every page but the last is filled to the brim, the last page is the one that receives the illustration whenever its text still fits beside it, and the story length itself is tuned — measured per language and per model — so a two-page story really does read as two full pages.
+**Page filling fills greedily, and the last card carries the picture.** A blind child holding a page that's mostly blank knows exactly what that feels like, and it isn't a small thing. The obvious fix is to balance the split so every page is evenly full. Tact did that, then withdrew it, because measurement showed balancing removes the sparse final page by pushing the deficit backwards into pages that were previously full. Each page here is a separate physical card, not a leaf in a bound book, so that trade converts one visibly unfinished card into two, and an intermediate card has no illustration to occupy the space the text doesn't reach. Instead every page but the last is filled to the brim, the last page is the one that receives the illustration whenever its text still fits beside it, and the story length itself is tuned, measured per language and per model, so a two-page story really does read as two full pages.
 
 **The page layout was shaped by the people who read braille.** The first layout wrapped six half-width lines beside a picture in the bottom-right corner. A teacher of students with visual impairments, reviewing the site, advised avoiding short lines of braille, so the picture moved to a band across the bottom and every line ran full width. Then a blind reader printed a page and read it. Three things went wrong:
 - the small picture sat in an "ocean" of blank plastic;
@@ -76,9 +76,9 @@ The picture now sits in the top-right corner, the way a picture book sets an ill
 <img src="assets/tact_layout_band_vs_corner.png" alt="Two illustrated pages side by side. Left, labelled Old version: nine full-width braille lines with a small picture centred in a wide band across the bottom. Right, labelled Updated version: the picture sits in the top-right corner, the first four braille lines are slightly shorter beside it and the first one starts indented, and nine full-width lines fill the rest of the page." width="720"/>
 </div>
 
-**The tactile shape library is hand-drawn, not clip art.** Ninety-three filled silhouettes — animals, fairy-tale figures, everyday objects, weather and sky — each in a flat side or front view, with strokes of at least 2.5 mm and gaps of at least 3 mm at print size. Filled shapes, not outlines, because blind children recognise filled pictures far more reliably than raised lines. The relief is built at 0.4 mm, the width of the nozzle, and the on-screen preview shows that exact relief, so what a parent sees is what the fingers will meet. Illustrations are matched to a story by whole-word keyword search across Italian and English, covering plurals and diminutives, so "a *lupo*" and "a *wolf*" both correctly summon the same wolf.
+**The tactile shape library is hand-drawn, not clip art.** Ninety-three filled silhouettes (animals, fairy-tale figures, everyday objects, weather and sky), each in a flat side or front view, with strokes of at least 2.5 mm and gaps of at least 3 mm at print size. Filled shapes, not outlines, because blind children recognise filled pictures far more reliably than raised lines. The relief is built at 0.4 mm, the width of the nozzle, and the on-screen preview shows that exact relief, so what a parent sees is what the fingers will meet. Illustrations are matched to a story by whole-word keyword search across Italian and English, covering plurals and diminutives, so "a *lupo*" and "a *wolf*" both correctly summon the same wolf.
 
-**Everything is free, permanently, by construction — not as a pricing tier.** No step in the pipeline has a paid-only path: speech recognition, story writing, braille translation, illustration, and the 3D file itself are all computed locally or via technology with no usage cost. The only recurring expense is the plastic.
+**Everything is free, permanently, by construction, not as a pricing tier.** No step in the pipeline has a paid-only path: speech recognition, story writing, braille translation, illustration, and the 3D file itself are all computed locally or via technology with no usage cost. The only recurring expense is the plastic.
 
 ---
 
@@ -86,14 +86,14 @@ The picture now sits in the top-right corner, the way a picture book sets an ill
 
 Open `index.html` in any modern desktop browser. Nothing to install, nothing to configure, no account, no server.
 
-1. Tap the microphone (or type) and describe a story in one sentence — Italian or English.
+1. Tap the microphone (or type) and describe a story in one sentence, in Italian or English.
 2. The page composes a short story, translates it to Grade 1 braille, and picks a matching tactile illustration.
-3. Preview the square page — braille dots and illustration, true to the size it will print at.
+3. Preview the square page: braille dots and illustration, true to the size it will print at.
 4. Download the `.stl` file and slice it for TPU or PETG on any FDM printer with a 220 × 220 mm bed.
 
 No sign-up, and no single point of failure: the hosted model is an accelerator, not a dependency. Switch it off and the app writes stories in the browser; switch that off too and the reader's own words still become a real braille page. A family that has the file keeps a working tool.
 
-**If you cloned this repository, it works — with one difference worth knowing.** The hosted fast path belongs to this project's own deployment and answers only its own domain, so a clone is declined and the page falls back to generating the story in your browser. That takes a one-time model download, and every other part of Tact behaves identically. It is a deliberate boundary, not a missing feature: one project's free allowance cannot fund everybody's stories. To get sub-second generation on a fork, deploy the small proxy in [`worker/`](worker/) with your own free API key — the README there walks through it in four steps.
+**If you cloned this repository, it works, with one difference worth knowing.** The hosted fast path belongs to this project's own deployment and answers only its own domain, so a clone is declined and the page falls back to generating the story in your browser. That takes a one-time model download, and every other part of Tact behaves identically. It is a deliberate boundary, not a missing feature: one project's free allowance cannot fund everybody's stories. To get sub-second generation on a fork, deploy the small proxy in [`worker/`](worker/) with your own free API key. The README there walks through it in four steps.
 
 ---
 
@@ -119,20 +119,20 @@ Printed values come from a single reference print (budget FDM, PLA, measured wit
 
 <p align="center"><sub>Dimensioned geometry of the shipped layout. The drawings of the earlier layouts are still in <a href="assets/">assets/</a> for reference.</sub></p>
 
-Italian output is **Grade 1 only** — Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
+Italian output is **Grade 1 only**: Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
 
 ## Bilingual by design
 
-Italian and English are both first-class from the first commit — not a default language with a translation bolted on. The developer is based in Milan, Italy, and the first real-world partners this project intends to reach are Italian: the Biblioteca Italiana per i Ciechi "Regina Margherita," the Istituto dei Ciechi di Milano, and UICI Lombardia. English exists so the same tool is useful everywhere else on day one.
+Italian and English are both first-class from the first commit, not a default language with a translation bolted on. The developer is based in Milan, Italy, and the first real-world partners this project intends to reach are Italian: the Biblioteca Italiana per i Ciechi "Regina Margherita," the Istituto dei Ciechi di Milano, and UICI Lombardia. English exists so the same tool is useful everywhere else on day one.
 
 ---
 
 ## Hardware
 
-Built around **budget FDM printers** (roughly €50–100 — an Ender 3 clone, a Kingroon KP3S, an Elegoo Neptune) rather than a purpose-built braille embosser, because:
+Built around **budget FDM printers** (roughly €50-100: an Ender 3 clone, a Kingroon KP3S, an Elegoo Neptune) rather than a purpose-built braille embosser, because:
 
 - A printed TPU or PETG page survives years of small hands, bending, and washing; embossed paper does not.
-- The same €70 device that prints a page can also print a phone stand or a toy — no single-purpose hardware purchase required.
+- The same €70 device that prints a page can also print a phone stand or a toy, with no single-purpose hardware purchase required.
 - Recycled PET filament brings the marginal cost of a page close to zero.
 - Families and classrooms are far more likely to already own, or be able to justify, a general-purpose 3D printer than a specialized embosser costing three to five times as much.
 
@@ -169,20 +169,20 @@ Built around **budget FDM printers** (roughly €50–100 — an Ender 3 clone, 
 
 ## License
 
-MIT — free to use, fork, and adapt, including for schools, libraries, and nonprofit organizations. No attribution required, though it's always welcome.
+MIT. Free to use, fork, and adapt, including for schools, libraries, and nonprofit organizations. No attribution required, though it's always welcome.
 
 ## Organizations this project intends to reach
 
-- Biblioteca Italiana per i Ciechi "Regina Margherita" — Monza
+- Biblioteca Italiana per i Ciechi "Regina Margherita" - Monza
 - Istituto dei Ciechi di Milano
 - UICI Lombardia (Unione Italiana dei Ciechi e degli Ipovedenti)
-- Lega del Filo d'Oro — for the deafblind community, for whom braille is often the only channel
+- Lega del Filo d'Oro - for the deafblind community, for whom braille is often the only channel
 
 ---
 
 ## Related work
 
-**[tatto.dev](https://github.com/francescogiuliani87/tatto.dev)** — by **Francesco Giuliani**
+**[tatto.dev](https://github.com/francescogiuliani87/tatto.dev)** - by **Francesco Giuliani**
 
 An independent fork that rebuilt Tact as a production web application. It replaces the in-browser language model with a fast server-side one, so a story arrives in seconds on any device with no model download; cuts the JavaScript payload by roughly 94%; moves the codebase to TypeScript with a modular architecture and unit tests on the braille tables; adds SEO infrastructure, a reader mode and a responsive navigation; and fixes a bug where the Italian toggle still produced English stories.
 
