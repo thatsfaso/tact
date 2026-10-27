@@ -2523,7 +2523,11 @@ const TARGET_ROWS = LINE_WIDTHS.length + LINE_WIDTHS_FULL.length - 1;
 // or 67 Italian words. Since the service lets the sentence count follow the
 // requested length, the model writes close to what it is asked in both
 // languages; the second, parallel request asks about 10% more.
-function firstWordTarget(lang) {
+// Contracted English (UEB Grade 2) packs words tighter: on real stories it
+// takes about 0.78 of the Grade 1 cells, so two cards need about a quarter
+// more words.
+function firstWordTarget(lang, contracted) {
+  if (contracted) return 88;
   return lang === "it" ? 66 : 70;
 }
 
@@ -2690,9 +2694,24 @@ function App() {
       // the in-browser model (private, needs WebGPU and a download). If neither
       // is available the visitor's own words still become a real Braille page,
       // so there is never a dead end.
+      // Contracted braille fits about a quarter more words on a card, so the
+      // translator must be ready before the first length is chosen and before
+      // any answer is measured; measured in Grade 1, a contracted story looks
+      // full and comes out with a half-empty second card.
+      setGradeNote("");
+      let contracted = false;
+      if (lang === "en" && grade === 2) {
+        try { await window.TACT.loadGrade2(); window.TACT.setBrailleMode(lang, 2); contracted = true; }
+        catch (e) {
+          console.warn('[TACT] Grade 2 unavailable, using Grade 1:', e && e.message);
+          window.TACT.setBrailleMode(lang, 1);
+          setGradeNote(t.grade2Failed);
+        }
+      }
+
       let storyText = null;
       let askedWords = 0;
-      const firstAsk = firstWordTarget(lang), secondAsk = Math.round(firstAsk * 1.1);
+      const firstAsk = firstWordTarget(lang, contracted), secondAsk = Math.round(firstAsk * 1.1);
       let extra = Promise.resolve(null);
       setLoadingMsg(t.generating);
       try {
@@ -2751,18 +2770,6 @@ function App() {
           } catch (e) {
             break; /* keep the best so far: a slightly loose page beats no story */
           }
-        }
-      }
-
-      // Contracted braille changes how much fits on a page, so the translator
-      // must be ready before the story is split into pages.
-      setGradeNote("");
-      if (lang === "en" && grade === 2) {
-        try { await window.TACT.loadGrade2(); window.TACT.setBrailleMode(lang, 2); }
-        catch (e) {
-          console.warn('[TACT] Grade 2 unavailable, using Grade 1:', e && e.message);
-          window.TACT.setBrailleMode(lang, 1);
-          setGradeNote(t.grade2Failed);
         }
       }
 
