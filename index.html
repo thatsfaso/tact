@@ -1516,6 +1516,7 @@ const COPY = {
     demoNotice: "AI writing off · your own words become real braille",
     hints: ["a brave robot lost in the snow","the moon's secret garden","two friends and a paper boat","a bear who collects rainbows","a pirate cat sailing to the moon"],
     footer: "Open source · No account · Works with any FDM 3D printer",
+    about: { short: "About", label: "About Tact: what it is and who it is for", more: "About the project: what Tact is, who it is for and who made it" },
     help: {
       button: "Help and printing guide",
       title: "How to print, and how it works",
@@ -1592,6 +1593,7 @@ const COPY = {
     demoNotice: "Scrittura AI non attiva · le tue parole diventano braille reale",
     hints: ["un robot coraggioso perso nella neve","il giardino segreto della luna","due amici e una barchetta di carta","un orso che colleziona arcobaleni","un gatto pirata che naviga verso la luna"],
     footer: "Open source · Senza account · Funziona con ogni stampante FDM",
+    about: { short: "Il progetto", label: "Il progetto Tact: cos'è e per chi è", more: "Il progetto: cos'è Tact, per chi è e chi l'ha creato" },
     help: {
       button: "Aiuto e guida alla stampa",
       title: "Come si stampa, e come funziona",
@@ -1757,6 +1759,15 @@ function Header({ lang, setLang, sound, setSound, t, onHelp }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
           )}
         </button>
+        {/* Text label where there is room; on a phone the header already holds
+            three controls, so it shrinks to an icon with the same name. */}
+        <a href={lang === "it" ? "about.html?lang=it" : "about.html"}
+          className="focus-ring h-9 rounded-full flex items-center justify-center gap-2 px-4 text-[13px] font-medium transition-colors max-md:w-9 max-md:px-0"
+          style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)", textDecoration: "none" }}
+          aria-label={t.about.label}>
+          <svg className="md:hidden" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 11v6"/><path d="M12 7.5h.01"/></svg>
+          <span className="max-md:hidden" aria-hidden="true">{t.about.short}</span>
+        </a>
         <button onClick={onHelp}
           className="focus-ring w-9 h-9 rounded-full flex items-center justify-center transition-colors"
           style={{ background: "rgba(250,250,247,0.7)", boxShadow: "0 0 0 1px var(--hairline) inset", backdropFilter: "blur(10px)", color: "var(--ink)" }}
@@ -1785,7 +1796,7 @@ function Header({ lang, setLang, sound, setSound, t, onHelp }) {
 // announced properly by screen readers, which matters more here than in most
 // places. Escape closes, focus moves into the panel on open and returns to the
 // button on close.
-function HelpPanel({ t, onClose }) {
+function HelpPanel({ t, lang, onClose }) {
   const boxRef = useRef(null);
   // The parent passes a fresh onClose on every render; reading it through a
   // ref keeps the effect below to one run per opening, so focus is not
@@ -1867,10 +1878,17 @@ function HelpPanel({ t, onClose }) {
           </section>
         ))}
 
-        <p className="mono text-[10px] uppercase tracking-[0.18em] pt-2"
-          style={{ color: "var(--muted-soft)", borderTop: "1px solid var(--hairline)" }}>
-          Tact · Iliano Fasolino · MIT
-        </p>
+        {/* The full story of the project, for anyone who wants more than the
+            short "who made this" answer above. */}
+        <div className="pt-4" style={{ borderTop: "1px solid var(--hairline)" }}>
+          <a href={lang === "it" ? "about.html?lang=it" : "about.html"}
+            className="focus-ring text-[15px] underline underline-offset-4" style={{ color: "var(--ink)" }}>
+            {t.about.more}
+          </a>
+          <p className="mono text-[10px] uppercase tracking-[0.18em] pt-4" style={{ color: "var(--muted-soft)" }}>
+            Tact · Iliano Fasolino · MIT
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -2418,7 +2436,12 @@ function buildPages(storyText, lang) {
 
 // ─── Main app ─────────────────────────────────────────────────────────────────
 function App() {
-  const [lang,  setLang]  = useState("en");
+  // about.html links back with ?lang=it so the app opens in the language the
+  // visitor was already reading.
+  const [lang,  setLang]  = useState(() => {
+    try { return new URLSearchParams(location.search).get("lang") === "it" ? "it" : "en"; }
+    catch (e) { return "en"; }
+  });
   // Screen readers (JAWS, NVDA, VoiceOver) pick their voice from the page
   // language. Without this, Italian was read with an English voice.
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
@@ -2633,7 +2656,7 @@ function App() {
   return (
     <div className="relative w-full h-full">
       <Header lang={lang} setLang={setLang} sound={sound} setSound={setSound} t={t} onHelp={() => { window.SFX && window.SFX.play("tap"); setHelpOpen(true); }} />
-      {helpOpen && <HelpPanel t={t} onClose={() => setHelpOpen(false)} />}
+      {helpOpen && <HelpPanel t={t} lang={lang} onClose={() => setHelpOpen(false)} />}
 
       {(phase === "idle" || phase === "listening") && (
         <main className="absolute inset-0 flex flex-col items-center justify-center px-6 compact:justify-start compact:overflow-y-auto max-md:px-5 compact:pt-20 compact:pb-8">

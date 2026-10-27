@@ -48,7 +48,7 @@ The full architecture, module by module:
 The result: a flexible page, roughly postcard-sized, with domed braille dots and a raised silhouette set into the top-right corner — read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
 
 <div align="center">
-<img src="assets/tact_page_mockup.svg" alt="Tact page mockup: top view of the 150x150mm page and a cross-section comparing domed braille dots to the flat-topped tactile illustration relief" width="720"/>
+<img src="assets/tact_page_mockup_corner.svg" alt="Tact page mockup: top view of the 150x150mm page with a filled cat silhouette in the top-right corner, four short braille rows beside it and nine full rows below, and a cross-section comparing domed braille dots to the flat-topped tactile picture relief" width="720"/>
 </div>
 
 ---
@@ -114,10 +114,10 @@ Every dimension follows **ISO 17049:2013**, over-built by roughly 20 to 30% to c
 Printed values come from a single reference print (budget FDM, PLA, measured with a digital caliper on one page), not a multi-printer distribution. Both dot values fall inside the ISO 17049:2013 tolerance band. Testing with blind readers has not happened yet.
 
 <div align="center">
-<img src="assets/tact_page_layout_geometry.svg" alt="Dimensioned diagram of the earlier square corner layout: 150x150mm page, 7 full braille rows of 21 cells, 6 narrow rows of 12 cells, 54x54mm illustration zone at origin (86, 12)" width="720"/>
+<img src="assets/tact_page_layout_geometry_corner.svg" alt="Dimensioned diagram of the shipped layout: 150x150mm page, four short braille rows of 15 cells beside a 36.8 by 36mm picture zone at origin (103.2, 104) in the top-right corner, and nine full rows of 21 cells below" width="720"/>
 </div>
 
-<p align="center"><sub>Dimensioned geometry of the first corner layout, kept for reference. The shipped layout keeps the same page, margins and cell spacing: four 15-cell rows beside a 36.8 × 36 mm picture at origin (103.2, 104) in the top-right corner, then nine full-width rows.</sub></p>
+<p align="center"><sub>Dimensioned geometry of the shipped layout. The drawings of the earlier layouts are still in <a href="assets/">assets/</a> for reference.</sub></p>
 
 Italian output is **Grade 1 only** — Italian braille has no contracted form, so this is the correct default rather than a simplification. English defaults to **UEB Grade 1**, the form used for beginning readers before contractions are introduced.
 

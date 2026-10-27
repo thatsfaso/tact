@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About Tact</title>
+<meta name="description" content="What Tact is, who it is for and how it works: a free, open source tool that turns a spoken idea into a braille page with a raised picture, printed at home on a 3D printer." />
+<meta name="author" content="Iliano Fasolino" />
+<link rel="canonical" href="https://tactbraille.com/about.html" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="icon" type="image/png" sizes="96x96" href="assets/favicon-96.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+<meta name="theme-color" content="#0a0a0c" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Tact" />
+<meta property="og:title" content="About Tact" />
+<meta property="og:description" content="Stories a blind child can read with their own hands, printed at home for the cost of the filament." />
+<meta property="og:url" content="https://tactbraille.com/about.html" />
+<meta property="og:image" content="https://tactbraille.com/assets/favicon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Same tokens as index.html, so the two pages read as one site. */
+  :root {
+    --ink: #0a0a0c;
+    --paper: #fafaf7;
+    --paper-warm: #f4f2ec;
+    --hairline: rgba(10, 10, 12, 0.08);
+    --hairline-strong: rgba(10, 10, 12, 0.14);
+    --muted: rgba(10, 10, 12, 0.66);
+    --muted-soft: rgba(10, 10, 12, 0.6);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .serif { font-family: "Instrument Serif", "Cormorant Garamond", Georgia, serif; font-weight: 400; }
+  .mono { font-family: "Geist Mono", "JetBrains Mono", "SF Mono", ui-monospace, monospace; }
+  .grain {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.07  0 0 0 0.42 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 8px; }
+
+  .skip {
+    position: absolute; left: 16px; top: -60px; z-index: 20;
+    background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 999px;
+    text-decoration: none; font-size: 14px;
+  }
+  .skip:focus { top: 12px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px;
+    background: rgba(250, 250, 247, 0.86);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 0 var(--hairline);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .cell { display: grid; grid-template-columns: 7px 7px; gap: 3px; }
+  .bd {
+    width: 7px; height: 7px; border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, #2a2a2e, #08080a 70%);
+    box-shadow: 0 1px 1.5px rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.18);
+  }
+  .bd.off { background: transparent; box-shadow: 0 0 0 1px rgba(10,10,12,0.06) inset; }
+  .brand .serif { font-size: 22px; line-height: 1; letter-spacing: -0.01em; }
+  .controls { display: flex; align-items: center; gap: 8px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px;
+    background: rgba(250,250,247,0.7); box-shadow: 0 0 0 1px var(--hairline) inset;
+  }
+  .pill button {
+    font: inherit; font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    min-height: 28px; padding: 6px 12px; border: 0; border-radius: 999px; cursor: pointer;
+    background: transparent; color: var(--ink);
+  }
+  .pill button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    white-space: nowrap; padding: 12px 20px; border-radius: 999px;
+    background: var(--ink); color: var(--paper); text-decoration: none;
+    font-weight: 500; font-size: 15px; letter-spacing: -0.005em;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 6px 22px rgba(10,10,12,0.18);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 14px 36px rgba(10,10,12,0.22); }
+  .btn-ghost { background: transparent; color: var(--ink); box-shadow: 0 0 0 1px var(--hairline-strong) inset; }
+  .btn-ghost:hover { background: rgba(10,10,12,0.04); box-shadow: 0 0 0 1px var(--hairline-strong) inset; }
+  .btn-light { background: var(--paper); color: var(--ink); box-shadow: none; }
+  .btn-light:hover { box-shadow: none; }
+  .btn.small { padding: 9px 16px; font-size: 14px; }
+
+  main { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 56px 24px 40px; }
+
+  .crumbs { font-size: 13px; color: var(--muted); margin: 0 0 28px; }
+  .crumbs a { text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs span[aria-current] { color: var(--ink); font-weight: 500; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .tag {
+    font-family: "Geist Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; padding: 6px 11px; border-radius: 999px;
+    box-shadow: 0 0 0 1px var(--hairline-strong) inset; color: var(--muted);
+  }
+
+  h1 { font-size: clamp(40px, 7.4vw, 64px); line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 18px; }
+  .lede { font-size: 18px; line-height: 1.55; color: var(--muted); margin: 0 0 30px; max-width: 580px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  hr { border: 0; height: 1px; background: var(--hairline-strong); margin: 48px 0; }
+
+  section { margin: 0 0 48px; }
+  .label {
+    font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 14px; font-weight: 400;
+  }
+  section p { font-size: 16px; line-height: 1.65; margin: 0 0 14px; }
+
+  .card {
+    background: rgba(255,255,255,0.55); border-radius: 22px;
+    box-shadow: 0 0 0 1px var(--hairline) inset, 0 30px 80px -30px rgba(10,10,12,0.18);
+  }
+  figure.card { margin: 0 0 48px; padding: 28px; }
+  figure svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+  figcaption { font-size: 13px; line-height: 1.5; color: var(--muted); text-align: center; margin-top: 18px; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  ol.steps li { display: grid; grid-template-columns: 44px 1fr; padding: 16px 0; border-top: 1px solid var(--hairline); }
+  ol.steps li:last-child { border-bottom: 1px solid var(--hairline); }
+  .num { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--muted); padding-top: 3px; }
+  .step-title { font-weight: 600; font-size: 16px; margin: 0 0 4px; }
+  .step-text { font-size: 15px; line-height: 1.55; color: var(--muted); margin: 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 0 0 48px; padding: 28px 0; border-top: 1px solid var(--hairline-strong); border-bottom: 1px solid var(--hairline-strong); }
+  .stat-value { font-size: 40px; line-height: 1; letter-spacing: -0.02em; margin: 0 0 10px; }
+  .stat-label { font-size: 13px; line-height: 1.4; color: var(--muted); margin: 0; font-weight: 500; }
+
+  .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .who h3 { font-size: 15px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+  .who p { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; }
+
+  blockquote.card { margin: 0 0 48px; padding: 44px 32px; text-align: center; }
+  blockquote p { font-size: clamp(30px, 5.4vw, 42px); line-height: 1.1; letter-spacing: -0.015em; margin: 0 0 16px; }
+  blockquote footer { font-size: 13px; color: var(--muted); }
+
+  .cta {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    background: var(--ink); color: var(--paper); border-radius: 22px; padding: 28px 32px; margin: 8px 0 40px;
+  }
+  .cta h2 { font-size: 30px; line-height: 1.1; margin: 0; letter-spacing: -0.01em; }
+
+  .foot {
+    font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted-soft); text-align: center; line-height: 1.8;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 12px 16px; }
+    main { padding: 36px 16px 32px; }
+    .lede { font-size: 17px; }
+    hr { margin: 40px 0; }
+    figure.card { padding: 18px; }
+    .stats { grid-template-columns: repeat(2, 1fr); row-gap: 28px; }
+    .who { grid-template-columns: 1fr; gap: 18px; }
+    blockquote.card { padding: 32px 20px; }
+    .cta { padding: 24px; }
+    .cta h2 { font-size: 26px; }
+    .hide-sm { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn, .btn:hover { transition: none; transform: none; } }
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<a class="skip" href="#content" data-k="skip">Skip to content</a>
+
+<header>
+  <a class="brand" href="./" data-href="home" aria-label="Tact, home">
+    <span class="cell" aria-hidden="true">
+      <span class="bd"></span><span class="bd off"></span>
+      <span class="bd"></span><span class="bd"></span>
+      <span class="bd off"></span><span class="bd"></span>
+    </span>
+    <span class="serif">Tact</span>
+  </a>
+  <div class="controls">
+    <a class="btn small hide-sm" href="./" data-href="home" data-k="make">Make a story</a>
+    <div class="pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true" aria-label="English">EN</button>
+      <button type="button" data-lang="it" aria-pressed="false" aria-label="Italiano">IT</button>
+    </div>
+  </div>
+</header>
+
+<main id="content">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="./" data-href="home">Tact</a> / <span aria-current="page" data-k="crumb">About</span>
+  </nav>
+
+  <div class="tags">
+    <span class="tag" data-k="tag1">Free</span>
+    <span class="tag" data-k="tag2">Open source</span>
+    <span class="tag" data-k="tag3">Italian and English</span>
+  </div>
+
+  <h1 class="serif" data-k="title">Stories a blind child can read with their own hands.</h1>
+  <p class="lede" data-k="lede">Tact turns a spoken or typed idea into a short story, writes it in braille, adds a raised picture and gives you a file to print at home on a 3D printer.</p>
+  <div class="actions">
+    <a class="btn" href="./" data-href="home" data-k="make">Make a story</a>
+    <a class="btn btn-ghost" href="https://github.com/thatsfaso/tact" data-k="code">Source code</a>
+  </div>
+
+  <hr />
+
+  <section aria-labelledby="why">
+    <h2 class="label" id="why" data-k="whyL">Why it exists</h2>
+    <p data-k="why1">A sighted child can ask for a story about anything and hear it that same evening. A blind child usually waits for someone to transcribe a book, and only the books someone already chose ever get transcribed. Braille books cost many times more than print and take weeks to make.</p>
+    <p data-k="why2">Tact makes the story the child asked for, on the same day, as a page they can keep and read again.</p>
+  </section>
+
+  <figure class="card">
+    <svg id="page" viewBox="0 0 150 150" role="img" aria-labelledby="page-desc">
+      <desc id="page-desc" data-k="figAlt">A square braille page with rows of raised dots and a filled cat silhouette in the top-right corner.</desc>
+    </svg>
+    <figcaption data-k="figCap">A Tact page drawn to scale, 150 × 150 mm. The braille fills the page and a simple raised picture sits in the top-right corner, the way a picture book sets an illustration into its text.</figcaption>
+  </figure>
+
+  <section aria-labelledby="how">
+    <h2 class="label" id="how" data-k="howL">How it works</h2>
+    <ol class="steps">
+      <li><span class="num">01</span><div><p class="step-title" data-k="s1t">Say or type an idea</p><p class="step-text" data-k="s1">One sentence is enough, in Italian or English: a fox who guards a castle.</p></div></li>
+      <li><span class="num">02</span><div><p class="step-title" data-k="s2t">Tact builds the page</p><p class="step-text" data-k="s2">It writes a short story, translates it into Grade 1 braille and picks a matching tactile picture.</p></div></li>
+      <li><span class="num">03</span><div><p class="step-title" data-k="s3t">Print it at home</p><p class="step-text" data-k="s3">Download the STL file and print it in TPU or PETG on any FDM 3D printer with a 220 mm bed. Each story fills two cards.</p></div></li>
+    </ol>
+  </section>
+
+  <div class="stats">
+    <div><p class="stat-value serif">93</p><p class="stat-label" data-k="st1">Tactile pictures</p></div>
+    <div><p class="stat-value serif">2</p><p class="stat-label" data-k="st2">Languages, Italian and English</p></div>
+    <div><p class="stat-value serif">150<span style="font-size:0.5em"> mm</span></p><p class="stat-label" data-k="st3">Square page, about a postcard</p></div>
+    <div><p class="stat-value serif">0 €</p><p class="stat-label" data-k="st4">No fee, no account</p></div>
+  </div>
+
+  <section aria-labelledby="who">
+    <h2 class="label" id="who" data-k="whoL">Who it is for</h2>
+    <div class="who">
+      <div><h3 data-k="w1t">Blind and low-vision children</h3><p data-k="w1">Who are learning braille and want stories about the things they love.</p></div>
+      <div><h3 data-k="w2t">Parents and families</h3><p data-k="w2">Who want to say yes when a child asks for a new story tonight.</p></div>
+      <div><h3 data-k="w3t">Teachers and libraries</h3><p data-k="w3">Who need short, personal reading material quickly, without an embosser.</p></div>
+    </div>
+  </section>
+
+  <blockquote class="card">
+    <p class="serif" data-k="quote">The only cost is the plastic.</p>
+    <footer data-k="quoteBy">Free and open source, under the MIT license</footer>
+  </blockquote>
+
+  <section aria-labelledby="readers">
+    <h2 class="label" id="readers" data-k="readL">Shaped by readers</h2>
+    <p data-k="read1">The page has changed because of people who read braille. A teacher of students with visual impairments reviewed the first version and advised against short braille lines. Then a blind reader printed a page and told us what did not work: the picture was too small to recognise and sat in too much empty plastic.</p>
+    <p data-k="read2">Today every picture is a simple filled silhouette in the top-right corner, only the first four lines are a little shorter, and the braille is the first thing the printer lays down.</p>
+  </section>
+
+  <section aria-labelledby="open">
+    <h2 class="label" id="open" data-k="openL">Privacy and openness</h2>
+    <p data-k="open1">There is no account and nothing to install. The story is written by a hosted model that receives only your one-line idea or, when that is not available, by a small model running in your own browser. The braille and the 3D file are made on your device.</p>
+  </section>
+
+  <section aria-labelledby="maker">
+    <h2 class="label" id="maker" data-k="makerL">Who made it</h2>
+    <p data-k="maker1">Tact was created by Iliano Fasolino, a Master's student in Computer Science at the University of Milan. It is still a prototype. If you print a page, read one or teach braille, your feedback shapes the next version.</p>
+    <p><a href="https://github.com/thatsfaso/tact/issues" data-k="feedback">Share feedback on GitHub</a></p>
+  </section>
+
+  <div class="cta">
+    <h2 class="serif" data-k="ctaT">Have a story in mind?</h2>
+    <a class="btn btn-light" href="./" data-href="home" data-k="make">Make a story</a>
+  </div>
+
+  <p class="foot" data-k="foot">Open source · No account · Works with any FDM 3D printer</p>
+</main>
+
+<script>
+(function () {
+  var T = {
+    en: {
+      docTitle: "About Tact",
+      skip: "Skip to content", make: "Make a story", crumb: "About",
+      tag1: "Free", tag2: "Open source", tag3: "Italian and English",
+      title: "Stories a blind child can read with their own hands.",
+      lede: "Tact turns a spoken or typed idea into a short story, writes it in braille, adds a raised picture and gives you a file to print at home on a 3D printer.",
+      code: "Source code",
+      whyL: "Why it exists",
+      why1: "A sighted child can ask for a story about anything and hear it that same evening. A blind child usually waits for someone to transcribe a book, and only the books someone already chose ever get transcribed. Braille books cost many times more than print and take weeks to make.",
+      why2: "Tact makes the story the child asked for, on the same day, as a page they can keep and read again.",
+      figAlt: "A square braille page with rows of raised dots and a filled cat silhouette in the top-right corner.",
+      figCap: "A Tact page drawn to scale, 150 × 150 mm. The braille fills the page and a simple raised picture sits in the top-right corner, the way a picture book sets an illustration into its text.",
+      howL: "How it works",
+      s1t: "Say or type an idea", s1: "One sentence is enough, in Italian or English: a fox who guards a castle.",
+      s2t: "Tact builds the page", s2: "It writes a short story, translates it into Grade 1 braille and picks a matching tactile picture.",
+      s3t: "Print it at home", s3: "Download the STL file and print it in TPU or PETG on any FDM 3D printer with a 220 mm bed. Each story fills two cards.",
+      st1: "Tactile pictures", st2: "Languages, Italian and English", st3: "Square page, about a postcard", st4: "No fee, no account",
+      whoL: "Who it is for",
+      w1t: "Blind and low-vision children", w1: "Who are learning braille and want stories about the things they love.",
+      w2t: "Parents and families", w2: "Who want to say yes when a child asks for a new story tonight.",
+      w3t: "Teachers and libraries", w3: "Who need short, personal reading material quickly, without an embosser.",
+      quote: "The only cost is the plastic.", quoteBy: "Free and open source, under the MIT license",
+      readL: "Shaped by readers",
+      read1: "The page has changed because of people who read braille. A teacher of students with visual impairments reviewed the first version and advised against short braille lines. Then a blind reader printed a page and told us what did not work: the picture was too small to recognise and sat in too much empty plastic.",
+      read2: "Today every picture is a simple filled silhouette in the top-right corner, only the first four lines are a little shorter, and the braille is the first thing the printer lays down.",
+      openL: "Privacy and openness",
+      open1: "There is no account and nothing to install. The story is written by a hosted model that receives only your one-line idea or, when that is not available, by a small model running in your own browser. The braille and the 3D file are made on your device.",
+      makerL: "Who made it",
+      maker1: "Tact was created by Iliano Fasolino, a Master's student in Computer Science at the University of Milan. It is still a prototype. If you print a page, read one or teach braille, your feedback shapes the next version.",
+      feedback: "Share feedback on GitHub",
+      ctaT: "Have a story in mind?",
+      foot: "Open source · No account · Works with any FDM 3D printer",
+      sample: "once upon a time a small cat lived on a quiet hill. every night she climbed the tallest tree to count the stars, and every night she lost count at seven, because the moon kept winking at her. so one evening she asked the moon to wait, and the moon said yes."
+    },
+    it: {
+      docTitle: "Il progetto Tact",
+      skip: "Vai al contenuto", make: "Crea una storia", crumb: "Il progetto",
+      tag1: "Gratuito", tag2: "Open source", tag3: "Italiano e inglese",
+      title: "Storie che un bambino cieco legge con le proprie mani.",
+      lede: "Tact trasforma un'idea, detta a voce o scritta, in una breve storia, la scrive in braille, aggiunge un disegno in rilievo e ti dà un file da stampare a casa con una stampante 3D.",
+      code: "Codice sorgente",
+      whyL: "Perché esiste",
+      why1: "Un bambino vedente può chiedere una storia su qualsiasi cosa e ascoltarla la sera stessa. Un bambino cieco di solito aspetta che qualcuno trascriva un libro, e vengono trascritti solo i libri che qualcuno ha già scelto. Un libro in braille costa molte volte più di quello stampato e richiede settimane.",
+      why2: "Tact crea la storia che il bambino ha chiesto, lo stesso giorno, su una pagina da tenere e rileggere.",
+      figAlt: "Una pagina braille quadrata con righe di puntini in rilievo e la sagoma piena di un gatto nell'angolo in alto a destra.",
+      figCap: "Una pagina di Tact in scala, 150 × 150 mm. Il braille riempie la pagina e un disegno semplice in rilievo sta nell'angolo in alto a destra, come nei libri illustrati.",
+      howL: "Come funziona",
+      s1t: "Di' o scrivi un'idea", s1: "Basta una frase, in italiano o in inglese: una volpe che fa la guardia a un castello.",
+      s2t: "Tact prepara la pagina", s2: "Scrive una breve storia, la traduce in braille integrale e sceglie un disegno tattile adatto.",
+      s3t: "Stampala a casa", s3: "Scarica il file STL e stampalo in TPU o PETG su qualsiasi stampante 3D FDM con piatto da 220 mm. Ogni storia riempie due schede.",
+      st1: "Disegni tattili", st2: "Lingue, italiano e inglese", st3: "Pagina quadrata, circa una cartolina", st4: "Niente costi, niente account",
+      whoL: "Per chi è",
+      w1t: "Bambini ciechi e ipovedenti", w1: "Che stanno imparando il braille e vogliono storie su ciò che amano.",
+      w2t: "Genitori e famiglie", w2: "Che vogliono dire di sì quando un bambino chiede una storia nuova stasera.",
+      w3t: "Insegnanti e biblioteche", w3: "Che hanno bisogno di letture brevi e personali in poco tempo, senza una stampante braille.",
+      quote: "L'unico costo è la plastica.", quoteBy: "Gratuito e open source, con licenza MIT",
+      readL: "Costruito con chi legge",
+      read1: "La pagina è cambiata grazie a chi legge il braille. Una persona che insegna a studenti con disabilità visiva ha esaminato la prima versione e ha consigliato di evitare righe braille corte. Poi una persona cieca ha stampato una pagina e ci ha detto cosa non funzionava: il disegno era troppo piccolo per riconoscerlo e stava in mezzo a troppa plastica vuota.",
+      read2: "Oggi ogni disegno è una sagoma piena e semplice nell'angolo in alto a destra, solo le prime quattro righe sono un po' più corte e il braille è la prima cosa che la stampante deposita.",
+      openL: "Privacy e trasparenza",
+      open1: "Non serve un account e non c'è niente da installare. La storia la scrive un modello online che riceve solo la tua idea di una riga oppure, se non è disponibile, un piccolo modello che gira nel tuo browser. Il braille e il file 3D vengono creati sul tuo dispositivo.",
+      makerL: "Chi l'ha creato",
+      maker1: "Tact è stato creato da Iliano Fasolino, studente di laurea magistrale in Informatica all'Università degli Studi di Milano. È ancora un prototipo. Se stampi una pagina, ne leggi una o insegni il braille, il tuo parere guida la prossima versione.",
+      feedback: "Lascia un parere su GitHub",
+      ctaT: "Hai una storia in mente?",
+      foot: "Open source · Senza account · Funziona con ogni stampante FDM",
+      sample: "c'era una volta un piccolo gatto che viveva su una collina tranquilla. ogni notte saliva sull'albero piu alto per contare le stelle, e ogni notte perdeva il conto a sette, perche la luna gli faceva l'occhiolino. cosi una sera chiese alla luna di aspettare, e la luna disse di si."
+    }
+  };
+
+  // Grade 1 letters only, enough for the sample text. Dot numbers as in
+  // index.html: 1-2-3 down the left column, 4-5-6 down the right.
+  var CELLS = { a:"1", b:"12", c:"14", d:"145", e:"15", f:"124", g:"1245", h:"125", i:"24", j:"245",
+    k:"13", l:"123", m:"134", n:"1345", o:"135", p:"1234", q:"12345", r:"1235", s:"234", t:"2345",
+    u:"136", v:"1236", w:"2456", x:"1346", y:"13456", z:"1356", ".":"256", ",":"2", "'":"3" };
+  var DOT = { 1:[0,0], 2:[0,2.5], 3:[0,5], 4:[2.5,0], 5:[2.5,2.5], 6:[2.5,5] };
+  // Same geometry as window.TACT_LAYOUT: 10 mm margin, 6 mm cells, 10 mm rows,
+  // four 15-cell rows beside a 36.8 x 36 mm picture, then nine 21-cell rows.
+  var WIDTHS = [15,15,15,15,21,21,21,21,21,21,21,21,21];
+
+  function drawPage(text) {
+    var svg = document.getElementById("page");
+    var ns = "http://www.w3.org/2000/svg";
+    Array.prototype.slice.call(svg.querySelectorAll("g,rect")).forEach(function (n) { n.remove(); });
+    var bg = document.createElementNS(ns, "rect");
+    bg.setAttribute("width", 150); bg.setAttribute("height", 150); bg.setAttribute("rx", 10);
+    bg.setAttribute("fill", "#f4f2ec"); bg.setAttribute("stroke", "rgba(10,10,12,0.14)"); bg.setAttribute("stroke-width", "0.4");
+    svg.appendChild(bg);
+
+    var words = text.split(" "), rows = [], row = "  ", r = 0;
+    words.forEach(function (w) {
+      var cand = row.trim() === "" ? row + w : row + " " + w;
+      if (cand.length > WIDTHS[r]) { rows.push(row); r++; row = w; }
+      else row = cand;
+    });
+    rows.push(row);
+
+    var g = document.createElementNS(ns, "g");
+    g.setAttribute("fill", "#1a1a1e");
+    rows.slice(0, WIDTHS.length).forEach(function (line, li) {
+      for (var ci = 0; ci < line.length; ci++) {
+        var dots = CELLS[line[ci]];
+        if (!dots) continue;
+        for (var k = 0; k < dots.length; k++) {
+          var o = DOT[dots[k]], c = document.createElementNS(ns, "circle");
+          c.setAttribute("cx", 10 + ci * 6 + o[0]); c.setAttribute("cy", 10 + li * 10 + o[1]);
+          c.setAttribute("r", 0.8);
+          g.appendChild(c);
+        }
+      }
+    });
+    svg.appendChild(g);
+
+    // The cat silhouette from shapes/animals/cat_sitting.svg, fitted into
+    // the picture zone (x 103.2 to 140, y 10 to 46).
+    var cat = document.createElementNS(ns, "g");
+    cat.setAttribute("fill", "#1a1a1e");
+    cat.setAttribute("transform", "translate(102.8 9.4) scale(0.205)");
+    cat.innerHTML = '<ellipse cx="100" cy="134" rx="42" ry="46"/><circle cx="100" cy="70" r="30"/>' +
+      '<path d="M 74,58 L 78,22 L 100,44 Z"/><path d="M 100,44 L 122,22 L 126,58 Z"/>' +
+      '<path d="M 136,170 Q 176,168 172,128 Q 170,108 182,96" fill="none" stroke="#1a1a1e" stroke-width="12" stroke-linecap="round"/>';
+    svg.appendChild(cat);
+  }
+
+  function setLang(lang) {
+    var t = T[lang];
+    document.documentElement.lang = lang;
+    document.title = t.docTitle;
+    document.querySelectorAll("[data-k]").forEach(function (el) {
+      var v = t[el.getAttribute("data-k")];
+      if (v != null) el.textContent = v;
+    });
+    // Carry the language back to the app so it opens in the same one.
+    document.querySelectorAll("[data-href=home]").forEach(function (a) { a.href = lang === "it" ? "./?lang=it" : "./"; });
+    document.querySelectorAll(".pill button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang)); });
+    var url = new URL(location.href);
+    if (lang === "it") url.searchParams.set("lang", "it"); else url.searchParams.delete("lang");
+    history.replaceState(null, "", url);
+    drawPage(t.sample);
+  }
+
+  document.querySelectorAll(".pill button").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); });
+  });
+  var q = new URLSearchParams(location.search).get("lang");
+  setLang(q === "it" ? "it" : "en");
+})();
+</script>
+</body>
+</html>
