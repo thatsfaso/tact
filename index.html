@@ -1947,7 +1947,7 @@ function LoadingScreen({ msg, progress, t }) {
   }, [t]);
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 compact:justify-start compact:overflow-y-auto compact:gap-6 compact:pt-20 compact:pb-8 compact:[&>*:first-child]:mt-auto compact:[&>*:last-child]:mb-auto" style={{ zIndex: 5 }}>
+    <main className="absolute inset-0 flex flex-col items-center justify-center gap-10 compact:justify-start compact:overflow-y-auto compact:gap-6 compact:pt-20 compact:pb-8 compact:[&>*:first-child]:mt-auto compact:[&>*:last-child]:mb-auto" style={{ zIndex: 5 }}>
       <BlobLoader size={240} />
       <div className="flex flex-col items-center gap-4 rise" style={{ maxWidth: 400, width: '100%', padding: '0 32px' }}>
         <div role="status" aria-live="polite" className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
@@ -1978,7 +1978,7 @@ function LoadingScreen({ msg, progress, t }) {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -2047,7 +2047,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
   }, [page]);
 
   return (
-    <section role="region" aria-label={t.resultRegion}
+    <main aria-label={t.resultRegion}
       className="absolute inset-0 flex flex-col items-center justify-center px-6 compact:justify-start compact:overflow-y-auto max-md:px-5 compact:pt-20 compact:pb-10" style={{ zIndex: 5 }}>
       <div className="sr-only" role="status" aria-live="polite">{liveText}</div>
       {/* Phones: one column, page above and story below, and the screen scrolls.
@@ -2107,7 +2107,9 @@ function StoryResult({ pages, lang, t, onAgain }) {
               {t.demoNotice}
             </div>
           )}
-          <h2 ref={headingRef} tabIndex={-1} className="mono text-[11px] tracking-[0.22em] uppercase focus-ring" style={{ color: "var(--muted)", outlineOffset: 4 }}>{t.yourStory}</h2>
+          {/* The page's main heading for screen readers (h1, so JAWS and NVDA
+              can jump straight to it), styled as the small label it looks like. */}
+          <h1 ref={headingRef} tabIndex={-1} className="mono text-[11px] tracking-[0.22em] uppercase focus-ring" style={{ color: "var(--muted)", outlineOffset: 4, fontWeight: "inherit" }}>{t.yourStory}</h1>
           <p className="serif text-[32px] leading-[1.18] max-md:text-[24px] max-md:leading-[1.25]" style={{ letterSpacing: "-0.01em" }}>"{p.text}"</p>
 
           <div className="flex items-center gap-3 mt-2">
@@ -2172,7 +2174,7 @@ function StoryResult({ pages, lang, t, onAgain }) {
           </div>
         </div>
       </div>
-    </section>
+    </main>
   );
 }
 
