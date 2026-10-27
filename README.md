@@ -45,7 +45,7 @@ The full architecture, module by module:
 <img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, in-browser LLM, parallel braille translation and tactile graphics, page layout, STL generation, 3D printer output" width="720"/>
 </div>
 
-The result: a flexible page, roughly postcard-sized, with domed braille dots and a raised silhouette set into the top-right corner: read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
+The result: a page roughly the size of a postcard, with domed braille dots and a raised silhouette set into the top-right corner: read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
 
 <div align="center">
 <img src="assets/tact_page_mockup_corner.svg" alt="Tact page mockup: top view of the 150x150mm page with a filled cat silhouette in the top-right corner, four short braille rows beside it and nine full rows below, and a cross-section comparing domed braille dots to the flat-topped tactile picture relief" width="720"/>
@@ -131,7 +131,7 @@ Italian and English are both first-class from the first commit, not a default la
 
 Built around **budget FDM printers** (roughly €50-100: an Ender 3 clone, a Kingroon KP3S, an Elegoo Neptune) rather than a purpose-built braille embosser, because:
 
-- A printed TPU or PETG page survives years of small hands, bending, and washing; embossed paper does not.
+- A printed TPU or PETG page survives years of small hands and washing; embossed paper does not.
 - The same €70 device that prints a page can also print a phone stand or a toy, with no single-purpose hardware purchase required.
 - Recycled PET filament brings the marginal cost of a page close to zero.
 - Families and classrooms are far more likely to already own, or be able to justify, a general-purpose 3D printer than a specialized embosser costing three to five times as much.
