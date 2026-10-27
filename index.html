@@ -93,8 +93,11 @@
     --paper-warm: #f4f2ec;
     --hairline: rgba(10, 10, 12, 0.08);
     --hairline-strong: rgba(10, 10, 12, 0.14);
-    --muted: rgba(10, 10, 12, 0.55);
-    --muted-soft: rgba(10, 10, 12, 0.35);
+    /* Both pass WCAG AA (4.5:1) on the paper background. They were 0.55 and
+       0.35, which left small labels and the help section titles at about
+       2.4:1, too faint for low-vision readers. */
+    --muted: rgba(10, 10, 12, 0.66);
+    --muted-soft: rgba(10, 10, 12, 0.6);
   }
   html, body, #root {
     height: 100%;
@@ -215,7 +218,7 @@
 </style>
 </head>
 <body>
-<canvas id="chrome-bg"></canvas>
+<canvas id="chrome-bg" aria-hidden="true"></canvas>
 <div class="grain"></div>
 <div id="root" class="relative" style="z-index:2;"></div>
 
@@ -1480,6 +1483,8 @@ const COPY = {
     headline:   "Tell me a story…",
     sub:        "Speak your idea. We'll write it, translate it to braille, and prepare a tactile page you can print at home.",
     tap:        "Tap to speak",
+    noVoice:    "Voice input does not work in this browser. Type your idea in the box below.",
+    micBlocked: "The microphone is blocked for this site. Allow it in the browser, or type your idea in the box below.",
     listening:  "Listening…",
     stop:       "Tap to stop",
     or:         "or type below",
@@ -1554,6 +1559,8 @@ const COPY = {
     headline:   "Raccontami una storia…",
     sub:        "Dimmi la tua idea. La scriviamo, la traduciamo in braille e prepariamo una pagina tattile da stampare a casa.",
     tap:        "Tocca e parla",
+    noVoice:    "In questo browser la dettatura non funziona. Scrivi la tua idea nella casella qui sotto.",
+    micBlocked: "Il microfono è bloccato per questo sito. Consentilo nel browser, oppure scrivi la tua idea nella casella qui sotto.",
     listening:  "Ti ascolto…",
     stop:       "Tocca per fermare",
     or:         "oppure scrivi qui sotto",
@@ -1780,13 +1787,38 @@ function Header({ lang, setLang, sound, setSound, t, onHelp }) {
 // button on close.
 function HelpPanel({ t, onClose }) {
   const boxRef = useRef(null);
+  // The parent passes a fresh onClose on every render; reading it through a
+  // ref keeps the effect below to one run per opening, so focus is not
+  // snatched back to the panel (or handed to the opener) on unrelated renders.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
+    // Remember who opened the panel so focus can go back there on close; left
+    // on <body>, a screen-reader user lands at the top of the page, lost.
+    const opener = document.activeElement;
     if (boxRef.current) boxRef.current.focus();
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e) => {
+      if (e.key === "Escape") { closeRef.current(); return; }
+      // Keep Tab inside the modal: aria-modal tells screen readers, but the
+      // keyboard would otherwise walk out behind the panel.
+      if (e.key === "Tab" && boxRef.current) {
+        // Everything the browser itself would Tab to, <summary> included
+        // (the questions are <details>): a selector list missed them once.
+        const f = [...boxRef.current.querySelectorAll('*')]
+          .filter(el => el.tabIndex >= 0 && !el.disabled && el.offsetParent !== null);
+        if (!f.length) return;
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === boxRef.current)) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      if (opener && opener.focus && document.contains(opener)) opener.focus();
+    };
+  }, []);
 
   return (
     <div onClick={onClose}
@@ -1849,7 +1881,7 @@ function MicButton({ state, onClick, t }) {
   const isListening = state === "listening";
   return (
     <button onClick={onClick} className="focus-ring relative inline-flex items-center justify-center"
-      aria-label={isListening ? t.stop : t.tap}
+      aria-label={isListening ? t.stop : t.tap} aria-pressed={isListening}
       style={{ width: 96, height: 96, borderRadius: 999, background: "var(--ink)", color: "var(--paper)",
         boxShadow: isListening
           ? "0 0 0 8px rgba(10,10,12,0.06), 0 0 0 18px rgba(10,10,12,0.04), 0 18px 50px -12px rgba(10,10,12,0.5)"
@@ -1918,7 +1950,7 @@ function LoadingScreen({ msg, progress, t }) {
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 compact:justify-start compact:overflow-y-auto compact:gap-6 compact:pt-20 compact:pb-8 compact:[&>*:first-child]:mt-auto compact:[&>*:last-child]:mb-auto" style={{ zIndex: 5 }}>
       <BlobLoader size={240} />
       <div className="flex flex-col items-center gap-4 rise" style={{ maxWidth: 400, width: '100%', padding: '0 32px' }}>
-        <div className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
+        <div role="status" aria-live="polite" className="serif text-[28px] text-center" style={{ letterSpacing: "-0.01em" }}>
           {msg || t.weaving}
         </div>
         {progress !== null ? (
@@ -2085,10 +2117,16 @@ function StoryResult({ pages, lang, t, onAgain }) {
               aria-label={t.prevPage}>‹</button>
             <div className="flex gap-1.5">
               {pages.map((_, i) => (
+                // The dot is 6px; the button around it is 24px, the WCAG 2.2
+                // minimum touch target, so it can actually be hit.
                 <button key={i} onClick={() => setPage(i)} aria-label={`${t.goToPage} ${i+1}`}
-                  style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6,
+                  aria-current={i === page ? "page" : undefined} className="focus-ring"
+                  style={{ minWidth: 24, height: 24, display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    background: "transparent", cursor: "pointer", border: "none", padding: 0, borderRadius: 12 }}>
+                  <span aria-hidden="true" style={{ width: i === page ? 22 : 6, height: 6, borderRadius: 6, display: "block",
                     background: i === page ? "var(--ink)" : "rgba(10,10,12,0.2)",
-                    transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)", cursor: "pointer", border: "none", padding: 0 }} />
+                    transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)" }} />
+                </button>
               ))}
             </div>
             <button onClick={() => { window.SFX && window.SFX.play("pageTurn"); setPage(x => Math.min(pages.length-1, x+1)); }}
@@ -2379,6 +2417,9 @@ function buildPages(storyText, lang) {
 // ─── Main app ─────────────────────────────────────────────────────────────────
 function App() {
   const [lang,  setLang]  = useState("en");
+  // Screen readers (JAWS, NVDA, VoiceOver) pick their voice from the page
+  // language. Without this, Italian was read with an English voice.
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const [sound, setSound] = useState(window.SFX ? window.SFX.isEnabled() : true);
   const [phase, setPhase] = useState("idle");
   const [text,  setText]  = useState("");
@@ -2386,6 +2427,10 @@ function App() {
   const [helpOpen,        setHelpOpen]        = useState(false);
   const [loadingMsg,      setLoadingMsg]      = useState("");
   const [loadingProgress, setLoadingProgress] = useState(null);
+  // Spoken and shown when voice input cannot run, so the reader is told why
+  // and handed to the text box instead of waiting on a silent microphone.
+  const [voiceNote, setVoiceNote] = useState("");
+  useEffect(() => { setVoiceNote(""); }, [lang]);
   const t = COPY[lang];
 
   const inputRef  = useRef(null);
@@ -2405,20 +2450,18 @@ function App() {
       window.SFX && window.SFX.play("listenEnd");
       return;
     }
-    window.SFX && window.SFX.play("listenStart");
-    setPhase("listening");
-
+    // No speech recognition (Firefox, which many NVDA users browse with, has
+    // none). This used to pretend to listen and then submit a sample idea the
+    // reader never said. Say so plainly and move them to the text box.
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      // No Web Speech API — simulate after 3s
-      setTimeout(() => {
-        const phrase = lang === "it" ? "un gatto pirata che naviga verso la luna" : "a pirate cat who sails to the moon";
-        setText(phrase);
-        window.SFX && window.SFX.play("listenEnd");
-        doSubmit(phrase);
-      }, 3000);
+      setVoiceNote(t.noVoice);
+      inputRef.current && inputRef.current.focus();
       return;
     }
+    setVoiceNote("");
+    window.SFX && window.SFX.play("listenStart");
+    setPhase("listening");
 
     const sr = new SR();
     srRef.current = sr;
@@ -2447,7 +2490,14 @@ function App() {
       if (phrase) { setText(phrase); doSubmit(phrase); }
       else setPhase("idle");
     };
-    sr.onerror = () => { window.SFX && window.SFX.play("listenEnd"); finishListening(); };
+    sr.onerror = (e) => {
+      window.SFX && window.SFX.play("listenEnd");
+      if (e && (e.error === "not-allowed" || e.error === "service-not-allowed")) {
+        setVoiceNote(t.micBlocked);
+        inputRef.current && inputRef.current.focus();
+      }
+      finishListening();
+    };
     sr.onend   = finishListening;
     try {
       window.SFX && window.SFX.recording && window.SFX.recording(true);
@@ -2610,6 +2660,9 @@ function App() {
               <MicButton state={phase === "listening" ? "listening" : "idle"} onClick={toggleListen} t={t} />
               <div aria-hidden="true" className="mono text-[11px] tracking-[0.22em] uppercase" style={{ color: phase === "listening" ? "var(--ink)" : "var(--muted)" }}>
                 {phase === "listening" ? t.listening : t.tap}
+              </div>
+              <div role="status" aria-live="polite" className="text-[14px] text-center max-w-[420px]" style={{ color: "var(--ink)" }}>
+                {voiceNote}
               </div>
             </div>
 
