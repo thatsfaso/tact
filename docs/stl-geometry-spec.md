@@ -1,6 +1,6 @@
 # STL Geometry Specification
 
-**Status: v1.0 — locked for implementation.**
+**Status: v1.1.** The browser implementation (`index.html`) is the reference; sections marked as the original Python plan are kept for history.
 
 This document defines every geometric parameter the STL generator (Module 5) must use to produce tactilely readable, ISO-compliant, FDM-printable Braille pages. All dimensions are in millimetres. All values account for FDM shrinkage unless explicitly noted.
 
@@ -24,9 +24,12 @@ Depth:              150mm  (PAGE_H)
 Thickness:          0.5mm
 Corner radius:      2.0mm (XY plane only — bevelled edges, not sphere corners)
 Z range:            0.0 → 0.5mm
+Bottom edge:        0.4mm chamfer (the foot is inset 0.4mm, Z 0 → 0.4), which absorbs first-layer spread
 ```
 
-**Why 0.5mm thickness:** At 0.3mm layer height (standard for budget FDM), this is 1-2 layers. Thinner than 0.4mm risks warping on non-heated beds; thicker than 0.6mm wastes filament and print time without tactile benefit.
+**Why 0.5mm thickness:** Printed flat at 0.3mm layer height (standard for budget FDM), this is 1-2 layers. Thinner than 0.4mm risks warping on non-heated beds.
+
+**Under test:** printed standing up (the page's bottom edge on the bed), which gives the roundest dots, a 0.5mm page is too thin: a blind reader who printed one this way found it buckled. Two test prints are planned, 2mm standing up and 1mm flat, to choose the default thickness and orientation. This section changes with their results.
 
 **Corner treatment:** Use a 2D hull with 2mm radius rounded corners, then extrude in Z. This is a minkowski sum of the rectangle with a 2mm circle — `trimesh.creation.extrude_polygon(shapely_polygon)`.
 
@@ -284,14 +287,16 @@ A future `profiles/` directory will contain per-printer `{printer_name}.json` wi
 
 ## Material Recommendations
 
-| Material | Flexibility | Durability | Print difficulty | Recommended for |
+| Material | Feel | Durability | Print difficulty | Notes |
 |---|---|---|---|---|
-| TPU (95A) | High | Very high | Medium | Primary: "page" feel, survives bending |
-| PETG | Low | High | Low | Alternative: rigid, washable, hygienic |
-| PLA | None | Low | Very low | Prototyping only — brittle, not child-safe |
-| Recycled PET | Low-medium | High | Medium | Near-zero cost option |
+| PETG | Rigid, smooth | High | Low | Washable; the material of the test prints |
+| TPU (95A) | Soft surface | Very high | Medium | Slower to print; harder to print standing up |
+| PLA | Rigid | Low | Very low | Prototyping only: brittle, not for daily handling |
+| Recycled PET | Rigid | High | Medium | Near-zero cost option |
 
-**Default recommendation:** TPU 95A at 220°C, 30mm/s, 0% fan for the first layer, 50% thereafter. Heated bed 50°C.
+Tact pages are meant to be held and read, not bent; no material is recommended for flexibility.
+
+**Settings:** PETG 230-240°C, heated bed 70-80°C. TPU 95A 220°C, 30mm/s, 0% fan for the first layer, 50% thereafter, heated bed 50°C.
 
 ---
 
@@ -309,6 +314,8 @@ A future `profiles/` directory will contain per-printer `{printer_name}.json` wi
 These are guidelines to include in the TACT documentation, not enforced by the software:
 
 ```
+Orientation:       flat, or standing on the page's bottom edge (rounder dots; needs a brim
+                   and a thicker page, see Base Plate)
 Layer height:      0.20mm
 Infill:            100% (it's already a thin slab — infill setting is effectively irrelevant)
 Walls:             2 perimeters
@@ -326,3 +333,4 @@ Raft:              optional (helps with TPU bed adhesion)
 | Version | Date | Notes |
 |---|---|---|
 | 1.0 | 2026-05-04 | Initial spec. Base plate, Braille dot profile, tactile graphic extrusion, assembly, calibration, materials, file format. |
+| 1.1 | 2026-10-28 | Bottom-edge chamfer; thickness and orientation under test; materials described without a flexibility claim. |

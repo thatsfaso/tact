@@ -1,5 +1,7 @@
 # Architecture & Pipeline
 
+> **Historical design document.** This is the original plan: a Python library plus a web app sharing Liblouis and a structured JSON story format. The shipped system is the single page `index.html` with a small story service (`worker/`); see the README and `docs/decisions.md` for how it works today.
+
 TACT is designed as two deliverables sharing a common core:
 
 1. **Python CLI/library** — for developers, power users, local automation

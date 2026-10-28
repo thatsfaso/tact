@@ -30,8 +30,8 @@ A parent, teacher, or the child themselves speaks a one-line idea. Everything do
 
 ```mermaid
 flowchart LR
-    A["🎙️ Voice or text\n'a fox who guarded a castle'"] --> B["Story writing\n(in-browser language model)"]
-    B --> C["Grade 1 braille\ntranslation - IT / EN"]
+    A["🎙️ Voice or text\n'a fox who guarded a castle'"] --> B["Story writing\n(story service, in-browser model as fallback)"]
+    B --> C["Braille translation\nGrade 1 IT / EN, Grade 2 EN"]
     B --> D["Illustration matching\n93 tactile shapes"]
     C --> E["Page layout\nsquare, picture top-right"]
     D --> E
@@ -42,7 +42,7 @@ flowchart LR
 The full architecture, module by module:
 
 <div align="center">
-<img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, in-browser LLM, parallel braille translation and tactile graphics, page layout, STL generation, 3D printer output" width="720"/>
+<img src="assets/tact_pipeline_architecture.svg" alt="Tact pipeline architecture: voice/text input, speech-to-text, story writing (story service, in-browser model as fallback), parallel braille translation and tactile pictures, page layout, STL generation, 3D printer output" width="720"/>
 </div>
 
 The result: a page roughly the size of a postcard, with domed braille dots and a raised silhouette set into the top-right corner: read by touch, kept, re-read, collected into a shelf of stories nobody else has. The physical realization of that page, top view and cross-section, is shown below:
@@ -59,7 +59,7 @@ A few decisions this project made on purpose, because the obvious version of thi
 
 **The story-writing model runs inside the visitor's browser tab: no server, no API key, no account.** Tact loads a small language model over WebGPU and generates the story entirely on the reader's own device. The app profiles the device at runtime and steps down through a tier list, from a 3-billion-parameter model on capable hardware to progressively lighter ones, so nobody is locked out by their laptop, and on that path nothing leaves their machine. A faster hosted path now runs ahead of it and sends only the one-line idea, returning a story in a second or two; it races several independent providers so no single one can take it down, and removing it from the configuration returns the app to browser-only generation. If the device has no GPU at all, the pipeline doesn't fall back to a canned demo: it takes the words the person actually spoke or typed and turns *those* into real braille and a real tactile page. Every visitor gets a working product; the model is a bonus, not a dependency.
 
-**Uncontracted braille is translated in the page and checked against the reference translator.** Grade 1 braille, the uncontracted form for beginning readers, needs no dictionary, but it is not a plain letter-for-cell table either: Italian and English mark capitals, quotes and brackets differently, and both depend on context (a capitalised word, an opening or closing quote, a letter right after a number). Tact implements these rules for both languages, so translation is instant and works offline, and its output matches liblouis, the open translator used by braille software, cell for cell on 60 generated stories and a set of test sentences. Contracted English (UEB Grade 2) has rules far too subtle to hand-roll, so when someone picks it, Tact loads liblouis itself, compiled for the browser (about 470 KB, see [`vendor/liblouis/`](vendor/liblouis/)).
+**Uncontracted braille is translated in the page and checked against the reference translator.** Grade 1 braille, the uncontracted form for beginning readers, needs no dictionary, but it is not a plain letter-for-cell table either: Italian and English mark capitals, quotes and brackets differently, and both depend on context (a capitalised word, an opening or closing quote, a letter right after a number). Tact implements these rules for both languages, so translation is instant and works offline, and its output matches liblouis, the open translator used by braille software, cell for cell on 60 generated stories and a set of test sentences. A [test](tests/braille/) checks this again at every push. Contracted English (UEB Grade 2) has rules far too subtle to hand-roll, so when someone picks it, Tact loads liblouis itself, compiled for the browser (about 470 KB, see [`vendor/liblouis/`](vendor/liblouis/)).
 
 **The on-screen preview and the physical print are generated from the same geometry, in millimetres, from one source of truth.** There is exactly one object describing where every braille dot and every illustration pixel sits on the page. The browser preview renders it as scalable vector shapes; the STL exporter walks the same coordinates into 3D domes and pillars. What a parent sees on screen before printing is what comes out of the nozzle, not an approximation of it.
 

@@ -1,5 +1,7 @@
 # JSON Schema — LLM Output Contract
 
+> **Historical design document.** The shipped app does not use this contract: the story service returns plain story text, and pages and pictures are derived in the page (decision D017). Kept for reference.
+
 This is the authoritative data contract between the LLM content generator (Module 2) and every downstream module (3a Braille translation, 3b tactile graphics, 4 page layout, 5 STL generator).
 
 **Status: v1.0 — locked for implementation.**
@@ -101,7 +103,7 @@ One page of the physical book. In `picture_book` layout: ~20 words of text + one
 | `illustration` | `IllustrationSpec` | no | Omit for text-only pages (e.g. title page or final page with just a page number). |
 
 **Text rules (enforced at validation):**
-- No em-dashes (`—`); use a comma or period instead (Braille has no em-dash cell in Grade 1)
+- No long dashes (`—`); use a comma or period instead, which reads more simply for young readers
 - No ellipsis character (`…`); use three periods `...`
 - Accented Italian characters (`à è é ì ò ù`) are fine — Liblouis handles them
 - Numbers must be written as digits (`3`), not words (`three`) — the number indicator is added automatically by Liblouis
