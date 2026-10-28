@@ -520,72 +520,189 @@ window.TACT = (function () {
   "use strict";
 
   // ── Braille translation (Grade 1 / uncontracted, pure JS) ────────────────
-  // This project uses Grade 1 Braille only for both Italian and English
-  // (decisions D004 / D005), which is a deterministic character→cell mapping
-  // with no contractions. A pure-JS translator is therefore exact, has zero
-  // dependencies, works offline and on file://, and avoids the fragile
-  // Liblouis WASM build (whose bundled English tables fail to compile and whose
-  // translate calls intermittently abort the WASM heap).
-  //
-  // Letters a–z are identical between Italian 6-dot and English UEB Grade 1.
-  // Italian accented vowels and shared punctuation are included below.
-  var BRAILLE = {
+  // Uncontracted braille needs no dictionary, so it is translated here without
+  // loading anything. It is not a plain letter-for-cell lookup, though: Italian
+  // and English (UEB) mark capitals, quotes and brackets differently, and both
+  // depend on context (a capitalised word, an opening or closing quote, a letter
+  // straight after a number). The rules below follow liblouis 3.39, the
+  // reference translator (en-ueb-g1.ctb, it-it-comp6.utb), and were checked
+  // against it cell for cell on every story of the evaluation set.
+  var LETTERS = {
     a:[1], b:[1,2], c:[1,4], d:[1,4,5], e:[1,5], f:[1,2,4], g:[1,2,4,5],
     h:[1,2,5], i:[2,4], j:[2,4,5], k:[1,3], l:[1,2,3], m:[1,3,4], n:[1,3,4,5],
     o:[1,3,5], p:[1,2,3,4], q:[1,2,3,4,5], r:[1,2,3,5], s:[2,3,4], t:[2,3,4,5],
     u:[1,3,6], v:[1,2,3,6], w:[2,4,5,6], x:[1,3,4,6], y:[1,3,4,5,6], z:[1,3,5,6],
-    'à':[1,2,3,5,6], 'è':[2,3,4,6], 'é':[1,2,3,4,5,6], 'ì':[3,4], 'ò':[3,4,6], 'ù':[2,3,4,5,6],
-    'â':[1,6], 'ê':[1,2,6], 'î':[1,4,6], 'ô':[1,4,5,6], 'û':[1,5,6],
-    'ç':[1,2,3,4,6], 'ñ':[1,2,4,5,6], 'ü':[1,2,5,6],
-    '.':[2,5,6], ',':[2], ';':[2,3], ':':[2,5], '?':[2,6], '!':[2,3,5],
-    "'":[3], '-':[3,6], '"':[2,3,6], '(':[1,2,6], ')':[3,4,5], '/':[3,4],
-    '1':[1], '2':[1,2], '3':[1,4], '4':[1,4,5], '5':[1,5],
-    '6':[1,2,4], '7':[1,2,4,5], '8':[1,2,5], '9':[2,4], '0':[2,4,5],
   };
-  var CAP_SIGN = [6];        // single-letter capital indicator (dot 6)
-  var NUM_SIGN = [3,4,5,6];  // number indicator
+  // Digits are the letters a-j after the number sign.
+  var DIGITS = { '1':'a', '2':'b', '3':'c', '4':'d', '5':'e', '6':'f', '7':'g', '8':'h', '9':'i', '0':'j' };
+  var NUM_SIGN = [3,4,5,6];
+  var G1 = {
+    en: {
+      cap: [6],
+      // UEB writes accented letters as a modifier, then the accent, then the letter.
+      accents: { '̀':[1,6], '́':[3,4], '̂':[1,4,6], '̃':[1,2,4,5,6],
+                 '̈':[2,5], '̊':[1,2,4,6], '̧':[1,2,3,4,6] },
+      letters: {},
+      punct: { '.':[[2,5,6]], ',':[[2]], ';':[[2,3]], ':':[[2,5]], '?':[[2,3,6]], '!':[[2,3,5]],
+               "'":[[3]], '-':[[3,6]], '—':[[6],[3,6]], '/':[[4,5,6],[3,4]],
+               '(':[[5],[1,2,6]], ')':[[5],[3,4,5]], '[':[[4,6],[1,2,6]], ']':[[4,6],[3,4,5]] },
+      openQuote: [2,3,6], closeQuote: [3,5,6],
+      decimal: [2,5,6],          // 1.5
+      afterNumber: [5,6],        // grade 1 indicator before a-j right after digits: 12a
+      inWord: [5,6],             // the same indicator before , ; : ? ! between two letters
+      passages: true,            // three or more capitalised words: one indicator, then a terminator
+      ellipsis: null
+    },
+    it: {
+      cap: [4,6],
+      accents: null,
+      letters: { 'à':[1,2,3,5,6], 'á':[1,2,3,5,6], 'è':[2,3,4,6], 'é':[1,2,3,4,5,6], 'ì':[3,4], 'í':[3,4],
+                 'ò':[3,4,6], 'ó':[3,4,6], 'ù':[2,3,4,5,6], 'ú':[2,3,4,5,6], 'â':[1,6], 'ê':[1,2,6], 'î':[1,4,6],
+                 'ô':[1,4,5,6], 'û':[1,5,6], 'ä':[3,4,5], 'ë':[1,2,4,6], 'ï':[1,2,4,5,6], 'ö':[2,4,6],
+                 'ü':[1,2,5,6], 'ç':[1,2,3,4,6], 'ñ':[1,2,4,5,6] },
+      punct: { '.':[[2,5,6]], ',':[[2]], ';':[[2,3]], ':':[[2,5]], '?':[[2,6]], '!':[[2,3,5]],
+               "'":[[3]], '-':[[3,6]], '—':[[4,5,6],[3,6]], '/':[[3,4]],
+               '(':[[2,3,5,6]], ')':[[2,3,5,6]], '[':[[1,2,3,5,6]], ']':[[2,3,4,5,6]] },
+      openQuote: [2,3,6], closeQuote: [3,5,6],
+      decimal: [3],
+      afterNumber: [4,5,6],
+      inWord: null,
+      passages: false,
+      ellipsis: [3]              // Italian writes "..." as three dot-3 cells
+    }
+  };
+  var CAPS_TERMINATOR = [[6],[3]];
 
-  // Fold typographic punctuation onto the ASCII forms the table above knows.
-  // Language models (and macOS smart quotes) emit curly apostrophes, ellipses
-  // and long dashes constantly. Any character the table misses becomes a blank
-  // cell, and a blank cell is also where a line is allowed to break — so
-  // "C’era" would read as "C era" and could even split across two lines.
-  // Italian elides everywhere (l’orso, un’amica, dov’è), so this is not cosmetic.
+  // Fold typographic punctuation onto the forms the tables know. Language
+  // models (and macOS smart quotes) emit curly apostrophes, ellipses and long
+  // dashes constantly. Any character the table misses becomes a blank cell, and
+  // a blank cell is also where a line is allowed to break, so "C’era" would
+  // read as "C era" and could even split across two lines. Italian elides
+  // everywhere (l’orso, un’amica, dov’è), so this is not cosmetic. Long dashes
+  // stay a dash (one form, U+2014): braille writes a dash, not a hyphen.
   function normalisePunctuation(text) {
     return String(text)
       .replace(/[‘’‚‛]/g, "'")  // ‘ ’ ‚ ‛
       .replace(/[“”„‟]/g, '"')  // “ ” „ ‟
-      .replace(/…/g, '...')                     // … → three period cells
-      .replace(/[–—―]/g, '-')         // – — ―
-      .replace(/[   ]/g, ' ');        // non-breaking spaces
+      .replace(/…/g, '...')                     // … → three periods
+      .replace(/[–―]/g, '—')                    // – ― → —
+      .replace(/[   ]/g, ' ');        // non-breaking spaces
+  }
+
+  function isLetter(ch) { return !!ch && ch.toLowerCase() !== ch.toUpperCase(); }
+  function isUpper(ch) { return isLetter(ch) && ch === ch.toUpperCase() && ch !== ch.toLowerCase(); }
+
+  // The cells of one letter, without any capital sign.
+  function letterCells(ch, R) {
+    var lo = ch.toLowerCase();
+    if (LETTERS[lo]) return [LETTERS[lo]];
+    if (R.letters[lo]) return [R.letters[lo]];
+    var parts = Array.from(lo.normalize('NFD'));
+    var base = LETTERS[parts[0]];
+    if (!base) return [[]];
+    if (R.accents && parts.length > 1 && R.accents[parts[1]]) return [[4,5], R.accents[parts[1]], base];
+    return [base];                                  // unknown accent: the plain letter
+  }
+
+  // Uncontracted braille for text in lang ('it' or 'en', default: the current
+  // mode). Cell forms: dots[] = a cell, [] = space (and word-wrap point),
+  // "BR" = line break.
+  function grade1Cells(text, lang) {
+    var R = G1[(lang || brailleMode.lang) === 'it' ? 'it' : 'en'];
+    var chars = Array.from(normalisePunctuation(text));
+    var n = chars.length;
+
+    // Capitals are decided per run of letters, and (English only) per run of
+    // words: three or more fully capitalised words in a row are a passage.
+    var capWordAt = {}, passageStart = {}, passageEnd = {};
+    if (R.passages) {
+      var words = [], s = -1;
+      for (var k = 0; k <= n; k++) {
+        var sp = k === n || chars[k] === ' ' || chars[k] === '\n' || chars[k] === '\t';
+        if (!sp && s < 0) s = k;
+        if (sp && s >= 0) { words.push([s, k]); s = -1; }
+      }
+      var caps = words.map(function (w) {
+        var letters = chars.slice(w[0], w[1]).filter(isLetter);
+        return letters.length > 0 && letters.every(isUpper);
+      });
+      for (var w = 0; w < words.length; ) {
+        if (!caps[w]) { w++; continue; }
+        var e = w; while (e + 1 < words.length && caps[e + 1]) e++;
+        if (e - w + 1 >= 3) {
+          for (var q = w; q <= e; q++) for (var c = words[q][0]; c < words[q][1]; c++) capWordAt[c] = 'passage';
+          passageStart[words[w][0]] = true;
+          passageEnd[words[e][1] - 1] = true;
+        }
+        w = e + 1;
+      }
+    }
+
+    var cells = [];
+    var push = function (list) { list.forEach(function (x) { cells.push(x); }); };
+    var inNumber = false, inCapsRun = false, passageOpen = false;
+    for (var i = 0; i < n; i++) {
+      var ch = chars[i], prev = chars[i - 1], next = chars[i + 1];
+      if (passageStart[i]) {
+        // The passage indicator goes right before the first letter, after any
+        // opening punctuation of the first word.
+        passageOpen = true;
+      }
+      if (ch === '\n') { cells.push('BR'); inNumber = false; inCapsRun = false; continue; }
+      if (ch === ' ' || ch === '\t') { cells.push([]); inNumber = false; inCapsRun = false; continue; }
+
+      if (DIGITS[ch]) {
+        if (!inNumber) cells.push(NUM_SIGN);
+        inNumber = true; inCapsRun = false;
+        cells.push(LETTERS[DIGITS[ch]]);
+        continue;
+      }
+      // A comma or decimal point between digits keeps the number going: 3,000 and 1.5.
+      if (inNumber && (ch === ',' || ch === '.') && DIGITS[next]) {
+        cells.push(ch === ',' ? [2] : R.decimal);
+        continue;
+      }
+
+      if (isLetter(ch)) {
+        if (inNumber && 'abcdefghij'.indexOf(ch.toLowerCase()) >= 0) cells.push(R.afterNumber);
+        inNumber = false;
+        if (passageOpen && capWordAt[i] === 'passage') {
+          cells.push(R.cap); cells.push(R.cap); cells.push(R.cap); passageOpen = false;
+        }
+        if (capWordAt[i] !== 'passage' && isUpper(ch)) {
+          if (!inCapsRun) {
+            var len = 0; while (isUpper(chars[i + len])) len++;
+            if (len >= 2) { cells.push(R.cap); cells.push(R.cap); inCapsRun = true; }
+            else cells.push(R.cap);
+          }
+        } else if (inCapsRun && !isUpper(ch)) {
+          push(CAPS_TERMINATOR); inCapsRun = false;        // ABc: the capitals end here
+        }
+        push(letterCells(ch, R));
+        if (!isLetter(next)) inCapsRun = false;
+      } else {
+        inNumber = false; inCapsRun = false;
+        if (ch === '"') {
+          var opens = i === 0 || prev === ' ' || prev === '\n' || prev === '(' || prev === '[' || prev === '—';
+          cells.push(opens ? R.openQuote : R.closeQuote);
+        } else if (ch === '.' && R.ellipsis && next === '.' && chars[i + 2] === '.') {
+          cells.push(R.ellipsis); cells.push(R.ellipsis); cells.push(R.ellipsis); i += 2;
+        } else if (R.punct[ch]) {
+          if (R.inWord && ',;:?!'.indexOf(ch) >= 0 && isLetter(prev) && isLetter(next)) cells.push(R.inWord);
+          push(R.punct[ch]);
+        } else {
+          cells.push([]);                                   // unknown → blank cell
+        }
+      }
+      if (passageEnd[i]) push(CAPS_TERMINATOR);
+    }
+    return cells;
   }
 
   // Returns Promise<Array> — one entry per Braille cell.
-  // Cell forms: dots[] = a cell, [] = space (and word-wrap point), "BR" = line break.
   function translateBraille(text, lang) {
     if (grade2Active()) return Promise.resolve(grade2Cells(text));
-    return new Promise(function (resolve) {
-      var cells = [];
-      var inNumber = false;
-      var chars = Array.from(normalisePunctuation(text));
-      for (var i = 0; i < chars.length; i++) {
-        var raw = chars[i];
-        if (raw === '\n') { cells.push('BR'); inNumber = false; continue; }
-        if (raw === ' ' || raw === '\t') { cells.push([]); inNumber = false; continue; }
-        if (raw >= '0' && raw <= '9') {
-          if (!inNumber) { cells.push(NUM_SIGN); inNumber = true; }
-          cells.push(BRAILLE[raw] || []);
-          continue;
-        }
-        inNumber = false;
-        var lower = raw.toLowerCase();
-        var glyph = BRAILLE[lower];
-        if (glyph === undefined) { cells.push([]); continue; } // unknown → blank cell
-        if (raw !== lower) cells.push(CAP_SIGN); // letter has an uppercase form
-        cells.push(glyph);
-      }
-      resolve(cells);
-    });
+    return Promise.resolve(grade1Cells(text, lang));
   }
 
   // ── Contracted braille (UEB Grade 2), English only ───────────────────────
@@ -913,6 +1030,7 @@ window.TACT = (function () {
     cloudEnabled: !!CLOUD_ENDPOINT,
     translateBraille: translateBraille,
     normalisePunctuation: normalisePunctuation,
+    grade1Cells: grade1Cells,
     loadGrade2: loadGrade2,
     grade2Cells: grade2Cells,
     grade2Active: grade2Active,
@@ -1420,46 +1538,13 @@ function BlobLoader({ size = 220 }) {
 }
 
 // ─── Braille (synchronous) ───────────────────────────────────────────────────
-// Same table and rules as window.TACT.translateBraille, in sync form: the
-// paginator needs to measure text before a Promise could resolve. The two must
-// stay in step — a character missing here (but present there) would make the
-// page fit calculation disagree with the page that actually prints.
-const BRAILLE_MAP = {
-  a:[1],b:[1,2],c:[1,4],d:[1,4,5],e:[1,5],f:[1,2,4],g:[1,2,4,5],
-  h:[1,2,5],i:[2,4],j:[2,4,5],k:[1,3],l:[1,2,3],m:[1,3,4],n:[1,3,4,5],
-  o:[1,3,5],p:[1,2,3,4],q:[1,2,3,4,5],r:[1,2,3,5],s:[2,3,4],t:[2,3,4,5],
-  u:[1,3,6],v:[1,2,3,6],w:[2,4,5,6],x:[1,3,4,6],y:[1,3,4,5,6],z:[1,3,5,6],
-  "à":[1,2,3,5,6],"è":[2,3,4,6],"é":[1,2,3,4,5,6],"ì":[3,4],"ò":[3,4,6],"ù":[2,3,4,5,6],
-  "â":[1,6],"ê":[1,2,6],"î":[1,4,6],"ô":[1,4,5,6],"û":[1,5,6],
-  "ç":[1,2,3,4,6],"ñ":[1,2,4,5,6],"ü":[1,2,5,6],
-  ".":[2,5,6],",":[2],";":[2,3],":":[2,5],"?":[2,6],"!":[2,3,5],
-  "'":[3],"-":[3,6],'"':[2,3,6],"(":[1,2,6],")":[3,4,5],"/":[3,4],
-  "1":[1],"2":[1,2],"3":[1,4],"4":[1,4,5],"5":[1,5],
-  "6":[1,2,4],"7":[1,2,4,5],"8":[1,2,5],"9":[2,4],"0":[2,4,5],
-};
-const CAP_INDICATOR = [6];
-const NUM_INDICATOR = [3,4,5,6];
-
+// The paginator needs to measure text before a Promise could resolve, so it
+// calls the translator directly. There is one translator (window.TACT), so the
+// page fit calculation can never disagree with the page that actually prints.
 function textToBrailleCells(text) {
   // Contracted English (Grade 2) comes from liblouis once it is loaded.
-  if (window.TACT && window.TACT.grade2Active && window.TACT.grade2Active()) return window.TACT.grade2Cells(text);
-  const cells = [];
-  let inNumber = false;
-  const normalise = (window.TACT && window.TACT.normalisePunctuation) || String;
-  for (const raw of normalise(text)) {
-    if (raw === " ") { cells.push([]); inNumber = false; continue; }
-    if (raw === "\n") { cells.push("BR"); inNumber = false; continue; }
-    if (/[0-9]/.test(raw)) {
-      if (!inNumber) { cells.push(NUM_INDICATOR); inNumber = true; }
-      cells.push(BRAILLE_MAP[raw] || []);
-      continue;
-    }
-    inNumber = false;
-    const lower = raw.toLowerCase();
-    if (raw !== lower && BRAILLE_MAP[lower]) { cells.push(CAP_INDICATOR); cells.push(BRAILLE_MAP[lower]); }
-    else cells.push(BRAILLE_MAP[lower] || []);
-  }
-  return cells;
+  if (window.TACT.grade2Active()) return window.TACT.grade2Cells(text);
+  return window.TACT.grade1Cells(text);
 }
 
 function layoutBrailleLines(cells, cellsPerLine = 22) {
@@ -2428,6 +2513,12 @@ const SHAPE_KEYWORDS = {
 // when nothing else is named.
 const WEAK_SHAPES = new Set(['heart', 'star', 'hat_pirate']);
 
+// A shape that is a particular kind of another one. When the reader's idea
+// names the particular one, the story's plain word for the general one means
+// it too: asked for "a teddy bear", a story that only ever says "the bear"
+// still shows the teddy bear.
+const SHAPE_REFINES = { teddy_bear: 'bear' };
+
 const wordsOf = (text) => (text || '').toLowerCase().split(/[^a-zàèéìòù]+/).filter(Boolean);
 
 // Picks the picture for a page. The first matching shape in table order used to
@@ -2441,8 +2532,13 @@ function pickShapeFromText(text, lang, idea = '', story = '') {
   const keywords = SHAPE_KEYWORDS[lang === 'it' ? 'it' : 'en'];
   const page = wordsOf(text), ideaW = wordsOf(idea), all = wordsOf(story);
   let best = null, bestScore = 0, bestPos = Infinity;
+  const named = (shape) => keywords[shape] && ideaW.some(w => keywords[shape].includes(w));
+  const refined = {};   // general shape → the particular one the idea names
+  for (const [special, general] of Object.entries(SHAPE_REFINES)) if (named(special)) refined[general] = special;
   for (const [shape, keys] of Object.entries(keywords)) {
-    const ks = new Set(keys);
+    if (refined[shape]) continue;
+    const general = SHAPE_REFINES[shape];
+    const ks = new Set(general && refined[general] === shape ? keys.concat(keywords[general] || []) : keys);
     const onPage = page.filter(w => ks.has(w)).length;
     const ideaPos = ideaW.findIndex(w => ks.has(w));
     const inStory = all.filter(w => ks.has(w)).length;

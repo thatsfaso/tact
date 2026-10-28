@@ -148,6 +148,19 @@ The 2mm relief made a 38mm picture into a 19×19 grid with broken outlines. In T
 **Decision:** English can be printed in UEB Grade 2 with a switch under the text box; Grade 1 stays the default and Italian stays Grade 1 only. Grade 2 is translated by liblouis 3.39.0 compiled to WebAssembly, with only the nine UEB tables embedded (`vendor/liblouis/`). It loads only when someone picks it. If it fails to load, the story is printed in Grade 1 and the page says so.
 **Rationale:** Feedback from a braille reader asked for contracted braille: many children, in the US especially, learn contractions from the start. Contraction rules depend on syllables and word position, so a hand-written table would teach a child wrong braille. liblouis is the reference open source translator. Output was checked against native liblouis cell for cell.
 **Rejected:** Hand-coding the common contractions. Translating on the server, which would add a dependency for something the browser can do.
+
+### D026 - Grade 1 follows liblouis, per language
+**Decision:** Uncontracted braille keeps its own translator in the page, but its rules now follow liblouis 3.39 for each language: `en-ueb-g1.ctb` for English, `it-it-comp6.utb` for Italian. One translator serves both the page measurement and the printed page.
+**Rationale:** The old single table mixed conventions. Checked against liblouis on the 60 stories of the paper's evaluation, it differed in all 20 Italian stories and in 5 of the 40 English ones:
+- Italian capitals used the English sign (dot 6) instead of dots 4-6;
+- the English question mark used the Italian cell (dots 2-6) instead of dots 2-3-6;
+- closing quotes repeated the opening cell;
+- brackets used old forms;
+- fully capitalised words had no word indicator.
+
+The new rules match liblouis cell for cell on all 60 stories and on 41 test sentences with numbers, capitals, quotes, brackets, accents and dashes. Long dashes are now kept as a dash (they were folded into a hyphen), which also corrects Grade 2.
+**Rejected:** Loading liblouis for Grade 1 as well, which would add a 470 KB download, plus an Italian table, to every story for rules that fit in a page of code.
+
 ---
 
 ## Resolved (were pending)
