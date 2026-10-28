@@ -2,7 +2,8 @@ name: Braille
 
 # Every change to the page is held to liblouis, the reference braille
 # translator: tests/braille/check.mjs runs the translator as it ships in
-# index.html and compares every cell with the expected output.
+# index.html and compares every cell with the expected output. The same job
+# checks the picture choice (tests/pictures).
 on:
   push:
   pull_request:
@@ -19,3 +20,4 @@ jobs:
         with:
           node-version: '22'
       - run: node tests/braille/check.mjs
+      - run: node tests/pictures/check.mjs
