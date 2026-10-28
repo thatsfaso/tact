@@ -2863,6 +2863,11 @@ function App() {
       // Either request is enough: if the first one failed but the parallel one
       // came back, that story is used instead of the reader's bare idea.
       const alt = await extra;
+      // Every answer with the length it was asked for: the last round below
+      // aims from all of them.
+      const seen = [];
+      if (storyText) seen.push({ text: storyText, ask: firstAsk });
+      if (alt) seen.push({ text: alt, ask: secondAsk });
       if (alt && (!storyText || fitScore(measureFit(alt)) > fitScore(measureFit(storyText)))) {
         storyText = alt; askedWords = secondAsk;
       }
@@ -2874,9 +2879,10 @@ function App() {
       // The model cannot count words accurately enough to land inside the narrow
       // window that fills exactly two cards. So measure what came back and, if
       // the second card is not nearly full, ask again for the length this
-      // story's own density says is right. Up to three rounds of two requests
-      // (eight at most, inside the service's 20 a minute; most stories need
-      // only the first two); keep whichever prints best.
+      // story's own density says is right. Up to three rounds of two requests,
+      // then one last round of three (eleven at most, inside the service's 20
+      // a minute; most stories need only the first two); keep whichever prints
+      // best.
       if (storyText && !isDemo) {
         let bestFit = measureFit(storyText);
         // Aim each correction from the LATEST answer, kept or not: it is the
@@ -2892,11 +2898,32 @@ function App() {
             const got = await Promise.allSettled(asks.map(a => window.TACT.refineStoryCloudOnly(q, lang, a)));
             const ok = got.map((g, i) => g.status === "fulfilled" ? { text: g.value, ask: asks[i], fit: measureFit(g.value) } : null).filter(Boolean);
             if (!ok.length) break;
-            ok.forEach(c => { if (fitScore(c.fit) > fitScore(bestFit)) { storyText = c.text; bestFit = c.fit; } });
+            ok.forEach(c => { seen.push(c); if (fitScore(c.fit) > fitScore(bestFit)) { storyText = c.text; bestFit = c.fit; } });
             lastText = ok[0].text; lastAsk = ok[0].ask;
           } catch (e) {
             break; /* keep the best so far: a slightly loose page beats no story */
           }
+        }
+        // Last round, for the few stories still short after three (about one in
+        // twenty). Aiming from the last answer alone chases the model's scatter:
+        // one answer runs long, the next short. By now there are several
+        // answers, so aim from the typical drift across all of them, and spread
+        // three requests around that aim.
+        if (!fitIsGood(bestFit) && seen.length) {
+          try {
+            const wordsIn = (t) => t.split(/\s+/).filter(Boolean).length;
+            const drifts = seen.map(c => wordsIn(c.text) / c.ask).sort((a, b) => a - b);
+            const drift = Math.max(0.6, Math.min(1.4, drifts[drifts.length >> 1]));
+            const needed = wordsIn(storyText) * TARGET_ROWS / Math.max(1, bestFit.rows);
+            const aim = needed / drift;
+            const asks = [...new Set([aim, aim * 1.08, aim * 0.93].map(a => Math.max(45, Math.min(110, Math.round(a)))))];
+            const got = await Promise.allSettled(asks.map(a => window.TACT.refineStoryCloudOnly(q, lang, a)));
+            got.forEach(g => {
+              if (g.status !== "fulfilled") return;
+              const fit = measureFit(g.value);
+              if (fitScore(fit) > fitScore(bestFit)) { storyText = g.value; bestFit = fit; }
+            });
+          } catch (e) { /* keep the best so far */ }
         }
       }
 
