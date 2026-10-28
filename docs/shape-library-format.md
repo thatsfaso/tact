@@ -50,7 +50,7 @@ Every shape file must satisfy all of the following. Files that fail are rejected
 
 ### Tactile rules (v2, all shapes)
 
-Every shape is printed cropped to its own drawing, with its longest side at about 37 mm in the top-right corner of the page, so **1 unit is roughly 0.2 mm**. The rules below are written for that size. They come from the first print read by a blind reader, who could not tell what the old outline drawing showed, and from Theurel et al. (2013), where blind children recognised filled, textured pictures far more reliably than raised-line drawings.
+Every shape is printed cropped to its own drawing, with its longest side at about 37 mm in the top-right corner of the page, so **1 unit is roughly 0.2 mm**. The rules below are written for that size. They come from the first print read by a blind reader, who could not tell what the old outline drawing showed, and from Theurel et al. (2013), where early blind children identified raised-line drawings least well (27% against 36% for textured pictures), and the authors trace this to outlines giving few cues and being confused with the background.
 
 - **Filled surfaces, not outlines.** The body of the thing is a solid black region (`fill="#000000"`). The silhouette carries the identity: ears, tail, legs, wheels, crown points.
 - **Flat view.** Animals and vehicles from the side, people, buildings and objects from the front. No perspective, no three-quarter views, no foreshortening.

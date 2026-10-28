@@ -136,7 +136,7 @@ This file records every significant design decision made, why it was made, and w
 - no braille appeared until a third of the print was done;
 - the picture could not be recognised.
 
-The 2mm relief made a 38mm picture into a 19×19 grid with broken outlines. Filled pictures are recognised by blind children far more reliably than raised-line drawings (Theurel et al. 2013). Four lines at 71% width are a much smaller cost than the old six at 57%, the left margin never moves, and the picture-book convention is familiar.
+The 2mm relief made a 38mm picture into a 19×19 grid with broken outlines. In Theurel et al. (2013), raised-line drawings were the hardest pictures for early blind children to identify, and the authors trace this to outlines giving few cues and being confused with the background. Four lines at 71% width are a much smaller cost than the old six at 57%, the left margin never moves, and the picture-book convention is familiar.
 **Rejected:** Centring a larger picture on top, which still leaves blank sides. A separate picture card, which needs a second layout and another print.
 
 ### D024 - Braille page number on every page
