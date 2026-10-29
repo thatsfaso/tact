@@ -278,6 +278,10 @@ function providers(env) {
       model: 'ministral-14b-latest',
       key: env.MISTRAL_API_KEY,
       timeoutMs: 8000,
+      // Measured on /probe with the page's lengths: asked 66 Italian words it
+      // wrote 91, asked 70 English words it wrote 111. It is asked for 70% of
+      // the length the page needs, so it lands near what the page measures.
+      lengthScale: 0.7,
       omitSeed: true,
       tune: MISTRAL_TUNE,
     },
@@ -484,6 +488,9 @@ function reply(body, status, origin, allowed) {
 // One attempt against one provider. Resolves to the story string, or throws an
 // Error whose .kind distinguishes rate limiting from everything else.
 async function askProvider(p, language, idea, targetWords) {
+  // Some models run long or short of any length they are given; lengthScale
+  // asks them for proportionally less or more, so the story fits the page.
+  if (targetWords && p.lengthScale) targetWords = Math.max(30, Math.round(targetWords * p.lengthScale));
   const res = await fetch(p.url, {
     method: 'POST',
     headers: {
