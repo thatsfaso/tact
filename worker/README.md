@@ -69,12 +69,18 @@ the model:
 
 ```bash
 curl https://tact-story-proxy.<your-subdomain>.workers.dev/health
-# {"ok":true,"configured":true,"providers":["groq:llama-3.3-70b-versatile","groq-fast:llama-3.1-8b-instant","agnes:agnes-2.0-flash"]}
+# {"ok":true,"configured":true,"providers":["groq-qwen:qwen/qwen3.8-27b","mistral:mistral-medium-latest","ministral:ministral-14b-latest","groq-oss:openai/gpt-oss-120b","agnes:agnes-3.0-flash"]}
 ```
 
-The Groq key buys two links in the chain, not one: the 70B model and the 8B
-one are separate rate-limit buckets, so the busiest allowance running out drops
-to another sub-second model rather than all the way down the chain.
+The Groq and Mistral keys each buy two links in the chain, not one: two models
+on one key are separate rate-limit buckets, so the busiest allowance running
+out drops to another model rather than all the way down the chain.
+
+To check one provider for real, with a story and a requested length:
+
+```bash
+curl -H "Origin: https://tactbraille.com" "https://tact-story-proxy.<your-subdomain>.workers.dev/probe?p=agnes&lang=it&w=66&idea=un%20riccio"
+```
 
 `configured: false` means the secret is missing: run `wrangler secret put
 AGNES_API_KEY` again and redeploy.

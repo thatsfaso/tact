@@ -266,6 +266,22 @@ function providers(env) {
       tune: MISTRAL_TUNE,
     },
     {
+      // Same Mistral account, a smaller model with its own allowance. In
+      // October 2026 Medium and Small both answered 429 on every call for
+      // hours (their free allowance spent) while Ministral 14B kept writing;
+      // on live stories its Italian and English were warm and well arced in
+      // about 3s. The 8B was faster but wrote odd Italian ("a soft sting like
+      // mouse bristles"), so it stays out. When Medium is limited it fails in
+      // about 100ms and is skipped for the cooldown, so this costs nothing.
+      name: 'ministral',
+      url: 'https://api.mistral.ai/v1/chat/completions',
+      model: 'ministral-14b-latest',
+      key: env.MISTRAL_API_KEY,
+      timeoutMs: 8000,
+      omitSeed: true,
+      tune: MISTRAL_TUNE,
+    },
+    {
       // Same Groq account as groq-qwen, different model, so a different
       // rate-limit bucket: when Qwen's allowance runs out, this keeps a
       // sub-second model in play instead of dropping to a slow one. gpt-oss-120b
@@ -273,6 +289,12 @@ function providers(env) {
       // where it sometimes returns an empty story. That is acceptable HERE, as
       // a fallback: an empty story simply throws and the chain moves on to
       // Mistral or Agnes, and most of the time Qwen above has already answered.
+      // It is a reasoning model: by default it spends its output budget
+      // thinking, and with 600 tokens it returned empty or four-word stories
+      // (October 2026). Low reasoning effort and a larger budget leave room
+      // for the story itself.
+      extra: { reasoning_effort: 'low' },
+      maxTokens: 1500,
       name: 'groq-oss',
       url: 'https://api.groq.com/openai/v1/chat/completions',
       model: 'openai/gpt-oss-120b',
@@ -283,7 +305,9 @@ function providers(env) {
     {
       name: 'agnes',
       url: 'https://apihub.agnes-ai.com/v1/chat/completions',
-      model: 'agnes-2.0-flash',
+      // agnes-2.0-flash disappeared from the key's /models list in October
+      // 2026 and answered "temporarily unavailable"; 3.0-flash passed /probe.
+      model: 'agnes-3.0-flash',
       key: env.AGNES_API_KEY,
       // Was 40s, on the reasoning that waiting beats a 1.8 GB model download.
       // That reasoning was wrong once measured: when Agnes is degraded it does
@@ -476,7 +500,8 @@ async function askProvider(p, language, idea, targetWords) {
       ],
       temperature: 0.85,
       top_p: 0.9,
-      max_tokens: 600,
+      max_tokens: p.maxTokens || 600,
+      ...(p.extra || {}),
       // Identical requests come back byte-for-byte identical from some
       // providers, so the same idea would always produce the same story.
       // A fresh seed per request makes each telling different.
@@ -627,9 +652,13 @@ export default {
       const override = u.searchParams.get('m');
       if (override) p = Object.assign({}, p, { model: override });
       const idea = u.searchParams.get('idea') || 'un gatto curioso';
+      // ?w=<words> asks for a length, as the page does, to check that a
+      // provider follows it.
+      let words = Number(u.searchParams.get('w')) || 0;
+      if (words) words = Math.max(40, Math.min(110, Math.round(words)));
       const t0 = Date.now();
       try {
-        const story = await askProvider(p, lang, idea.slice(0, 300), 0);
+        const story = await askProvider(p, lang, idea.slice(0, 300), words);
         return reply({ ok: true, model: p.model, ms: Date.now() - t0, story: story }, 200, origin, allowed);
       } catch (e) {
         return reply({ ok: false, model: p.model, ms: Date.now() - t0, kind: e.kind || 'err', detail: String(e.message).slice(0, 700) }, 200, origin, allowed);
