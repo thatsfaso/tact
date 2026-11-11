@@ -97,7 +97,7 @@
 <line x1="86" y1="440" x2="90" y2="440" stroke="#73726c" stroke-width="0.5"/>
 <line x1="86" y1="423" x2="90" y2="423" stroke="#73726c" stroke-width="0.5"/>
 <line x1="340" y1="420" x2="348" y2="420" stroke="#73726c" stroke-width="0.5"/>
-<text x="76" y="448" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">0.5mm</text>
+<text x="76" y="448" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">2mm</text>
 <text x="76" y="427" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">0.85mm</text>
 <text x="336" y="424" text-anchor="end" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">1.0mm</text>
 
@@ -110,7 +110,7 @@
 <text x="350" y="508" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.7">(0.15mm above the dots), 0.4mm relief</text>
 
 <text x="500" y="420" text-anchor="start" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">Base plate</text>
-<text x="500" y="434" text-anchor="start" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">0.5mm, 10mm corners</text>
+<text x="500" y="434" text-anchor="start" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.6">2mm, 10mm corners</text>
 
 <text x="80" y="540" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.55">Material: TPU 95A / PETG</text>
 <text x="80" y="554" font-family="sans-serif" font-size="12" fill="#82817A" opacity="0.55">Print bed: 220 × 220mm · page: 150 × 150mm</text>

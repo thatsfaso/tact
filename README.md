@@ -109,7 +109,7 @@ Every dimension follows **ISO 17049:2013**, over-built by roughly 20 to 30% to c
 | Dot spacing (within a cell) | 2.5 mm center-to-center | | |
 | Cell spacing | 6.0 mm center-to-center | 5.9 mm | |
 | Line spacing | 10.0 mm center-to-center | | |
-| Base plate | 0.5 mm | 0.48 mm | |
+| Base plate | 2 mm | | printed standing up |
 
 Printed values come from a single reference print (budget FDM, PLA, measured with a digital caliper on one page), not a multi-printer distribution. Both dot values fall inside the ISO 17049:2013 tolerance band. A blind reader has printed and read a page of the earlier layout, and that feedback shaped the current one (see above). The current layout has not been tested by blind readers yet.
 

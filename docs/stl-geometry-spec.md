@@ -1,6 +1,6 @@
 # STL Geometry Specification
 
-**Status: v1.1.** The browser implementation (`index.html`) is the reference; sections marked as the original Python plan are kept for history.
+**Status: v1.2.** The browser implementation (`index.html`) is the reference; sections marked as the original Python plan are kept for history. The page is designed to be printed standing up on a 2mm plate.
 
 This document defines every geometric parameter the STL generator (Module 5) must use to produce tactilely readable, ISO-compliant, FDM-printable Braille pages. All dimensions are in millimetres. All values account for FDM shrinkage unless explicitly noted.
 
@@ -11,7 +11,7 @@ This document defines every geometric parameter the STL generator (Module 5) mus
 Matches the page format spec exactly:
 - Origin (0, 0, 0): bottom-left of base plate, bottom surface
 - Z=0: bottom of base plate (printer bed)
-- Z=0.5: top surface of base plate (where all raised elements begin)
+- Z=2.0: top surface of base plate (where all raised elements begin)
 - Z positive: away from the printer bed (toward the reader's fingers)
 
 ---
@@ -21,19 +21,17 @@ Matches the page format spec exactly:
 ```
 Width:              150mm  (PAGE_W — square page, see page-format-spec.md v2.0)
 Depth:              150mm  (PAGE_H)
-Thickness:          0.5mm
-Corner radius:      2.0mm (XY plane only — bevelled edges, not sphere corners)
-Z range:            0.0 → 0.5mm
+Thickness:          2.0mm
+Corner radius:      10mm (XY plane only)
+Z range:            0.0 → 2.0mm
 Bottom edge:        0.4mm chamfer (the foot is inset 0.4mm, Z 0 → 0.4), which absorbs first-layer spread
 ```
 
-**Why 0.5mm thickness:** Printed flat at 0.3mm layer height (standard for budget FDM), this is 1-2 layers. Thinner than 0.4mm risks warping on non-heated beds.
-
-**Under test:** printed standing up (the page's bottom edge on the bed), which gives the roundest dots, a 0.5mm page is too thin: a blind reader who printed one this way found it buckled. Two test prints are planned, 2mm standing up and 1mm flat, to choose the default thickness and orientation. This section changes with their results.
+**Why 2mm thickness:** the page is printed standing up, on its bottom edge, the orientation that gives the roundest dots. A 0.5mm page printed that way buckled for a blind reader who printed one; stiffness grows with the cube of the thickness, so a 2mm plate is 64 times stiffer. A 2mm page takes about 57 g of PETG. Test prints of the 2mm page are under way.
 
 **Corner treatment:** Use a 2D hull with 2mm radius rounded corners, then extrude in Z. This is a minkowski sum of the rectangle with a 2mm circle — `trimesh.creation.extrude_polygon(shapely_polygon)`.
 
-**Material:** Homogeneous solid (no infill, no walls+infill separation). At 0.5mm, it's thinner than a single perimeter wall, so this is just a flat extruded face.
+**Material:** Homogeneous solid block, extruded from the rounded outline.
 
 ---
 
@@ -45,8 +43,8 @@ Bottom edge:        0.4mm chamfer (the foot is inset 0.4mm, Z 0 → 0.4), which 
 Dot diameter (base):   1.6mm
 Dot height:            0.85mm
 Dot profile:           domed (hemisphere)
-Base Z:                0.5mm   (top of base plate)
-Apex Z:                1.35mm  (0.5 + 0.85)
+Base Z:                2.0mm   (top of base plate)
+Apex Z:                2.85mm  (2.0 + 0.85)
 ```
 
 ### Expected printed dimensions (after FDM shrinkage)
@@ -81,7 +79,7 @@ import numpy as np
 def make_braille_dot(x_mm: float, y_mm: float) -> trimesh.Trimesh:
     """
     Returns a single Braille dot mesh positioned at (x_mm, y_mm) on the page.
-    Base plate top surface is Z=0.5. Dot sits above it.
+    Base plate top surface is Z=2.0. Dot sits above it.
     """
     # Cylinder base
     cyl = trimesh.creation.cylinder(
@@ -101,7 +99,7 @@ def make_braille_dot(x_mm: float, y_mm: float) -> trimesh.Trimesh:
 
     dot = trimesh.util.concatenate([cyl, cap])
     dot = trimesh.convex.convex_hull(dot)      # ensure watertight
-    dot.apply_translation([x_mm, y_mm, 0.5])  # lift to base plate top
+    dot.apply_translation([x_mm, y_mm, 2.0])  # lift to base plate top
     return dot
 ```
 
@@ -144,7 +142,7 @@ def dot_positions(
 
 ## Tactile Graphic Geometry
 
-**As implemented in the browser (`reliefFromSvg` in `index.html`).** The SVG is drawn onto a canvas, cropped to the drawing itself, fitted aspect-preserving into the 36.8 × 36 mm top-right zone (origin 103.2, 104), and thresholded at **0.4 mm per pixel**, the width of a standard nozzle. Runs of ink in each row become one block, and identical runs in consecutive rows are stacked into one taller block; each block is extruded flat-topped from Z 0.5 to 1.5 mm. Shapes are filled silhouettes (see `docs/shape-library-format.md`, "Tactile rules"), so the bitmap carries surfaces, not thin outlines. The on-screen preview shows this same bitmap.
+**As implemented in the browser (`reliefFromSvg` in `index.html`).** The SVG is drawn onto a canvas, cropped to the drawing itself, fitted aspect-preserving into the 36.8 × 36 mm top-right zone (origin 103.2, 104), and thresholded at **0.4 mm per pixel**, the width of a standard nozzle. Runs of ink in each row become one block, and identical runs in consecutive rows are stacked into one taller block; each block is extruded flat-topped from the top of the plate (Z 2.0) to 1.0 mm above it. Shapes are filled silhouettes (see `docs/shape-library-format.md`, "Tactile rules"), so the bitmap carries surfaces, not thin outlines. The on-screen preview shows this same bitmap.
 
 The relief used to be built at 2 mm per pixel, which turned a 38 mm picture into a 19 × 19 grid of square columns: outlines broke into gaps and edges felt like stairs. A blind reader who printed such a page could not tell what the picture was.
 
@@ -155,10 +153,10 @@ Tactile graphics are SVG paths extruded perpendicular to the page surface.
 ### Extrusion parameters
 
 ```
-Extrusion height:     1.0mm  (above base plate top, i.e. Z: 0.5 → 1.5mm)
+Extrusion height:     1.0mm  (above base plate top, i.e. Z: 2.0 → 3.0mm)
 Stroke expansion:     the SVG stroke-width is already encoded in the path geometry
-Base Z:               0.5mm
-Apex Z:               1.5mm
+Base Z:               2.0mm
+Apex Z:               3.0mm
 ```
 
 Tactile graphics are 0.15mm taller than Braille dots (1.0mm vs 0.85mm). This ensures fingertips distinguish illustration from text without conscious effort — the illustration feels unmistakably "more raised."
@@ -169,7 +167,7 @@ Tactile graphics are 0.15mm taller than Braille dots (1.0mm vs 0.85mm). This ens
 2. **Scale** the path from its 200×200 viewBox to the `natural_width_mm × natural_height_mm` specified in `index.json`, then apply the art director's `scale` factor.
 3. **Offset** the path to its `PlacementSpec` position in illustration zone coordinates, then convert to page coordinates (see page format spec Y-flip).
 4. **Stroke to polygon:** convert SVG strokes to filled polygons using `shapely.buffer()`. Buffer radius = `stroke_width_svg_units × mm_per_unit / 2`. Cap style: round. Join style: round.
-5. **Extrude:** `trimesh.creation.extrude_polygon(shapely_polygon, height=1.0)`, translated to Z=0.5.
+5. **Extrude:** `trimesh.creation.extrude_polygon(shapely_polygon, height=1.0)`, translated to Z=2.0.
 6. **Union:** merge all extruded polygons for this illustration into one mesh using `trimesh.boolean.union()` (uses OpenSCAD or manifold backend).
 
 ```python
@@ -185,7 +183,7 @@ def svg_path_to_mesh(
     position_y_mm: float,
     scale: float,
     extrusion_height: float = 1.0,
-    base_z: float = 0.5,
+    base_z: float = 2.0,
 ) -> trimesh.Trimesh:
     """Convert one SVG path element to an extruded 3D mesh."""
     # Parse path, discretize to polygon
@@ -216,7 +214,7 @@ def page_to_stl(page_elements: list, output_path: str, page_width: float, page_h
     meshes = []
 
     # 1. Base plate
-    base = make_base_plate(page_width, page_height, thickness=0.5, corner_radius=2.0)
+    base = make_base_plate(page_width, page_height, thickness=2.0, corner_radius=10.0)
     meshes.append(base)
 
     # 2. Braille dots
@@ -255,7 +253,7 @@ The design dimensions above target a mid-range budget FDM printer printing at 0.
 | Dot diameter | 1.6mm | 1.3mm | −19% |
 | Dot height | 0.85mm | 0.60mm | −29% |
 | Cell spacing | 6.0mm | 5.9mm | −2% |
-| Base plate thickness | 0.5mm | 0.48mm | −4% |
+| Base plate thickness (0.5mm reference print) | 0.5mm | 0.48mm | −4% |
 
 Cell spacing and base plate shrinkage are negligible. Dot height shrinkage is the critical variable.
 
@@ -314,8 +312,8 @@ Tact pages are meant to be held and read, not bent; no material is recommended f
 These are guidelines to include in the TACT documentation, not enforced by the software:
 
 ```
-Orientation:       flat, or standing on the page's bottom edge (rounder dots; needs a brim
-                   and a thicker page, see Base Plate)
+Orientation:       standing on the page's bottom edge (rounder dots); use a brim of
+                   8-10mm, since the page stands on a 150 × 2mm strip
 Layer height:      0.20mm
 Infill:            100% (it's already a thin slab — infill setting is effectively irrelevant)
 Walls:             2 perimeters
@@ -334,3 +332,4 @@ Raft:              optional (helps with TPU bed adhesion)
 |---|---|---|
 | 1.0 | 2026-05-04 | Initial spec. Base plate, Braille dot profile, tactile graphic extrusion, assembly, calibration, materials, file format. |
 | 1.1 | 2026-10-28 | Bottom-edge chamfer; thickness and orientation under test; materials described without a flexibility claim. |
+| 1.2 | 2026-11-11 | 2mm plate printed standing up; 10mm corners. |

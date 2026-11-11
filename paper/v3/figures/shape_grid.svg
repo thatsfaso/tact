@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="780" viewBox="0 0 920 780">
+<rect width="920" height="780" fill="#ffffff"/>
+<rect x="24" y="24" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="40" y="40" width="168" height="168" viewBox="0 0 200 200">
+
+<ellipse cx="100" cy="134" rx="42" ry="46" fill="#000000"/>
+<circle cx="100" cy="70" r="30" fill="#000000"/>
+<path d="M 74,58 L 78,22 L 100,44 Z" fill="#000000"/>
+<path d="M 100,44 L 122,22 L 126,58 Z" fill="#000000"/>
+<path d="M 136,170 Q 176,168 172,128 Q 170,108 182,96" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<text x="124.0" y="246" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">cat</text>
+<rect x="248" y="24" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="264" y="40" width="168" height="168" viewBox="0 0 200 200">
+
+<ellipse cx="98" cy="104" rx="50" ry="24" fill="#000000"/>
+<path d="M 134,92 L 190,94 L 150,72 Z" fill="#000000"/>
+<path d="M 140,78 L 146,48 L 160,74 Z" fill="#000000"/>
+<path d="M 156,74 L 170,50 L 172,82 Z" fill="#000000"/>
+<path d="M 52,100 Q 12,98 6,62 Q 34,72 60,90 Z" fill="#000000"/>
+<rect x="56" y="114" width="12" height="46" rx="5" fill="#000000"/>
+<rect x="84" y="114" width="12" height="46" rx="5" fill="#000000"/>
+<rect x="114" y="114" width="12" height="46" rx="5" fill="#000000"/>
+<rect x="142" y="114" width="12" height="46" rx="5" fill="#000000"/>
+</svg>
+<text x="348.0" y="246" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">fox</text>
+<rect x="472" y="24" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="488" y="40" width="168" height="168" viewBox="0 0 200 200">
+
+<ellipse cx="100" cy="112" rx="52" ry="66" fill="#000000"/>
+<path d="M 58,62 L 52,24 L 82,48 Z" fill="#000000"/>
+<path d="M 142,62 L 148,24 L 118,48 Z" fill="#000000"/>
+<circle cx="74" cy="84" r="19" fill="#ffffff"/>
+<circle cx="126" cy="84" r="19" fill="#ffffff"/>
+<circle cx="74" cy="84" r="7" fill="#000000"/>
+<circle cx="126" cy="84" r="7" fill="#000000"/>
+<rect x="75" y="172" width="14" height="14" rx="4" fill="#000000"/>
+<rect x="111" y="172" width="14" height="14" rx="4" fill="#000000"/>
+</svg>
+<text x="572.0" y="246" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">owl</text>
+<rect x="696" y="24" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="712" y="40" width="168" height="168" viewBox="0 0 200 200">
+
+<path d="M 18,110 Q 18,58 90,58 Q 150,58 164,100 Q 150,134 90,134 Q 38,134 18,110 Z" fill="#000000"/>
+<path d="M 156,100 L 196,68 L 186,104 L 196,140 Z" fill="#000000"/>
+<path d="M 74,50 L 74,26" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 74,30 L 58,14" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 74,30 L 90,14" fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="44" cy="96" r="9" fill="#ffffff"/>
+</svg>
+<text x="796.0" y="246" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">whale</text>
+<rect x="24" y="276" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="40" y="292" width="168" height="168" viewBox="0 0 200 200">
+
+<path d="M 38,124 Q 46,54 110,54 Q 170,54 178,124 Z" fill="#000000"/>
+<circle cx="84" cy="98" r="12" fill="#ffffff"/>
+<circle cx="134" cy="98" r="12" fill="#ffffff"/>
+<ellipse cx="186" cy="114" rx="13" ry="12" fill="#000000"/>
+<rect x="51" y="120" width="22" height="28" rx="8" fill="#000000"/>
+<rect x="141" y="120" width="22" height="28" rx="8" fill="#000000"/>
+<path d="M 40,118 L 18,126 L 40,132 Z" fill="#000000"/>
+</svg>
+<text x="124.0" y="498" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">turtle</text>
+<rect x="248" y="276" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="264" y="292" width="168" height="168" viewBox="0 0 200 200">
+
+<ellipse cx="94" cy="134" rx="48" ry="36" fill="#000000"/>
+<circle cx="138" cy="94" r="25" fill="#000000"/>
+<ellipse cx="118" cy="46" rx="11" ry="32" fill="#000000" transform="rotate(-12 118 46)"/>
+<ellipse cx="154" cy="48" rx="11" ry="32" fill="#000000" transform="rotate(12 154 48)"/>
+<circle cx="46" cy="126" r="13" fill="#000000"/>
+<ellipse cx="112" cy="168" rx="32" ry="9" fill="#000000"/>
+</svg>
+<text x="348.0" y="498" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">rabbit</text>
+<rect x="472" y="276" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="488" y="292" width="168" height="168" viewBox="0 0 200 200">
+
+<ellipse cx="96" cy="116" rx="48" ry="28" fill="#000000"/>
+<path d="M 132,104 Q 150,80 156,62" fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="168" cy="56" rx="22" ry="14" fill="#000000"/>
+<path d="M 156,46 L 148,26 L 166,42 Z" fill="#000000"/>
+<path d="M 82,98 L 90,26 L 110,56 L 128,36 L 126,98 Z" fill="#000000"/>
+<path d="M 54,110 Q 22,100 12,68 Q 30,120 62,130 Z" fill="#000000"/>
+<path d="M 12,68 L 4,52 L 24,64 Z" fill="#000000"/>
+<rect x="67" y="130" width="16" height="36" rx="6" fill="#000000"/>
+<rect x="113" y="130" width="16" height="36" rx="6" fill="#000000"/>
+</svg>
+<text x="572.0" y="498" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">dragon</text>
+<rect x="696" y="276" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="712" y="292" width="168" height="168" viewBox="0 0 200 200">
+
+<circle cx="100" cy="62" r="34" fill="#000000"/>
+<circle cx="66" cy="32" r="17" fill="#000000"/>
+<circle cx="134" cy="32" r="17" fill="#000000"/>
+<ellipse cx="100" cy="138" rx="42" ry="44" fill="#000000"/>
+<ellipse cx="54" cy="120" rx="14" ry="26" fill="#000000" transform="rotate(30 54 120)"/>
+<ellipse cx="146" cy="120" rx="14" ry="26" fill="#000000" transform="rotate(-30 146 120)"/>
+<ellipse cx="72" cy="178" rx="20" ry="14" fill="#000000"/>
+<ellipse cx="128" cy="178" rx="20" ry="14" fill="#000000"/>
+<ellipse cx="100" cy="142" rx="18" ry="20" fill="#ffffff"/>
+</svg>
+<text x="796.0" y="498" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">teddy bear</text>
+<rect x="24" y="528" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="40" y="544" width="168" height="168" viewBox="0 0 200 200">
+
+<path d="M 18,140 L 182,140 L 158,174 L 42,174 Z" fill="#000000"/>
+<rect x="94" y="18" width="12" height="122" rx="0" fill="#000000"/>
+<path d="M 120,26 L 178,126 L 120,126 Z" fill="#000000"/>
+<path d="M 80,40 L 80,126 L 28,126 Z" fill="#000000"/>
+</svg>
+<text x="124.0" y="750" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">boat</text>
+<rect x="248" y="528" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="264" y="544" width="168" height="168" viewBox="0 0 200 200">
+
+<path d="M 68,178 L 80,70 L 120,70 L 132,178 Z" fill="#000000"/>
+<rect x="68" y="56" width="64" height="14" rx="4" fill="#000000"/>
+<rect x="82" y="28" width="36" height="30" rx="4" fill="#000000"/>
+<rect x="90" y="34" width="20" height="18" rx="2" fill="#ffffff"/>
+<path d="M 76,30 L 100,6 L 124,30 Z" fill="#000000"/>
+<rect x="70" y="112" width="60" height="16" rx="0" fill="#ffffff"/>
+<rect x="54" y="174" width="92" height="14" rx="5" fill="#000000"/>
+</svg>
+<text x="348.0" y="750" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">lighthouse</text>
+<rect x="472" y="528" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="488" y="544" width="168" height="168" viewBox="0 0 200 200">
+
+<circle cx="96" cy="100" r="74" fill="#000000"/>
+<circle cx="132" cy="80" r="62" fill="#ffffff"/>
+</svg>
+<text x="572.0" y="750" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">moon</text>
+<rect x="696" y="528" width="200" height="200" rx="14" fill="#ffffff" stroke="#cfcdc4" stroke-width="2"/>
+<svg x="712" y="544" width="168" height="168" viewBox="0 0 200 200">
+
+<circle cx="100" cy="70" r="46" fill="#000000"/>
+<circle cx="64" cy="98" r="32" fill="#000000"/>
+<circle cx="136" cy="98" r="32" fill="#000000"/>
+<rect x="88" y="110" width="24" height="72" rx="4" fill="#000000"/>
+<rect x="60" y="176" width="80" height="12" rx="6" fill="#000000"/>
+</svg>
+<text x="796.0" y="750" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="20" fill="#333">tree</text>
+</svg>

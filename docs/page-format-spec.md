@@ -210,14 +210,14 @@ Every STL file includes a contiguous base plate under all raised elements.
 ```
 Width:        150mm   (PAGE_W)
 Height:       150mm   (PAGE_H)
-Thickness:    0.5mm                 (1-2 print layers at 0.3mm layer height)
-Material:     homogeneous solid block (no infill holes — this is a 0.5mm slab)
-Z range:      0.0 to 0.5mm
+Thickness:    2.0mm                 (the page is printed standing up; see stl-geometry-spec.md)
+Material:     homogeneous solid block
+Z range:      0.0 to 2.0mm
 ```
 
-The base plate is the foundation. All Braille dots and tactile graphics sit on top of it (Z=0.5 to Z=0.5+element_height).
+The base plate is the foundation. All Braille dots and tactile graphics sit on top of it (Z=2.0 to Z=2.0+element_height).
 
-Corner radius: 2mm on all four corners (prevents sharp corners from cracking TPU/PETG pages during handling). Implemented as a hull operation in trimesh.
+Corner radius: 10mm on all four corners, soft to hold and the same in the preview.
 
 ---
 
